@@ -55,10 +55,12 @@ message CommandRequest {
 }
 
 message CommandReply {
-    string sender_id = 1 [(gogoproto.casttype) = "MemberID"];
-    ViewId view_id = 2;
-    uint64 slot_id = 3 [(gogoproto.casttype) = "LogSlotID"];
-    bytes value = 4;
+    uint64 session_id = 1 [(gogoproto.casttype) = "SessionID"];
+    uint64 message_id = 2 [(gogoproto.casttype) = "MessageID"];
+    string sender_id = 3 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 4;
+    uint64 slot_id = 5 [(gogoproto.casttype) = "LogSlotID"];
+    bytes value = 6;
 }
 
 message QueryRequest {
@@ -67,9 +69,11 @@ message QueryRequest {
 }
 
 message QueryReply {
-    string sender_id = 1 [(gogoproto.casttype) = "MemberID"];
-    ViewId view_id = 2;
-    bytes value = 3;
+    uint64 session_id = 1 [(gogoproto.casttype) = "SessionID"];
+    uint64 message_id = 2 [(gogoproto.casttype) = "MessageID"];
+    string sender_id = 3 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 4;
+    bytes value = 5;
 }
 
 message SlotLookup {
