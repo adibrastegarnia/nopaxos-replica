@@ -21,18 +21,18 @@ const (
 	defaultHeartbeatInterval = 500 * time.Millisecond
 )
 
-// GetElectionTimeoutOrDefault returns the configured election timeout if set, otherwise the default election timeout
-func (c *ProtocolConfig) GetElectionTimeoutOrDefault() time.Duration {
-	timeout := c.GetElectionTimeout()
+// GetLeaderTimeoutOrDefault returns the configured election timeout if set, otherwise the default election timeout
+func (c *ProtocolConfig) GetLeaderTimeoutOrDefault() time.Duration {
+	timeout := c.GetLeaderTimeout()
 	if timeout != nil {
 		return *timeout
 	}
 	return defaultElectionTimeout
 }
 
-// GetHeartbeatIntervalOrDefault returns the configured heartbeat interval if set, otherwise the default heartbeat interval
-func (c *ProtocolConfig) GetHeartbeatIntervalOrDefault() time.Duration {
-	interval := c.GetHeartbeatInterval()
+// GetPingIntervalOrDefault returns the configured heartbeat interval if set, otherwise the default heartbeat interval
+func (c *ProtocolConfig) GetPingIntervalOrDefault() time.Duration {
+	interval := c.GetPingInterval()
 	if interval != nil {
 		return *interval
 	}

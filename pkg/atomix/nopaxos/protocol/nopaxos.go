@@ -117,7 +117,7 @@ func (s *NOPaxos) handleClient(message *ClientMessage, stream ClientService_Clie
 	case *ClientMessage_Command:
 		s.command(m.Command, stream)
 	case *ClientMessage_Query:
-		s.query(m.Query)
+		s.query(m.Query, stream)
 	}
 }
 
@@ -176,28 +176,36 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 
 	if request.SessionNum == s.viewID.SessionNum && request.MessageNum == s.sessionMessageCount {
 		// Command received in the normal case
-		slotID := s.lastSlotNum + 1
-		s.log[slotID] = &LogEntry{
-			SlotNum:    slotID,
-			Timestamp:  time.Now(),
+		slotNum := s.lastSlotNum + 1
+		entry := &LogEntry{
+			SlotNum:    slotNum,
+			Timestamp:  request.Timestamp,
 			MessageNum: request.MessageNum,
 			Value:      request.Value,
 		}
-		s.lastSlotNum = slotID
+		s.log[slotNum] = entry
+		s.lastSlotNum = slotNum
 
-		// TODO: Apply the command to the state machine before responding if leader
-		if stream != nil {
-			_ = stream.Send(&ClientMessage{
-				Message: &ClientMessage_CommandReply{
-					CommandReply: &CommandReply{
-						MessageNum: request.MessageNum,
-						Sender:     s.cluster.Member(),
-						ViewID:     s.viewID,
-						SlotNum:    slotID,
-						Value:      nil, // TODO
-					},
-				},
-			})
+		// Apply the command to the state machine before responding if leader
+		if stream != nil && s.getLeader(s.viewID) == s.cluster.Member() {
+			ch := make(chan node.Output)
+			s.state.applyCommand(entry, ch)
+			go func() {
+				for result := range ch {
+					// TODO: Send state machine errors
+					_ = stream.Send(&ClientMessage{
+						Message: &ClientMessage_CommandReply{
+							CommandReply: &CommandReply{
+								MessageNum: request.MessageNum,
+								Sender:     s.cluster.Member(),
+								ViewID:     s.viewID,
+								SlotNum:    slotNum,
+								Value:      result.Value,
+							},
+						},
+					})
+				}
+			}()
 		}
 	} else if request.SessionNum > s.viewID.SessionNum {
 		// Command received in the session terminated case
@@ -238,8 +246,33 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 	}
 }
 
-func (s *NOPaxos) query(request *QueryRequest) {
+func (s *NOPaxos) query(request *QueryRequest, stream ClientService_ClientStreamServer) {
+	// If the replica's status is not Normal, skip the commit
+	if s.status != StatusNormal {
+		return
+	}
 
+	if request.SessionNum == s.viewID.SessionNum {
+		if stream != nil && s.getLeader(s.viewID) == s.cluster.Member() {
+			ch := make(chan node.Output)
+			s.state.applyQuery(request, ch)
+			go func() {
+				for result := range ch {
+					// TODO: Send state machine errors
+					_ = stream.Send(&ClientMessage{
+						Message: &ClientMessage_QueryReply{
+							QueryReply: &QueryReply{
+								MessageNum: request.MessageNum,
+								Sender:     s.cluster.Member(),
+								ViewID:     s.viewID,
+								Value:      result.Value,
+							},
+						},
+					})
+				}
+			}()
+		}
+	}
 }
 
 func (s *NOPaxos) slotLookup(request *SlotLookup, stream ReplicaService_ReplicaStreamServer) {
@@ -788,7 +821,23 @@ type stateMachine struct {
 	node     string
 	registry *node.Registry
 	state    node.StateMachine
-	context  node.Context
+	context  *stateMachineContext
+}
+
+// applyCommand applies a command to the state machine
+func (s *stateMachine) applyCommand(entry *LogEntry, ch chan<- node.Output) {
+	s.context.index++
+	s.context.op = service.OpTypeCommand
+	if entry.Timestamp.After(s.context.timestamp) {
+		s.context.timestamp = entry.Timestamp
+	}
+	s.state.Command(entry.Value, ch)
+}
+
+// applyQuery applies a query to the state machine
+func (s *stateMachine) applyQuery(request *QueryRequest, ch chan<- node.Output) {
+	s.context.op = service.OpTypeQuery
+	s.state.Query(request.Value, ch)
 }
 
 // reset resets the state machine

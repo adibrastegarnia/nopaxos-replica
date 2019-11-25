@@ -20,6 +20,7 @@ package atomix.nopaxos.protocol;
 
 import "atomix/nopaxos/protocol/log.proto";
 import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
 
 option (gogoproto.testgen_all) = true;
 option (gogoproto.populate_all) = true;
@@ -60,7 +61,8 @@ message ViewId {
 message CommandRequest {
     uint64 session_num = 1 [(gogoproto.casttype) = "SessionID"];
     uint64 message_num = 2 [(gogoproto.casttype) = "MessageID"];
-    bytes value = 3;
+    google.protobuf.Timestamp timestamp = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+    bytes value = 4;
 }
 
 message CommandReply {
@@ -73,7 +75,9 @@ message CommandReply {
 
 message QueryRequest {
     uint64 session_num = 1 [(gogoproto.casttype) = "SessionID"];
-    bytes value = 2;
+    uint64 message_num = 2 [(gogoproto.casttype) = "MessageID"];
+    google.protobuf.Timestamp timestamp = 3 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+    bytes value = 4;
 }
 
 message QueryReply {
@@ -139,9 +143,9 @@ message SyncCommit {
 }
 
 service ClientService {
-    rpc ClientStream(stream ClientMessage) returns (stream ClientMessage);
+    rpc ClientStream (stream ClientMessage) returns (stream ClientMessage);
 }
 
 service ReplicaService {
-    rpc ReplicaStream(stream ReplicaMessage) returns (stream ReplicaMessage);
+    rpc ReplicaStream (stream ReplicaMessage) returns (stream ReplicaMessage);
 }
