@@ -370,8 +370,8 @@ func (*ReplicaMessage) XXX_OneofWrappers() []interface{} {
 }
 
 type ViewId struct {
-	LeaderId  LeaderID  `protobuf:"bytes,1,opt,name=leader_id,json=leaderId,proto3,casttype=LeaderID" json:"leader_id,omitempty"`
-	SessionId SessionID `protobuf:"varint,2,opt,name=session_id,json=sessionId,proto3,casttype=SessionID" json:"session_id,omitempty"`
+	LeaderNum  LeaderID  `protobuf:"bytes,1,opt,name=leader_num,json=leaderNum,proto3,casttype=LeaderID" json:"leader_num,omitempty"`
+	SessionNum SessionID `protobuf:"varint,2,opt,name=session_num,json=sessionNum,proto3,casttype=SessionID" json:"session_num,omitempty"`
 }
 
 func (m *ViewId) Reset()         { *m = ViewId{} }
@@ -407,24 +407,24 @@ func (m *ViewId) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ViewId proto.InternalMessageInfo
 
-func (m *ViewId) GetLeaderId() LeaderID {
+func (m *ViewId) GetLeaderNum() LeaderID {
 	if m != nil {
-		return m.LeaderId
+		return m.LeaderNum
 	}
 	return ""
 }
 
-func (m *ViewId) GetSessionId() SessionID {
+func (m *ViewId) GetSessionNum() SessionID {
 	if m != nil {
-		return m.SessionId
+		return m.SessionNum
 	}
 	return 0
 }
 
 type CommandRequest struct {
-	SessionId SessionID `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3,casttype=SessionID" json:"session_id,omitempty"`
-	MessageId MessageID `protobuf:"varint,2,opt,name=message_id,json=messageId,proto3,casttype=MessageID" json:"message_id,omitempty"`
-	Value     []byte    `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
+	SessionNum SessionID `protobuf:"varint,1,opt,name=session_num,json=sessionNum,proto3,casttype=SessionID" json:"session_num,omitempty"`
+	MessageNum MessageID `protobuf:"varint,2,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
+	Value      []byte    `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`
 }
 
 func (m *CommandRequest) Reset()         { *m = CommandRequest{} }
@@ -460,16 +460,16 @@ func (m *CommandRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_CommandRequest proto.InternalMessageInfo
 
-func (m *CommandRequest) GetSessionId() SessionID {
+func (m *CommandRequest) GetSessionNum() SessionID {
 	if m != nil {
-		return m.SessionId
+		return m.SessionNum
 	}
 	return 0
 }
 
-func (m *CommandRequest) GetMessageId() MessageID {
+func (m *CommandRequest) GetMessageNum() MessageID {
 	if m != nil {
-		return m.MessageId
+		return m.MessageNum
 	}
 	return 0
 }
@@ -482,11 +482,11 @@ func (m *CommandRequest) GetValue() []byte {
 }
 
 type CommandReply struct {
-	MessageId MessageID `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3,casttype=MessageID" json:"message_id,omitempty"`
-	SenderId  MemberID  `protobuf:"bytes,2,opt,name=sender_id,json=senderId,proto3,casttype=MemberID" json:"sender_id,omitempty"`
-	ViewId    *ViewId   `protobuf:"bytes,3,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	SlotId    LogSlotID `protobuf:"varint,4,opt,name=slot_id,json=slotId,proto3,casttype=LogSlotID" json:"slot_id,omitempty"`
-	Value     []byte    `protobuf:"bytes,5,opt,name=value,proto3" json:"value,omitempty"`
+	MessageNum MessageID `protobuf:"varint,1,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
+	Sender     MemberID  `protobuf:"bytes,2,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID     *ViewId   `protobuf:"bytes,3,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	SlotNum    LogSlotID `protobuf:"varint,4,opt,name=slot_num,json=slotNum,proto3,casttype=LogSlotID" json:"slot_num,omitempty"`
+	Value      []byte    `protobuf:"bytes,5,opt,name=value,proto3" json:"value,omitempty"`
 }
 
 func (m *CommandReply) Reset()         { *m = CommandReply{} }
@@ -522,30 +522,30 @@ func (m *CommandReply) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_CommandReply proto.InternalMessageInfo
 
-func (m *CommandReply) GetMessageId() MessageID {
+func (m *CommandReply) GetMessageNum() MessageID {
 	if m != nil {
-		return m.MessageId
+		return m.MessageNum
 	}
 	return 0
 }
 
-func (m *CommandReply) GetSenderId() MemberID {
+func (m *CommandReply) GetSender() MemberID {
 	if m != nil {
-		return m.SenderId
+		return m.Sender
 	}
 	return ""
 }
 
-func (m *CommandReply) GetViewId() *ViewId {
+func (m *CommandReply) GetViewID() *ViewId {
 	if m != nil {
-		return m.ViewId
+		return m.ViewID
 	}
 	return nil
 }
 
-func (m *CommandReply) GetSlotId() LogSlotID {
+func (m *CommandReply) GetSlotNum() LogSlotID {
 	if m != nil {
-		return m.SlotId
+		return m.SlotNum
 	}
 	return 0
 }
@@ -558,8 +558,8 @@ func (m *CommandReply) GetValue() []byte {
 }
 
 type QueryRequest struct {
-	SessionId SessionID `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3,casttype=SessionID" json:"session_id,omitempty"`
-	Value     []byte    `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	SessionNum SessionID `protobuf:"varint,1,opt,name=session_num,json=sessionNum,proto3,casttype=SessionID" json:"session_num,omitempty"`
+	Value      []byte    `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
 }
 
 func (m *QueryRequest) Reset()         { *m = QueryRequest{} }
@@ -595,9 +595,9 @@ func (m *QueryRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryRequest proto.InternalMessageInfo
 
-func (m *QueryRequest) GetSessionId() SessionID {
+func (m *QueryRequest) GetSessionNum() SessionID {
 	if m != nil {
-		return m.SessionId
+		return m.SessionNum
 	}
 	return 0
 }
@@ -610,10 +610,10 @@ func (m *QueryRequest) GetValue() []byte {
 }
 
 type QueryReply struct {
-	MessageId MessageID `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3,casttype=MessageID" json:"message_id,omitempty"`
-	SenderId  MemberID  `protobuf:"bytes,2,opt,name=sender_id,json=senderId,proto3,casttype=MemberID" json:"sender_id,omitempty"`
-	ViewId    *ViewId   `protobuf:"bytes,3,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	Value     []byte    `protobuf:"bytes,4,opt,name=value,proto3" json:"value,omitempty"`
+	MessageNum MessageID `protobuf:"varint,1,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
+	Sender     MemberID  `protobuf:"bytes,2,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID     *ViewId   `protobuf:"bytes,3,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	Value      []byte    `protobuf:"bytes,4,opt,name=value,proto3" json:"value,omitempty"`
 }
 
 func (m *QueryReply) Reset()         { *m = QueryReply{} }
@@ -649,23 +649,23 @@ func (m *QueryReply) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryReply proto.InternalMessageInfo
 
-func (m *QueryReply) GetMessageId() MessageID {
+func (m *QueryReply) GetMessageNum() MessageID {
 	if m != nil {
-		return m.MessageId
+		return m.MessageNum
 	}
 	return 0
 }
 
-func (m *QueryReply) GetSenderId() MemberID {
+func (m *QueryReply) GetSender() MemberID {
 	if m != nil {
-		return m.SenderId
+		return m.Sender
 	}
 	return ""
 }
 
-func (m *QueryReply) GetViewId() *ViewId {
+func (m *QueryReply) GetViewID() *ViewId {
 	if m != nil {
-		return m.ViewId
+		return m.ViewID
 	}
 	return nil
 }
@@ -678,9 +678,9 @@ func (m *QueryReply) GetValue() []byte {
 }
 
 type SlotLookup struct {
-	SenderId  MemberID  `protobuf:"bytes,1,opt,name=sender_id,json=senderId,proto3,casttype=MemberID" json:"sender_id,omitempty"`
-	ViewId    *ViewId   `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	MessageId MessageID `protobuf:"varint,3,opt,name=message_id,json=messageId,proto3,casttype=MessageID" json:"message_id,omitempty"`
+	Sender     MemberID  `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID     *ViewId   `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	MessageNum MessageID `protobuf:"varint,3,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
 }
 
 func (m *SlotLookup) Reset()         { *m = SlotLookup{} }
@@ -716,30 +716,30 @@ func (m *SlotLookup) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SlotLookup proto.InternalMessageInfo
 
-func (m *SlotLookup) GetSenderId() MemberID {
+func (m *SlotLookup) GetSender() MemberID {
 	if m != nil {
-		return m.SenderId
+		return m.Sender
 	}
 	return ""
 }
 
-func (m *SlotLookup) GetViewId() *ViewId {
+func (m *SlotLookup) GetViewID() *ViewId {
 	if m != nil {
-		return m.ViewId
+		return m.ViewID
 	}
 	return nil
 }
 
-func (m *SlotLookup) GetMessageId() MessageID {
+func (m *SlotLookup) GetMessageNum() MessageID {
 	if m != nil {
-		return m.MessageId
+		return m.MessageNum
 	}
 	return 0
 }
 
 type GapCommitRequest struct {
-	ViewId *ViewId   `protobuf:"bytes,1,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	SlotId LogSlotID `protobuf:"varint,2,opt,name=slot_id,json=slotId,proto3,casttype=LogSlotID" json:"slot_id,omitempty"`
+	ViewID  *ViewId   `protobuf:"bytes,1,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	SlotNum LogSlotID `protobuf:"varint,2,opt,name=slot_num,json=slotNum,proto3,casttype=LogSlotID" json:"slot_num,omitempty"`
 }
 
 func (m *GapCommitRequest) Reset()         { *m = GapCommitRequest{} }
@@ -775,24 +775,24 @@ func (m *GapCommitRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GapCommitRequest proto.InternalMessageInfo
 
-func (m *GapCommitRequest) GetViewId() *ViewId {
+func (m *GapCommitRequest) GetViewID() *ViewId {
 	if m != nil {
-		return m.ViewId
+		return m.ViewID
 	}
 	return nil
 }
 
-func (m *GapCommitRequest) GetSlotId() LogSlotID {
+func (m *GapCommitRequest) GetSlotNum() LogSlotID {
 	if m != nil {
-		return m.SlotId
+		return m.SlotNum
 	}
 	return 0
 }
 
 type GapCommitReply struct {
-	SenderId MemberID  `protobuf:"bytes,1,opt,name=sender_id,json=senderId,proto3,casttype=MemberID" json:"sender_id,omitempty"`
-	ViewId   *ViewId   `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	SlotId   LogSlotID `protobuf:"varint,3,opt,name=slot_id,json=slotId,proto3,casttype=LogSlotID" json:"slot_id,omitempty"`
+	Sender  MemberID  `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID  *ViewId   `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	SlotNum LogSlotID `protobuf:"varint,3,opt,name=slot_num,json=slotNum,proto3,casttype=LogSlotID" json:"slot_num,omitempty"`
 }
 
 func (m *GapCommitReply) Reset()         { *m = GapCommitReply{} }
@@ -828,29 +828,29 @@ func (m *GapCommitReply) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_GapCommitReply proto.InternalMessageInfo
 
-func (m *GapCommitReply) GetSenderId() MemberID {
+func (m *GapCommitReply) GetSender() MemberID {
 	if m != nil {
-		return m.SenderId
+		return m.Sender
 	}
 	return ""
 }
 
-func (m *GapCommitReply) GetViewId() *ViewId {
+func (m *GapCommitReply) GetViewID() *ViewId {
 	if m != nil {
-		return m.ViewId
+		return m.ViewID
 	}
 	return nil
 }
 
-func (m *GapCommitReply) GetSlotId() LogSlotID {
+func (m *GapCommitReply) GetSlotNum() LogSlotID {
 	if m != nil {
-		return m.SlotId
+		return m.SlotNum
 	}
 	return 0
 }
 
 type ViewChangeRequest struct {
-	ViewId *ViewId `protobuf:"bytes,1,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	ViewID *ViewId `protobuf:"bytes,1,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
 }
 
 func (m *ViewChangeRequest) Reset()         { *m = ViewChangeRequest{} }
@@ -886,18 +886,18 @@ func (m *ViewChangeRequest) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ViewChangeRequest proto.InternalMessageInfo
 
-func (m *ViewChangeRequest) GetViewId() *ViewId {
+func (m *ViewChangeRequest) GetViewID() *ViewId {
 	if m != nil {
-		return m.ViewId
+		return m.ViewID
 	}
 	return nil
 }
 
 type ViewChange struct {
-	MemberId   MemberID    `protobuf:"bytes,1,opt,name=member_id,json=memberId,proto3,casttype=MemberID" json:"member_id,omitempty"`
-	ViewId     *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	Sender     MemberID    `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID     *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
 	LastNormal *ViewId     `protobuf:"bytes,3,opt,name=last_normal,json=lastNormal,proto3" json:"last_normal,omitempty"`
-	MessageId  MessageID   `protobuf:"varint,4,opt,name=message_id,json=messageId,proto3,casttype=MessageID" json:"message_id,omitempty"`
+	MessageNum MessageID   `protobuf:"varint,4,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
 	Log        []*LogEntry `protobuf:"bytes,5,rep,name=log,proto3" json:"log,omitempty"`
 }
 
@@ -934,16 +934,16 @@ func (m *ViewChange) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ViewChange proto.InternalMessageInfo
 
-func (m *ViewChange) GetMemberId() MemberID {
+func (m *ViewChange) GetSender() MemberID {
 	if m != nil {
-		return m.MemberId
+		return m.Sender
 	}
 	return ""
 }
 
-func (m *ViewChange) GetViewId() *ViewId {
+func (m *ViewChange) GetViewID() *ViewId {
 	if m != nil {
-		return m.ViewId
+		return m.ViewID
 	}
 	return nil
 }
@@ -955,9 +955,9 @@ func (m *ViewChange) GetLastNormal() *ViewId {
 	return nil
 }
 
-func (m *ViewChange) GetMessageId() MessageID {
+func (m *ViewChange) GetMessageNum() MessageID {
 	if m != nil {
-		return m.MessageId
+		return m.MessageNum
 	}
 	return 0
 }
@@ -970,9 +970,9 @@ func (m *ViewChange) GetLog() []*LogEntry {
 }
 
 type StartView struct {
-	ViewId    *ViewId     `protobuf:"bytes,1,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	MessageId MessageID   `protobuf:"varint,2,opt,name=message_id,json=messageId,proto3,casttype=MessageID" json:"message_id,omitempty"`
-	Log       []*LogEntry `protobuf:"bytes,3,rep,name=log,proto3" json:"log,omitempty"`
+	ViewID     *ViewId     `protobuf:"bytes,1,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	MessageNum MessageID   `protobuf:"varint,2,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
+	Log        []*LogEntry `protobuf:"bytes,3,rep,name=log,proto3" json:"log,omitempty"`
 }
 
 func (m *StartView) Reset()         { *m = StartView{} }
@@ -1008,16 +1008,16 @@ func (m *StartView) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_StartView proto.InternalMessageInfo
 
-func (m *StartView) GetViewId() *ViewId {
+func (m *StartView) GetViewID() *ViewId {
 	if m != nil {
-		return m.ViewId
+		return m.ViewID
 	}
 	return nil
 }
 
-func (m *StartView) GetMessageId() MessageID {
+func (m *StartView) GetMessageNum() MessageID {
 	if m != nil {
-		return m.MessageId
+		return m.MessageNum
 	}
 	return 0
 }
@@ -1030,10 +1030,10 @@ func (m *StartView) GetLog() []*LogEntry {
 }
 
 type SyncPrepare struct {
-	SenderId  MemberID    `protobuf:"bytes,1,opt,name=sender_id,json=senderId,proto3,casttype=MemberID" json:"sender_id,omitempty"`
-	ViewId    *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	MessageId MessageID   `protobuf:"varint,3,opt,name=message_id,json=messageId,proto3,casttype=MessageID" json:"message_id,omitempty"`
-	Log       []*LogEntry `protobuf:"bytes,4,rep,name=log,proto3" json:"log,omitempty"`
+	Sender     MemberID    `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID     *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	MessageNum MessageID   `protobuf:"varint,3,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
+	Log        []*LogEntry `protobuf:"bytes,4,rep,name=log,proto3" json:"log,omitempty"`
 }
 
 func (m *SyncPrepare) Reset()         { *m = SyncPrepare{} }
@@ -1069,23 +1069,23 @@ func (m *SyncPrepare) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SyncPrepare proto.InternalMessageInfo
 
-func (m *SyncPrepare) GetSenderId() MemberID {
+func (m *SyncPrepare) GetSender() MemberID {
 	if m != nil {
-		return m.SenderId
+		return m.Sender
 	}
 	return ""
 }
 
-func (m *SyncPrepare) GetViewId() *ViewId {
+func (m *SyncPrepare) GetViewID() *ViewId {
 	if m != nil {
-		return m.ViewId
+		return m.ViewID
 	}
 	return nil
 }
 
-func (m *SyncPrepare) GetMessageId() MessageID {
+func (m *SyncPrepare) GetMessageNum() MessageID {
 	if m != nil {
-		return m.MessageId
+		return m.MessageNum
 	}
 	return 0
 }
@@ -1098,9 +1098,9 @@ func (m *SyncPrepare) GetLog() []*LogEntry {
 }
 
 type SyncReply struct {
-	SenderId MemberID  `protobuf:"bytes,1,opt,name=sender_id,json=senderId,proto3,casttype=MemberID" json:"sender_id,omitempty"`
-	ViewId   *ViewId   `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	SlotId   LogSlotID `protobuf:"varint,3,opt,name=slot_id,json=slotId,proto3,casttype=LogSlotID" json:"slot_id,omitempty"`
+	Sender  MemberID  `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID  *ViewId   `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	SlotNum LogSlotID `protobuf:"varint,3,opt,name=slot_num,json=slotNum,proto3,casttype=LogSlotID" json:"slot_num,omitempty"`
 }
 
 func (m *SyncReply) Reset()         { *m = SyncReply{} }
@@ -1136,32 +1136,32 @@ func (m *SyncReply) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SyncReply proto.InternalMessageInfo
 
-func (m *SyncReply) GetSenderId() MemberID {
+func (m *SyncReply) GetSender() MemberID {
 	if m != nil {
-		return m.SenderId
+		return m.Sender
 	}
 	return ""
 }
 
-func (m *SyncReply) GetViewId() *ViewId {
+func (m *SyncReply) GetViewID() *ViewId {
 	if m != nil {
-		return m.ViewId
+		return m.ViewID
 	}
 	return nil
 }
 
-func (m *SyncReply) GetSlotId() LogSlotID {
+func (m *SyncReply) GetSlotNum() LogSlotID {
 	if m != nil {
-		return m.SlotId
+		return m.SlotNum
 	}
 	return 0
 }
 
 type SyncCommit struct {
-	SenderId  MemberID    `protobuf:"bytes,1,opt,name=sender_id,json=senderId,proto3,casttype=MemberID" json:"sender_id,omitempty"`
-	ViewId    *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	MessageId MessageID   `protobuf:"varint,3,opt,name=message_id,json=messageId,proto3,casttype=MessageID" json:"message_id,omitempty"`
-	Log       []*LogEntry `protobuf:"bytes,4,rep,name=log,proto3" json:"log,omitempty"`
+	Sender     MemberID    `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID     *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	MessageNum MessageID   `protobuf:"varint,3,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
+	Log        []*LogEntry `protobuf:"bytes,4,rep,name=log,proto3" json:"log,omitempty"`
 }
 
 func (m *SyncCommit) Reset()         { *m = SyncCommit{} }
@@ -1197,23 +1197,23 @@ func (m *SyncCommit) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SyncCommit proto.InternalMessageInfo
 
-func (m *SyncCommit) GetSenderId() MemberID {
+func (m *SyncCommit) GetSender() MemberID {
 	if m != nil {
-		return m.SenderId
+		return m.Sender
 	}
 	return ""
 }
 
-func (m *SyncCommit) GetViewId() *ViewId {
+func (m *SyncCommit) GetViewID() *ViewId {
 	if m != nil {
-		return m.ViewId
+		return m.ViewID
 	}
 	return nil
 }
 
-func (m *SyncCommit) GetMessageId() MessageID {
+func (m *SyncCommit) GetMessageNum() MessageID {
 	if m != nil {
-		return m.MessageId
+		return m.MessageNum
 	}
 	return 0
 }
@@ -1249,67 +1249,67 @@ func init() {
 }
 
 var fileDescriptor_5bf22afbce485451 = []byte{
-	// 954 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x57, 0xcd, 0x6e, 0xe4, 0x44,
-	0x10, 0x9e, 0x9e, 0xdf, 0xb8, 0x66, 0x26, 0xda, 0x35, 0x2b, 0x61, 0xe5, 0xe0, 0xec, 0x9a, 0x25,
-	0x24, 0x08, 0x4d, 0x50, 0xf6, 0xc2, 0x05, 0x09, 0x65, 0x02, 0xc4, 0x68, 0x82, 0xc0, 0x91, 0x38,
-	0x21, 0x59, 0x8e, 0xdd, 0x32, 0x16, 0x1e, 0xb7, 0xe3, 0x76, 0x26, 0xeb, 0x2b, 0x4f, 0xc0, 0x09,
-	0x71, 0x41, 0x5c, 0xf7, 0x01, 0x40, 0xe2, 0x11, 0x38, 0xee, 0x01, 0x24, 0x4e, 0x0b, 0x3b, 0x79,
-	0x09, 0xb4, 0x27, 0xd4, 0xdd, 0xfe, 0x9b, 0x41, 0x1e, 0x67, 0x36, 0x12, 0x8a, 0xd0, 0xde, 0xba,
-	0xab, 0xab, 0xbf, 0xfa, 0xea, 0xeb, 0xea, 0xb2, 0x1b, 0x76, 0xac, 0x98, 0x4c, 0xbd, 0xc7, 0xfb,
-	0x01, 0x09, 0xad, 0xc7, 0x84, 0xee, 0x87, 0x11, 0x89, 0x89, 0x4d, 0xfc, 0x7c, 0x30, 0xe2, 0x03,
-	0xf9, 0x75, 0xe1, 0x37, 0x4a, 0xfd, 0x46, 0xd9, 0xf2, 0xd6, 0x83, 0x2a, 0x00, 0x9f, 0xb8, 0xc2,
-	0x6b, 0xeb, 0x9e, 0x4b, 0x5c, 0xc2, 0x87, 0xfb, 0x6c, 0x24, 0xac, 0xda, 0x4f, 0x4d, 0x18, 0x8e,
-	0x7d, 0x0f, 0x07, 0xf1, 0x09, 0xa6, 0xd4, 0x72, 0xb1, 0x3c, 0x86, 0x9e, 0x4d, 0xa6, 0x53, 0x2b,
-	0x70, 0x14, 0x74, 0x1f, 0xed, 0xf6, 0x0f, 0xde, 0x1a, 0x55, 0x44, 0x1d, 0x8d, 0x85, 0x9f, 0x81,
-	0xcf, 0x2f, 0x30, 0x8d, 0x8f, 0x1b, 0x46, 0xb6, 0x53, 0x9e, 0xc0, 0x30, 0x1d, 0x9a, 0x11, 0x0e,
-	0xfd, 0x44, 0x69, 0x72, 0xa8, 0x37, 0xeb, 0xa1, 0x42, 0x3f, 0x39, 0x6e, 0x18, 0x03, 0xbb, 0x34,
-	0x97, 0xdf, 0x87, 0xce, 0xf9, 0x05, 0x8e, 0x12, 0xa5, 0x55, 0x83, 0xf2, 0x39, 0xf3, 0x2a, 0xe8,
-	0x88, 0x5d, 0xf2, 0x47, 0xd0, 0xe7, 0x83, 0x94, 0x4a, 0x9b, 0x83, 0xbc, 0x51, 0x07, 0x22, 0x88,
-	0xc0, 0x79, 0x3e, 0x3b, 0x94, 0xa0, 0x37, 0x15, 0x22, 0x69, 0xcf, 0x7b, 0xb0, 0xc9, 0x8c, 0x9e,
-	0x6d, 0xbd, 0xd2, 0xad, 0x46, 0x37, 0x86, 0x43, 0x7d, 0x12, 0x9b, 0x3e, 0x21, 0x5f, 0x5f, 0x84,
-	0x4a, 0xa7, 0x06, 0xe7, 0xd4, 0x27, 0xf1, 0x84, 0xbb, 0x32, 0x1c, 0x9a, 0xcf, 0xe4, 0x4f, 0x00,
-	0x5c, 0x2b, 0x34, 0x59, 0x8a, 0x5e, 0xac, 0x74, 0x39, 0xcc, 0x5e, 0x25, 0xcc, 0xc7, 0x56, 0x38,
-	0xe6, 0x9e, 0x45, 0x5e, 0x92, 0x9b, 0xd9, 0xe4, 0x53, 0xb8, 0x53, 0x60, 0xa5, 0x09, 0xf6, 0x6a,
-	0x8e, 0xad, 0x84, 0x28, 0x92, 0xdc, 0x74, 0x17, 0x2c, 0xf2, 0x97, 0xf0, 0xda, 0xcc, 0xc3, 0x97,
-	0xa6, 0xfd, 0x95, 0x15, 0xb8, 0xd8, 0x8c, 0x44, 0x60, 0x65, 0x83, 0xe3, 0xbe, 0x5d, 0x89, 0xfb,
-	0x85, 0x87, 0x2f, 0xc7, 0x7c, 0x4b, 0x41, 0xf5, 0xee, 0x6c, 0xd9, 0xc8, 0x64, 0x2c, 0xa1, 0x2b,
-	0x52, 0x8d, 0x8c, 0x05, 0x2a, 0x93, 0xb1, 0x80, 0x93, 0xc7, 0x00, 0x34, 0xb6, 0xa2, 0xd8, 0x64,
-	0x36, 0x05, 0x38, 0x8c, 0x56, 0x7d, 0x1a, 0xcc, 0x95, 0x61, 0x31, 0xfd, 0x68, 0x36, 0x91, 0x75,
-	0x18, 0xd0, 0x24, 0xb0, 0xcd, 0x30, 0xc2, 0xa1, 0x15, 0x61, 0xa5, 0xcf, 0x61, 0x1e, 0x56, 0xc3,
-	0x24, 0x81, 0xfd, 0x99, 0xf0, 0x3d, 0x6e, 0x18, 0x7d, 0x5a, 0x4c, 0x39, 0x1f, 0x06, 0x25, 0x0e,
-	0x61, 0x50, 0xc7, 0x27, 0x09, 0xec, 0x4c, 0x7f, 0x89, 0x66, 0x13, 0x5e, 0x63, 0x0c, 0x24, 0x2d,
-	0x8e, 0x61, 0x5d, 0x8d, 0x25, 0x81, 0x2d, 0x4e, 0x8e, 0xd7, 0x58, 0x3e, 0x2b, 0xdf, 0x71, 0x0b,
-	0xba, 0x2c, 0x55, 0xdd, 0x91, 0xf7, 0x40, 0xf2, 0xb1, 0xe5, 0xe0, 0xc8, 0xf4, 0xc4, 0xe5, 0x96,
-	0x0e, 0x07, 0x2f, 0x9e, 0x6d, 0x6f, 0x4c, 0xb8, 0x51, 0x3f, 0x32, 0x36, 0xc4, 0xb2, 0xee, 0xc8,
-	0xef, 0x00, 0x50, 0x4c, 0xa9, 0x47, 0x02, 0xe6, 0xcb, 0x6e, 0x6f, 0xfb, 0x70, 0xf8, 0xe2, 0xd9,
-	0xb6, 0x74, 0x2a, 0xac, 0xfa, 0x91, 0x21, 0xa5, 0x0e, 0xba, 0xa3, 0x7d, 0x83, 0x60, 0x73, 0xb1,
-	0x19, 0x2c, 0x01, 0xa0, 0xd5, 0x00, 0xcc, 0x3b, 0xa5, 0xbb, 0x14, 0x2e, 0xed, 0x4a, 0xcc, 0x3b,
-	0x75, 0xd0, 0x1d, 0xf9, 0x1e, 0x74, 0x66, 0x96, 0x7f, 0x81, 0x79, 0x3f, 0x18, 0x18, 0x62, 0xa2,
-	0xfd, 0x89, 0x60, 0x50, 0x6e, 0x23, 0x4b, 0xa0, 0xa8, 0x06, 0x74, 0x0f, 0x24, 0x8a, 0x83, 0x54,
-	0x9c, 0x66, 0x21, 0xce, 0x09, 0x9e, 0x9e, 0x09, 0x71, 0xc4, 0xb2, 0xee, 0xc8, 0xef, 0x41, 0x8f,
-	0x57, 0xb0, 0xe7, 0xa4, 0x1d, 0x69, 0x7b, 0x65, 0xf5, 0xea, 0x8e, 0xd1, 0x9d, 0x89, 0x13, 0xd8,
-	0x81, 0x1e, 0x6f, 0x21, 0x9e, 0xc3, 0xdb, 0x50, 0xca, 0x67, 0x42, 0x5c, 0xd6, 0x2c, 0xf4, 0x23,
-	0xa3, 0xcb, 0x56, 0xcb, 0x19, 0x76, 0xca, 0x19, 0x1a, 0x30, 0x28, 0x77, 0xb8, 0x35, 0x35, 0xce,
-	0x31, 0x9b, 0x65, 0xcc, 0x9f, 0x11, 0x40, 0xd1, 0xf1, 0x6e, 0xa3, 0x66, 0x39, 0xef, 0x76, 0x99,
-	0xf7, 0x8f, 0x08, 0xa0, 0xe8, 0xb0, 0x8b, 0x4c, 0xd0, 0x75, 0x99, 0x34, 0xd7, 0x63, 0xb2, 0x28,
-	0x4e, 0x6b, 0xb5, 0x38, 0x5a, 0x0c, 0x77, 0x96, 0x7b, 0x77, 0x39, 0x36, 0x7a, 0xe9, 0xca, 0x69,
-	0xae, 0xa8, 0x1c, 0xed, 0x07, 0x04, 0x9b, 0x8b, 0x0d, 0xfe, 0xbf, 0xd1, 0xa6, 0xc4, 0xaf, 0xb5,
-	0x8a, 0xdf, 0x09, 0xdc, 0xfd, 0xd7, 0x77, 0xe2, 0xe5, 0x65, 0xd1, 0xbe, 0x6b, 0x02, 0x14, 0x78,
-	0x2c, 0xd5, 0x29, 0xcf, 0xaa, 0x32, 0x55, 0xb1, 0x7c, 0xa3, 0x54, 0x3f, 0x80, 0xbe, 0x6f, 0xd1,
-	0xd8, 0x0c, 0x48, 0x34, 0xb5, 0xfc, 0xeb, 0x96, 0x33, 0xb0, 0x3d, 0x9f, 0xf2, 0x2d, 0x4b, 0x85,
-	0xd4, 0xae, 0xb9, 0x65, 0x8f, 0xa0, 0xe5, 0x13, 0x57, 0xe9, 0xdc, 0x6f, 0xed, 0xf6, 0x0f, 0x1e,
-	0x54, 0xc6, 0x99, 0x10, 0xf7, 0xc3, 0x20, 0x8e, 0x12, 0x83, 0x79, 0x6b, 0x4f, 0x10, 0x48, 0xf9,
-	0x37, 0xef, 0x06, 0x75, 0xb7, 0x5e, 0x67, 0x4e, 0xa9, 0xb6, 0xd6, 0xa2, 0xfa, 0x3b, 0x82, 0x7e,
-	0xe9, 0xbb, 0x7a, 0x0b, 0xef, 0x72, 0x96, 0x57, 0x7b, 0xad, 0xbc, 0xbe, 0x67, 0x47, 0x90, 0x7f,
-	0xd9, 0x6f, 0xd5, 0x2d, 0xfc, 0x8d, 0x75, 0xcf, 0xfc, 0x6f, 0xe1, 0xff, 0xa2, 0xf8, 0x01, 0xcd,
-	0x1e, 0x81, 0xa7, 0x38, 0x9a, 0x79, 0x36, 0x96, 0xcf, 0x60, 0x90, 0x1a, 0xe2, 0x08, 0x5b, 0x53,
-	0x79, 0xa7, 0xfa, 0x01, 0x52, 0x7e, 0x3c, 0x6e, 0x5d, 0xd3, 0x6f, 0x17, 0xbd, 0x8b, 0x0e, 0x2e,
-	0xf3, 0x27, 0x54, 0x16, 0x15, 0xc3, 0x30, 0xb3, 0x88, 0xb0, 0xd5, 0xff, 0xe2, 0x8b, 0x8f, 0xaf,
-	0xad, 0xeb, 0x3a, 0xb2, 0xc0, 0x87, 0x0f, 0xff, 0x7e, 0xae, 0xa2, 0x27, 0x73, 0x15, 0xfd, 0x32,
-	0x57, 0xd1, 0xaf, 0x73, 0x15, 0x3d, 0x9d, 0xab, 0xe8, 0xaf, 0xb9, 0x8a, 0xbe, 0xbd, 0x52, 0x1b,
-	0x4f, 0xaf, 0xd4, 0xc6, 0x1f, 0x57, 0x6a, 0xe3, 0xac, 0xcb, 0x21, 0x1e, 0xfd, 0x13, 0x00, 0x00,
-	0xff, 0xff, 0xe3, 0x1f, 0xe0, 0xc7, 0x9c, 0x0f, 0x00, 0x00,
+	// 956 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x57, 0x4d, 0x6f, 0xe3, 0x44,
+	0x18, 0xce, 0xe4, 0xb3, 0x79, 0xe3, 0x54, 0xbb, 0x66, 0x25, 0xac, 0x1e, 0xdc, 0x5d, 0x53, 0x96,
+	0x02, 0x52, 0x8a, 0xba, 0x67, 0x24, 0x94, 0x04, 0x68, 0x50, 0xb6, 0x02, 0x17, 0x21, 0x21, 0x21,
+	0x59, 0xae, 0x33, 0x32, 0x16, 0xb6, 0xc7, 0xf5, 0x38, 0xe9, 0xfa, 0xca, 0x81, 0x33, 0xff, 0x00,
+	0x71, 0x41, 0xfb, 0x03, 0x10, 0xe2, 0xc4, 0x99, 0xe3, 0x1e, 0xb9, 0x50, 0xb1, 0xe9, 0x8d, 0x5f,
+	0x80, 0xf6, 0x84, 0x66, 0xc6, 0x5f, 0x09, 0x72, 0xdd, 0xa0, 0x6a, 0x55, 0x21, 0x6e, 0x33, 0xaf,
+	0x9f, 0x79, 0xe6, 0x79, 0x3f, 0xe6, 0x1d, 0x0f, 0x3c, 0x34, 0x23, 0xe2, 0x39, 0x4f, 0x0e, 0x7c,
+	0x12, 0x98, 0x4f, 0x08, 0x3d, 0x08, 0x42, 0x12, 0x11, 0x8b, 0xb8, 0xd9, 0x60, 0xc0, 0x07, 0xf2,
+	0xab, 0x02, 0x37, 0x48, 0x70, 0x83, 0xf4, 0xf3, 0xce, 0x83, 0x32, 0x02, 0x97, 0xd8, 0x02, 0xb5,
+	0x73, 0xcf, 0x26, 0x36, 0xe1, 0xc3, 0x03, 0x36, 0x12, 0x56, 0xed, 0xc7, 0x3a, 0xf4, 0x47, 0xae,
+	0x83, 0xfd, 0xe8, 0x31, 0xa6, 0xd4, 0xb4, 0xb1, 0x3c, 0x82, 0x8e, 0x45, 0x3c, 0xcf, 0xf4, 0x67,
+	0x0a, 0xba, 0x8f, 0xf6, 0x7b, 0x87, 0x6f, 0x0c, 0x4a, 0x76, 0x1d, 0x8c, 0x04, 0x4e, 0xc7, 0x67,
+	0x73, 0x4c, 0xa3, 0xa3, 0x9a, 0x9e, 0xae, 0x94, 0xa7, 0xd0, 0x4f, 0x86, 0x46, 0x88, 0x03, 0x37,
+	0x56, 0xea, 0x9c, 0xea, 0xf5, 0x6a, 0xaa, 0xc0, 0x8d, 0x8f, 0x6a, 0xba, 0x64, 0x15, 0xe6, 0xf2,
+	0xbb, 0xd0, 0x3a, 0x9b, 0xe3, 0x30, 0x56, 0x1a, 0x15, 0x2c, 0x9f, 0x30, 0x54, 0x2e, 0x47, 0xac,
+	0x92, 0x3f, 0x80, 0x1e, 0x1f, 0x24, 0x52, 0x9a, 0x9c, 0xe4, 0xb5, 0x2a, 0x12, 0x21, 0x04, 0xce,
+	0xb2, 0xd9, 0xb0, 0x0b, 0x1d, 0x4f, 0x04, 0x49, 0x7b, 0xde, 0x81, 0x6d, 0x66, 0x74, 0x2c, 0xf3,
+	0xff, 0xb8, 0x55, 0xc4, 0x8d, 0xf1, 0x50, 0x97, 0x44, 0x86, 0x4b, 0xc8, 0x57, 0xf3, 0x40, 0x69,
+	0x55, 0xf0, 0x9c, 0xb8, 0x24, 0x9a, 0x72, 0x28, 0xe3, 0xa1, 0xd9, 0x4c, 0xfe, 0x08, 0xc0, 0x36,
+	0x03, 0x83, 0xb9, 0xe8, 0x44, 0x4a, 0x9b, 0xd3, 0xbc, 0x59, 0x4a, 0xf3, 0xa1, 0x19, 0x8c, 0x38,
+	0x32, 0xf7, 0xab, 0x6b, 0xa7, 0x36, 0xf9, 0x04, 0xee, 0xe4, 0x5c, 0x89, 0x83, 0x9d, 0x8a, 0xb4,
+	0x15, 0x18, 0x85, 0x93, 0xdb, 0xf6, 0x8a, 0x45, 0xfe, 0x02, 0x5e, 0x59, 0x38, 0xf8, 0xdc, 0xb0,
+	0xbe, 0x34, 0x7d, 0x1b, 0x1b, 0xa1, 0xd8, 0x58, 0xd9, 0xe2, 0xbc, 0x6f, 0x95, 0xf2, 0x7e, 0xe6,
+	0xe0, 0xf3, 0x11, 0x5f, 0x92, 0x4b, 0xbd, 0xbb, 0x58, 0x37, 0xb2, 0x30, 0x16, 0xd8, 0x95, 0x6e,
+	0x45, 0x18, 0x73, 0x56, 0x16, 0xc6, 0x9c, 0x4e, 0x1e, 0x01, 0xd0, 0xc8, 0x0c, 0x23, 0x83, 0xd9,
+	0x14, 0xe0, 0x34, 0x5a, 0x79, 0x36, 0x18, 0x94, 0x71, 0xb1, 0xf8, 0xd1, 0x74, 0x22, 0x4f, 0x40,
+	0xa2, 0xb1, 0x6f, 0x19, 0x41, 0x88, 0x03, 0x33, 0xc4, 0x4a, 0x8f, 0xd3, 0xec, 0x95, 0xd3, 0xc4,
+	0xbe, 0xf5, 0xb1, 0xc0, 0x1e, 0xd5, 0xf4, 0x1e, 0xcd, 0xa7, 0x5c, 0x0f, 0xa3, 0x12, 0x49, 0x90,
+	0xaa, 0xf4, 0xc4, 0xbe, 0x95, 0xc6, 0xbf, 0x4b, 0xd3, 0x09, 0xaf, 0x31, 0x46, 0x92, 0x14, 0x47,
+	0xbf, 0xaa, 0xc6, 0x62, 0xdf, 0x12, 0x99, 0xe3, 0x35, 0x96, 0xcd, 0x8a, 0x67, 0x1c, 0x43, 0x9b,
+	0xb9, 0x3a, 0x99, 0xc9, 0x6f, 0x03, 0xb8, 0xd8, 0x9c, 0xe1, 0xd0, 0xf0, 0xe7, 0x1e, 0x3f, 0xdd,
+	0xdd, 0xa1, 0xf4, 0xe2, 0x62, 0x77, 0x6b, 0xca, 0xad, 0x93, 0xb1, 0xde, 0x15, 0xdf, 0x8f, 0xe7,
+	0x9e, 0x3c, 0x80, 0x1e, 0xc5, 0x94, 0x3a, 0xc4, 0xe7, 0x68, 0x76, 0x80, 0x9b, 0xc3, 0xfe, 0x8b,
+	0x8b, 0xdd, 0xee, 0x89, 0x30, 0x4f, 0xc6, 0x3a, 0x24, 0x88, 0xe3, 0xb9, 0xa7, 0x7d, 0x83, 0x60,
+	0x7b, 0xb5, 0x21, 0xac, 0x53, 0xa0, 0x0a, 0x0a, 0x86, 0x4f, 0x44, 0xaf, 0x6f, 0x99, 0x34, 0x27,
+	0x86, 0x4f, 0x10, 0x0c, 0x7f, 0x0f, 0x5a, 0x0b, 0xd3, 0x9d, 0x63, 0xde, 0x17, 0x24, 0x5d, 0x4c,
+	0xb4, 0x3f, 0x11, 0x48, 0xc5, 0x76, 0xb2, 0x4e, 0x8b, 0xaa, 0x68, 0xf7, 0xa0, 0x4d, 0xb1, 0x3f,
+	0xc3, 0x21, 0x57, 0x90, 0x84, 0xe8, 0x31, 0xf6, 0x4e, 0x79, 0x88, 0x92, 0x6f, 0xf2, 0x18, 0x3a,
+	0xbc, 0x8c, 0x9d, 0x59, 0xd2, 0x96, 0x76, 0xaf, 0x2c, 0xe1, 0xc9, 0x6c, 0x08, 0xcb, 0x8b, 0x5d,
+	0x91, 0x8a, 0xb1, 0xde, 0x5e, 0x88, 0x94, 0xec, 0xc3, 0x16, 0xef, 0x29, 0x4c, 0x58, 0x33, 0x17,
+	0x36, 0x25, 0x36, 0x6b, 0x1f, 0x93, 0xb1, 0xde, 0x61, 0x9f, 0x57, 0x9c, 0x6d, 0x15, 0x9d, 0xfd,
+	0x14, 0xa4, 0x62, 0xd3, 0xdb, 0x38, 0xe4, 0x19, 0x6b, 0xbd, 0xc8, 0xfa, 0x0b, 0x02, 0xc8, 0xdb,
+	0xe0, 0xad, 0x0e, 0x60, 0xe6, 0x40, 0xb3, 0xe8, 0xc0, 0x53, 0x04, 0x90, 0xf7, 0xdf, 0x82, 0x20,
+	0x74, 0x3d, 0x41, 0xf5, 0x7f, 0x2f, 0x68, 0x2d, 0x58, 0x8d, 0x8a, 0x60, 0x69, 0x5f, 0x23, 0xb8,
+	0xb3, 0xde, 0xe3, 0x8b, 0x52, 0xd0, 0xcd, 0x14, 0x57, 0xfd, 0xaa, 0xe2, 0xd2, 0x7e, 0x40, 0xb0,
+	0xbd, 0x7a, 0x2d, 0xbc, 0xd4, 0x98, 0x15, 0x85, 0x36, 0xae, 0x14, 0xfa, 0x39, 0xdc, 0xfd, 0xc7,
+	0x35, 0x73, 0x33, 0xd1, 0xd2, 0xbe, 0xab, 0x03, 0xe4, 0xdc, 0x2f, 0xd5, 0xff, 0xf7, 0xa0, 0xe7,
+	0x9a, 0x34, 0x32, 0x7c, 0x12, 0x7a, 0xa6, 0x7b, 0xcd, 0xe3, 0xa0, 0x03, 0x5b, 0x73, 0xcc, 0x97,
+	0xac, 0x57, 0x5d, 0xb3, 0xea, 0x88, 0x3e, 0x82, 0x86, 0x4b, 0x6c, 0xa5, 0x75, 0xbf, 0xb1, 0xdf,
+	0x3b, 0x7c, 0x50, 0xba, 0xd3, 0x94, 0xd8, 0xef, 0xfb, 0x51, 0x18, 0xeb, 0x0c, 0xad, 0xfd, 0x84,
+	0xa0, 0x9b, 0xdd, 0xa3, 0x37, 0x54, 0xa3, 0x9b, 0xf6, 0xfc, 0x44, 0x78, 0x63, 0x23, 0xe1, 0x17,
+	0x08, 0x7a, 0x85, 0x9b, 0xfb, 0x36, 0xf7, 0x83, 0xd4, 0xc1, 0xe6, 0x46, 0x0e, 0x7e, 0xcf, 0x32,
+	0x93, 0xfd, 0x44, 0xdc, 0xce, 0xa3, 0xfb, 0x3b, 0xeb, 0xc9, 0xd9, 0x1f, 0xca, 0x7f, 0x2e, 0x07,
+	0x87, 0x34, 0x7d, 0x81, 0x9e, 0xe0, 0x70, 0xe1, 0x58, 0x58, 0x3e, 0x05, 0x29, 0x31, 0x44, 0x21,
+	0x36, 0x3d, 0xf9, 0x61, 0xf9, 0xeb, 0xa7, 0xf8, 0x72, 0xdd, 0xb9, 0x26, 0x6e, 0x1f, 0xbd, 0x83,
+	0x0e, 0xcf, 0xb3, 0xf7, 0x5b, 0xba, 0x2b, 0x86, 0x7e, 0x6a, 0x11, 0xdb, 0x96, 0x3f, 0x04, 0x56,
+	0x5f, 0x7e, 0x3b, 0xd7, 0x05, 0xb2, 0x8d, 0x87, 0x7b, 0x7f, 0x3d, 0x57, 0xd1, 0xd3, 0xa5, 0x8a,
+	0x7e, 0x5e, 0xaa, 0xe8, 0xd7, 0xa5, 0x8a, 0x9e, 0x2d, 0x55, 0xf4, 0xc7, 0x52, 0x45, 0xdf, 0x5e,
+	0xaa, 0xb5, 0x67, 0x97, 0x6a, 0xed, 0xb7, 0x4b, 0xb5, 0x76, 0xda, 0xe6, 0x14, 0x8f, 0xfe, 0x0e,
+	0x00, 0x00, 0xff, 0xff, 0x40, 0xef, 0x5a, 0xf9, 0x19, 0x10, 0x00, 0x00,
 }
 
 func (this *ClientMessage) Equal(that interface{}) bool {
@@ -1799,10 +1799,10 @@ func (this *ViewId) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.LeaderId != that1.LeaderId {
+	if this.LeaderNum != that1.LeaderNum {
 		return false
 	}
-	if this.SessionId != that1.SessionId {
+	if this.SessionNum != that1.SessionNum {
 		return false
 	}
 	return true
@@ -1826,10 +1826,10 @@ func (this *CommandRequest) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.SessionId != that1.SessionId {
+	if this.SessionNum != that1.SessionNum {
 		return false
 	}
-	if this.MessageId != that1.MessageId {
+	if this.MessageNum != that1.MessageNum {
 		return false
 	}
 	if !bytes.Equal(this.Value, that1.Value) {
@@ -1856,16 +1856,16 @@ func (this *CommandReply) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.MessageId != that1.MessageId {
+	if this.MessageNum != that1.MessageNum {
 		return false
 	}
-	if this.SenderId != that1.SenderId {
+	if this.Sender != that1.Sender {
 		return false
 	}
-	if !this.ViewId.Equal(that1.ViewId) {
+	if !this.ViewID.Equal(that1.ViewID) {
 		return false
 	}
-	if this.SlotId != that1.SlotId {
+	if this.SlotNum != that1.SlotNum {
 		return false
 	}
 	if !bytes.Equal(this.Value, that1.Value) {
@@ -1892,7 +1892,7 @@ func (this *QueryRequest) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.SessionId != that1.SessionId {
+	if this.SessionNum != that1.SessionNum {
 		return false
 	}
 	if !bytes.Equal(this.Value, that1.Value) {
@@ -1919,13 +1919,13 @@ func (this *QueryReply) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.MessageId != that1.MessageId {
+	if this.MessageNum != that1.MessageNum {
 		return false
 	}
-	if this.SenderId != that1.SenderId {
+	if this.Sender != that1.Sender {
 		return false
 	}
-	if !this.ViewId.Equal(that1.ViewId) {
+	if !this.ViewID.Equal(that1.ViewID) {
 		return false
 	}
 	if !bytes.Equal(this.Value, that1.Value) {
@@ -1952,13 +1952,13 @@ func (this *SlotLookup) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.SenderId != that1.SenderId {
+	if this.Sender != that1.Sender {
 		return false
 	}
-	if !this.ViewId.Equal(that1.ViewId) {
+	if !this.ViewID.Equal(that1.ViewID) {
 		return false
 	}
-	if this.MessageId != that1.MessageId {
+	if this.MessageNum != that1.MessageNum {
 		return false
 	}
 	return true
@@ -1982,10 +1982,10 @@ func (this *GapCommitRequest) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if !this.ViewId.Equal(that1.ViewId) {
+	if !this.ViewID.Equal(that1.ViewID) {
 		return false
 	}
-	if this.SlotId != that1.SlotId {
+	if this.SlotNum != that1.SlotNum {
 		return false
 	}
 	return true
@@ -2009,13 +2009,13 @@ func (this *GapCommitReply) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.SenderId != that1.SenderId {
+	if this.Sender != that1.Sender {
 		return false
 	}
-	if !this.ViewId.Equal(that1.ViewId) {
+	if !this.ViewID.Equal(that1.ViewID) {
 		return false
 	}
-	if this.SlotId != that1.SlotId {
+	if this.SlotNum != that1.SlotNum {
 		return false
 	}
 	return true
@@ -2039,7 +2039,7 @@ func (this *ViewChangeRequest) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if !this.ViewId.Equal(that1.ViewId) {
+	if !this.ViewID.Equal(that1.ViewID) {
 		return false
 	}
 	return true
@@ -2063,16 +2063,16 @@ func (this *ViewChange) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.MemberId != that1.MemberId {
+	if this.Sender != that1.Sender {
 		return false
 	}
-	if !this.ViewId.Equal(that1.ViewId) {
+	if !this.ViewID.Equal(that1.ViewID) {
 		return false
 	}
 	if !this.LastNormal.Equal(that1.LastNormal) {
 		return false
 	}
-	if this.MessageId != that1.MessageId {
+	if this.MessageNum != that1.MessageNum {
 		return false
 	}
 	if len(this.Log) != len(that1.Log) {
@@ -2104,10 +2104,10 @@ func (this *StartView) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if !this.ViewId.Equal(that1.ViewId) {
+	if !this.ViewID.Equal(that1.ViewID) {
 		return false
 	}
-	if this.MessageId != that1.MessageId {
+	if this.MessageNum != that1.MessageNum {
 		return false
 	}
 	if len(this.Log) != len(that1.Log) {
@@ -2139,13 +2139,13 @@ func (this *SyncPrepare) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.SenderId != that1.SenderId {
+	if this.Sender != that1.Sender {
 		return false
 	}
-	if !this.ViewId.Equal(that1.ViewId) {
+	if !this.ViewID.Equal(that1.ViewID) {
 		return false
 	}
-	if this.MessageId != that1.MessageId {
+	if this.MessageNum != that1.MessageNum {
 		return false
 	}
 	if len(this.Log) != len(that1.Log) {
@@ -2177,13 +2177,13 @@ func (this *SyncReply) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.SenderId != that1.SenderId {
+	if this.Sender != that1.Sender {
 		return false
 	}
-	if !this.ViewId.Equal(that1.ViewId) {
+	if !this.ViewID.Equal(that1.ViewID) {
 		return false
 	}
-	if this.SlotId != that1.SlotId {
+	if this.SlotNum != that1.SlotNum {
 		return false
 	}
 	return true
@@ -2207,13 +2207,13 @@ func (this *SyncCommit) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.SenderId != that1.SenderId {
+	if this.Sender != that1.Sender {
 		return false
 	}
-	if !this.ViewId.Equal(that1.ViewId) {
+	if !this.ViewID.Equal(that1.ViewID) {
 		return false
 	}
-	if this.MessageId != that1.MessageId {
+	if this.MessageNum != that1.MessageNum {
 		return false
 	}
 	if len(this.Log) != len(that1.Log) {
@@ -2884,15 +2884,15 @@ func (m *ViewId) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.SessionId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.SessionId))
+	if m.SessionNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.SessionNum))
 		i--
 		dAtA[i] = 0x10
 	}
-	if len(m.LeaderId) > 0 {
-		i -= len(m.LeaderId)
-		copy(dAtA[i:], m.LeaderId)
-		i = encodeVarintProtocol(dAtA, i, uint64(len(m.LeaderId)))
+	if len(m.LeaderNum) > 0 {
+		i -= len(m.LeaderNum)
+		copy(dAtA[i:], m.LeaderNum)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.LeaderNum)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -2926,13 +2926,13 @@ func (m *CommandRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x1a
 	}
-	if m.MessageId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
 		i--
 		dAtA[i] = 0x10
 	}
-	if m.SessionId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.SessionId))
+	if m.SessionNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.SessionNum))
 		i--
 		dAtA[i] = 0x8
 	}
@@ -2966,14 +2966,14 @@ func (m *CommandReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x2a
 	}
-	if m.SlotId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.SlotId))
+	if m.SlotNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.SlotNum))
 		i--
 		dAtA[i] = 0x20
 	}
-	if m.ViewId != nil {
+	if m.ViewID != nil {
 		{
-			size, err := m.ViewId.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -2983,15 +2983,15 @@ func (m *CommandReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x1a
 	}
-	if len(m.SenderId) > 0 {
-		i -= len(m.SenderId)
-		copy(dAtA[i:], m.SenderId)
-		i = encodeVarintProtocol(dAtA, i, uint64(len(m.SenderId)))
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Sender)))
 		i--
 		dAtA[i] = 0x12
 	}
-	if m.MessageId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
 		i--
 		dAtA[i] = 0x8
 	}
@@ -3025,8 +3025,8 @@ func (m *QueryRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if m.SessionId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.SessionId))
+	if m.SessionNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.SessionNum))
 		i--
 		dAtA[i] = 0x8
 	}
@@ -3060,9 +3060,9 @@ func (m *QueryReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x22
 	}
-	if m.ViewId != nil {
+	if m.ViewID != nil {
 		{
-			size, err := m.ViewId.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -3072,15 +3072,15 @@ func (m *QueryReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x1a
 	}
-	if len(m.SenderId) > 0 {
-		i -= len(m.SenderId)
-		copy(dAtA[i:], m.SenderId)
-		i = encodeVarintProtocol(dAtA, i, uint64(len(m.SenderId)))
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Sender)))
 		i--
 		dAtA[i] = 0x12
 	}
-	if m.MessageId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
 		i--
 		dAtA[i] = 0x8
 	}
@@ -3107,14 +3107,14 @@ func (m *SlotLookup) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.MessageId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
 		i--
 		dAtA[i] = 0x18
 	}
-	if m.ViewId != nil {
+	if m.ViewID != nil {
 		{
-			size, err := m.ViewId.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -3124,10 +3124,10 @@ func (m *SlotLookup) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.SenderId) > 0 {
-		i -= len(m.SenderId)
-		copy(dAtA[i:], m.SenderId)
-		i = encodeVarintProtocol(dAtA, i, uint64(len(m.SenderId)))
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Sender)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -3154,14 +3154,14 @@ func (m *GapCommitRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.SlotId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.SlotId))
+	if m.SlotNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.SlotNum))
 		i--
 		dAtA[i] = 0x10
 	}
-	if m.ViewId != nil {
+	if m.ViewID != nil {
 		{
-			size, err := m.ViewId.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -3194,14 +3194,14 @@ func (m *GapCommitReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.SlotId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.SlotId))
+	if m.SlotNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.SlotNum))
 		i--
 		dAtA[i] = 0x18
 	}
-	if m.ViewId != nil {
+	if m.ViewID != nil {
 		{
-			size, err := m.ViewId.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -3211,10 +3211,10 @@ func (m *GapCommitReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.SenderId) > 0 {
-		i -= len(m.SenderId)
-		copy(dAtA[i:], m.SenderId)
-		i = encodeVarintProtocol(dAtA, i, uint64(len(m.SenderId)))
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Sender)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -3241,9 +3241,9 @@ func (m *ViewChangeRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.ViewId != nil {
+	if m.ViewID != nil {
 		{
-			size, err := m.ViewId.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -3290,8 +3290,8 @@ func (m *ViewChange) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x2a
 		}
 	}
-	if m.MessageId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
 		i--
 		dAtA[i] = 0x20
 	}
@@ -3307,9 +3307,9 @@ func (m *ViewChange) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x1a
 	}
-	if m.ViewId != nil {
+	if m.ViewID != nil {
 		{
-			size, err := m.ViewId.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -3319,10 +3319,10 @@ func (m *ViewChange) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.MemberId) > 0 {
-		i -= len(m.MemberId)
-		copy(dAtA[i:], m.MemberId)
-		i = encodeVarintProtocol(dAtA, i, uint64(len(m.MemberId)))
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Sender)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -3363,14 +3363,14 @@ func (m *StartView) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x1a
 		}
 	}
-	if m.MessageId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
 		i--
 		dAtA[i] = 0x10
 	}
-	if m.ViewId != nil {
+	if m.ViewID != nil {
 		{
-			size, err := m.ViewId.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -3417,14 +3417,14 @@ func (m *SyncPrepare) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x22
 		}
 	}
-	if m.MessageId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
 		i--
 		dAtA[i] = 0x18
 	}
-	if m.ViewId != nil {
+	if m.ViewID != nil {
 		{
-			size, err := m.ViewId.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -3434,10 +3434,10 @@ func (m *SyncPrepare) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.SenderId) > 0 {
-		i -= len(m.SenderId)
-		copy(dAtA[i:], m.SenderId)
-		i = encodeVarintProtocol(dAtA, i, uint64(len(m.SenderId)))
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Sender)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -3464,14 +3464,14 @@ func (m *SyncReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.SlotId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.SlotId))
+	if m.SlotNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.SlotNum))
 		i--
 		dAtA[i] = 0x18
 	}
-	if m.ViewId != nil {
+	if m.ViewID != nil {
 		{
-			size, err := m.ViewId.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -3481,10 +3481,10 @@ func (m *SyncReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.SenderId) > 0 {
-		i -= len(m.SenderId)
-		copy(dAtA[i:], m.SenderId)
-		i = encodeVarintProtocol(dAtA, i, uint64(len(m.SenderId)))
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Sender)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -3525,14 +3525,14 @@ func (m *SyncCommit) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			dAtA[i] = 0x22
 		}
 	}
-	if m.MessageId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
 		i--
 		dAtA[i] = 0x18
 	}
-	if m.ViewId != nil {
+	if m.ViewID != nil {
 		{
-			size, err := m.ViewId.MarshalToSizedBuffer(dAtA[:i])
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -3542,10 +3542,10 @@ func (m *SyncCommit) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.SenderId) > 0 {
-		i -= len(m.SenderId)
-		copy(dAtA[i:], m.SenderId)
-		i = encodeVarintProtocol(dAtA, i, uint64(len(m.SenderId)))
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Sender)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -3704,8 +3704,8 @@ func NewPopulatedReplicaMessage_SyncCommit(r randyProtocol, easy bool) *ReplicaM
 }
 func NewPopulatedViewId(r randyProtocol, easy bool) *ViewId {
 	this := &ViewId{}
-	this.LeaderId = LeaderID(randStringProtocol(r))
-	this.SessionId = SessionID(uint64(r.Uint32()))
+	this.LeaderNum = LeaderID(randStringProtocol(r))
+	this.SessionNum = SessionID(uint64(r.Uint32()))
 	if !easy && r.Intn(10) != 0 {
 	}
 	return this
@@ -3713,8 +3713,8 @@ func NewPopulatedViewId(r randyProtocol, easy bool) *ViewId {
 
 func NewPopulatedCommandRequest(r randyProtocol, easy bool) *CommandRequest {
 	this := &CommandRequest{}
-	this.SessionId = SessionID(uint64(r.Uint32()))
-	this.MessageId = MessageID(uint64(r.Uint32()))
+	this.SessionNum = SessionID(uint64(r.Uint32()))
+	this.MessageNum = MessageID(uint64(r.Uint32()))
 	v1 := r.Intn(100)
 	this.Value = make([]byte, v1)
 	for i := 0; i < v1; i++ {
@@ -3727,12 +3727,12 @@ func NewPopulatedCommandRequest(r randyProtocol, easy bool) *CommandRequest {
 
 func NewPopulatedCommandReply(r randyProtocol, easy bool) *CommandReply {
 	this := &CommandReply{}
-	this.MessageId = MessageID(uint64(r.Uint32()))
-	this.SenderId = MemberID(randStringProtocol(r))
+	this.MessageNum = MessageID(uint64(r.Uint32()))
+	this.Sender = MemberID(randStringProtocol(r))
 	if r.Intn(5) != 0 {
-		this.ViewId = NewPopulatedViewId(r, easy)
+		this.ViewID = NewPopulatedViewId(r, easy)
 	}
-	this.SlotId = LogSlotID(uint64(r.Uint32()))
+	this.SlotNum = LogSlotID(uint64(r.Uint32()))
 	v2 := r.Intn(100)
 	this.Value = make([]byte, v2)
 	for i := 0; i < v2; i++ {
@@ -3745,7 +3745,7 @@ func NewPopulatedCommandReply(r randyProtocol, easy bool) *CommandReply {
 
 func NewPopulatedQueryRequest(r randyProtocol, easy bool) *QueryRequest {
 	this := &QueryRequest{}
-	this.SessionId = SessionID(uint64(r.Uint32()))
+	this.SessionNum = SessionID(uint64(r.Uint32()))
 	v3 := r.Intn(100)
 	this.Value = make([]byte, v3)
 	for i := 0; i < v3; i++ {
@@ -3758,10 +3758,10 @@ func NewPopulatedQueryRequest(r randyProtocol, easy bool) *QueryRequest {
 
 func NewPopulatedQueryReply(r randyProtocol, easy bool) *QueryReply {
 	this := &QueryReply{}
-	this.MessageId = MessageID(uint64(r.Uint32()))
-	this.SenderId = MemberID(randStringProtocol(r))
+	this.MessageNum = MessageID(uint64(r.Uint32()))
+	this.Sender = MemberID(randStringProtocol(r))
 	if r.Intn(5) != 0 {
-		this.ViewId = NewPopulatedViewId(r, easy)
+		this.ViewID = NewPopulatedViewId(r, easy)
 	}
 	v4 := r.Intn(100)
 	this.Value = make([]byte, v4)
@@ -3775,11 +3775,11 @@ func NewPopulatedQueryReply(r randyProtocol, easy bool) *QueryReply {
 
 func NewPopulatedSlotLookup(r randyProtocol, easy bool) *SlotLookup {
 	this := &SlotLookup{}
-	this.SenderId = MemberID(randStringProtocol(r))
+	this.Sender = MemberID(randStringProtocol(r))
 	if r.Intn(5) != 0 {
-		this.ViewId = NewPopulatedViewId(r, easy)
+		this.ViewID = NewPopulatedViewId(r, easy)
 	}
-	this.MessageId = MessageID(uint64(r.Uint32()))
+	this.MessageNum = MessageID(uint64(r.Uint32()))
 	if !easy && r.Intn(10) != 0 {
 	}
 	return this
@@ -3788,9 +3788,9 @@ func NewPopulatedSlotLookup(r randyProtocol, easy bool) *SlotLookup {
 func NewPopulatedGapCommitRequest(r randyProtocol, easy bool) *GapCommitRequest {
 	this := &GapCommitRequest{}
 	if r.Intn(5) != 0 {
-		this.ViewId = NewPopulatedViewId(r, easy)
+		this.ViewID = NewPopulatedViewId(r, easy)
 	}
-	this.SlotId = LogSlotID(uint64(r.Uint32()))
+	this.SlotNum = LogSlotID(uint64(r.Uint32()))
 	if !easy && r.Intn(10) != 0 {
 	}
 	return this
@@ -3798,11 +3798,11 @@ func NewPopulatedGapCommitRequest(r randyProtocol, easy bool) *GapCommitRequest 
 
 func NewPopulatedGapCommitReply(r randyProtocol, easy bool) *GapCommitReply {
 	this := &GapCommitReply{}
-	this.SenderId = MemberID(randStringProtocol(r))
+	this.Sender = MemberID(randStringProtocol(r))
 	if r.Intn(5) != 0 {
-		this.ViewId = NewPopulatedViewId(r, easy)
+		this.ViewID = NewPopulatedViewId(r, easy)
 	}
-	this.SlotId = LogSlotID(uint64(r.Uint32()))
+	this.SlotNum = LogSlotID(uint64(r.Uint32()))
 	if !easy && r.Intn(10) != 0 {
 	}
 	return this
@@ -3811,7 +3811,7 @@ func NewPopulatedGapCommitReply(r randyProtocol, easy bool) *GapCommitReply {
 func NewPopulatedViewChangeRequest(r randyProtocol, easy bool) *ViewChangeRequest {
 	this := &ViewChangeRequest{}
 	if r.Intn(5) != 0 {
-		this.ViewId = NewPopulatedViewId(r, easy)
+		this.ViewID = NewPopulatedViewId(r, easy)
 	}
 	if !easy && r.Intn(10) != 0 {
 	}
@@ -3820,14 +3820,14 @@ func NewPopulatedViewChangeRequest(r randyProtocol, easy bool) *ViewChangeReques
 
 func NewPopulatedViewChange(r randyProtocol, easy bool) *ViewChange {
 	this := &ViewChange{}
-	this.MemberId = MemberID(randStringProtocol(r))
+	this.Sender = MemberID(randStringProtocol(r))
 	if r.Intn(5) != 0 {
-		this.ViewId = NewPopulatedViewId(r, easy)
+		this.ViewID = NewPopulatedViewId(r, easy)
 	}
 	if r.Intn(5) != 0 {
 		this.LastNormal = NewPopulatedViewId(r, easy)
 	}
-	this.MessageId = MessageID(uint64(r.Uint32()))
+	this.MessageNum = MessageID(uint64(r.Uint32()))
 	if r.Intn(5) != 0 {
 		v5 := r.Intn(5)
 		this.Log = make([]*LogEntry, v5)
@@ -3843,9 +3843,9 @@ func NewPopulatedViewChange(r randyProtocol, easy bool) *ViewChange {
 func NewPopulatedStartView(r randyProtocol, easy bool) *StartView {
 	this := &StartView{}
 	if r.Intn(5) != 0 {
-		this.ViewId = NewPopulatedViewId(r, easy)
+		this.ViewID = NewPopulatedViewId(r, easy)
 	}
-	this.MessageId = MessageID(uint64(r.Uint32()))
+	this.MessageNum = MessageID(uint64(r.Uint32()))
 	if r.Intn(5) != 0 {
 		v6 := r.Intn(5)
 		this.Log = make([]*LogEntry, v6)
@@ -3860,11 +3860,11 @@ func NewPopulatedStartView(r randyProtocol, easy bool) *StartView {
 
 func NewPopulatedSyncPrepare(r randyProtocol, easy bool) *SyncPrepare {
 	this := &SyncPrepare{}
-	this.SenderId = MemberID(randStringProtocol(r))
+	this.Sender = MemberID(randStringProtocol(r))
 	if r.Intn(5) != 0 {
-		this.ViewId = NewPopulatedViewId(r, easy)
+		this.ViewID = NewPopulatedViewId(r, easy)
 	}
-	this.MessageId = MessageID(uint64(r.Uint32()))
+	this.MessageNum = MessageID(uint64(r.Uint32()))
 	if r.Intn(5) != 0 {
 		v7 := r.Intn(5)
 		this.Log = make([]*LogEntry, v7)
@@ -3879,11 +3879,11 @@ func NewPopulatedSyncPrepare(r randyProtocol, easy bool) *SyncPrepare {
 
 func NewPopulatedSyncReply(r randyProtocol, easy bool) *SyncReply {
 	this := &SyncReply{}
-	this.SenderId = MemberID(randStringProtocol(r))
+	this.Sender = MemberID(randStringProtocol(r))
 	if r.Intn(5) != 0 {
-		this.ViewId = NewPopulatedViewId(r, easy)
+		this.ViewID = NewPopulatedViewId(r, easy)
 	}
-	this.SlotId = LogSlotID(uint64(r.Uint32()))
+	this.SlotNum = LogSlotID(uint64(r.Uint32()))
 	if !easy && r.Intn(10) != 0 {
 	}
 	return this
@@ -3891,11 +3891,11 @@ func NewPopulatedSyncReply(r randyProtocol, easy bool) *SyncReply {
 
 func NewPopulatedSyncCommit(r randyProtocol, easy bool) *SyncCommit {
 	this := &SyncCommit{}
-	this.SenderId = MemberID(randStringProtocol(r))
+	this.Sender = MemberID(randStringProtocol(r))
 	if r.Intn(5) != 0 {
-		this.ViewId = NewPopulatedViewId(r, easy)
+		this.ViewID = NewPopulatedViewId(r, easy)
 	}
-	this.MessageId = MessageID(uint64(r.Uint32()))
+	this.MessageNum = MessageID(uint64(r.Uint32()))
 	if r.Intn(5) != 0 {
 		v8 := r.Intn(5)
 		this.Log = make([]*LogEntry, v8)
@@ -4214,12 +4214,12 @@ func (m *ViewId) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.LeaderId)
+	l = len(m.LeaderNum)
 	if l > 0 {
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.SessionId != 0 {
-		n += 1 + sovProtocol(uint64(m.SessionId))
+	if m.SessionNum != 0 {
+		n += 1 + sovProtocol(uint64(m.SessionNum))
 	}
 	return n
 }
@@ -4230,11 +4230,11 @@ func (m *CommandRequest) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.SessionId != 0 {
-		n += 1 + sovProtocol(uint64(m.SessionId))
+	if m.SessionNum != 0 {
+		n += 1 + sovProtocol(uint64(m.SessionNum))
 	}
-	if m.MessageId != 0 {
-		n += 1 + sovProtocol(uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		n += 1 + sovProtocol(uint64(m.MessageNum))
 	}
 	l = len(m.Value)
 	if l > 0 {
@@ -4249,19 +4249,19 @@ func (m *CommandReply) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.MessageId != 0 {
-		n += 1 + sovProtocol(uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		n += 1 + sovProtocol(uint64(m.MessageNum))
 	}
-	l = len(m.SenderId)
+	l = len(m.Sender)
 	if l > 0 {
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.ViewId != nil {
-		l = m.ViewId.Size()
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.SlotId != 0 {
-		n += 1 + sovProtocol(uint64(m.SlotId))
+	if m.SlotNum != 0 {
+		n += 1 + sovProtocol(uint64(m.SlotNum))
 	}
 	l = len(m.Value)
 	if l > 0 {
@@ -4276,8 +4276,8 @@ func (m *QueryRequest) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.SessionId != 0 {
-		n += 1 + sovProtocol(uint64(m.SessionId))
+	if m.SessionNum != 0 {
+		n += 1 + sovProtocol(uint64(m.SessionNum))
 	}
 	l = len(m.Value)
 	if l > 0 {
@@ -4292,15 +4292,15 @@ func (m *QueryReply) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.MessageId != 0 {
-		n += 1 + sovProtocol(uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		n += 1 + sovProtocol(uint64(m.MessageNum))
 	}
-	l = len(m.SenderId)
+	l = len(m.Sender)
 	if l > 0 {
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.ViewId != nil {
-		l = m.ViewId.Size()
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
 		n += 1 + l + sovProtocol(uint64(l))
 	}
 	l = len(m.Value)
@@ -4316,16 +4316,16 @@ func (m *SlotLookup) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.SenderId)
+	l = len(m.Sender)
 	if l > 0 {
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.ViewId != nil {
-		l = m.ViewId.Size()
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.MessageId != 0 {
-		n += 1 + sovProtocol(uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		n += 1 + sovProtocol(uint64(m.MessageNum))
 	}
 	return n
 }
@@ -4336,12 +4336,12 @@ func (m *GapCommitRequest) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.ViewId != nil {
-		l = m.ViewId.Size()
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.SlotId != 0 {
-		n += 1 + sovProtocol(uint64(m.SlotId))
+	if m.SlotNum != 0 {
+		n += 1 + sovProtocol(uint64(m.SlotNum))
 	}
 	return n
 }
@@ -4352,16 +4352,16 @@ func (m *GapCommitReply) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.SenderId)
+	l = len(m.Sender)
 	if l > 0 {
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.ViewId != nil {
-		l = m.ViewId.Size()
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.SlotId != 0 {
-		n += 1 + sovProtocol(uint64(m.SlotId))
+	if m.SlotNum != 0 {
+		n += 1 + sovProtocol(uint64(m.SlotNum))
 	}
 	return n
 }
@@ -4372,8 +4372,8 @@ func (m *ViewChangeRequest) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.ViewId != nil {
-		l = m.ViewId.Size()
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
 		n += 1 + l + sovProtocol(uint64(l))
 	}
 	return n
@@ -4385,20 +4385,20 @@ func (m *ViewChange) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.MemberId)
+	l = len(m.Sender)
 	if l > 0 {
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.ViewId != nil {
-		l = m.ViewId.Size()
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
 		n += 1 + l + sovProtocol(uint64(l))
 	}
 	if m.LastNormal != nil {
 		l = m.LastNormal.Size()
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.MessageId != 0 {
-		n += 1 + sovProtocol(uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		n += 1 + sovProtocol(uint64(m.MessageNum))
 	}
 	if len(m.Log) > 0 {
 		for _, e := range m.Log {
@@ -4415,12 +4415,12 @@ func (m *StartView) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.ViewId != nil {
-		l = m.ViewId.Size()
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.MessageId != 0 {
-		n += 1 + sovProtocol(uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		n += 1 + sovProtocol(uint64(m.MessageNum))
 	}
 	if len(m.Log) > 0 {
 		for _, e := range m.Log {
@@ -4437,16 +4437,16 @@ func (m *SyncPrepare) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.SenderId)
+	l = len(m.Sender)
 	if l > 0 {
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.ViewId != nil {
-		l = m.ViewId.Size()
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.MessageId != 0 {
-		n += 1 + sovProtocol(uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		n += 1 + sovProtocol(uint64(m.MessageNum))
 	}
 	if len(m.Log) > 0 {
 		for _, e := range m.Log {
@@ -4463,16 +4463,16 @@ func (m *SyncReply) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.SenderId)
+	l = len(m.Sender)
 	if l > 0 {
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.ViewId != nil {
-		l = m.ViewId.Size()
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.SlotId != 0 {
-		n += 1 + sovProtocol(uint64(m.SlotId))
+	if m.SlotNum != 0 {
+		n += 1 + sovProtocol(uint64(m.SlotNum))
 	}
 	return n
 }
@@ -4483,16 +4483,16 @@ func (m *SyncCommit) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.SenderId)
+	l = len(m.Sender)
 	if l > 0 {
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.ViewId != nil {
-		l = m.ViewId.Size()
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
 		n += 1 + l + sovProtocol(uint64(l))
 	}
-	if m.MessageId != 0 {
-		n += 1 + sovProtocol(uint64(m.MessageId))
+	if m.MessageNum != 0 {
+		n += 1 + sovProtocol(uint64(m.MessageNum))
 	}
 	if len(m.Log) > 0 {
 		for _, e := range m.Log {
@@ -5241,7 +5241,7 @@ func (m *ViewId) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field LeaderId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field LeaderNum", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -5269,13 +5269,13 @@ func (m *ViewId) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.LeaderId = LeaderID(dAtA[iNdEx:postIndex])
+			m.LeaderNum = LeaderID(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SessionId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SessionNum", wireType)
 			}
-			m.SessionId = 0
+			m.SessionNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -5285,7 +5285,7 @@ func (m *ViewId) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.SessionId |= SessionID(b&0x7F) << shift
+				m.SessionNum |= SessionID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -5345,9 +5345,9 @@ func (m *CommandRequest) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SessionId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SessionNum", wireType)
 			}
-			m.SessionId = 0
+			m.SessionNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -5357,16 +5357,16 @@ func (m *CommandRequest) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.SessionId |= SessionID(b&0x7F) << shift
+				m.SessionNum |= SessionID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
 		case 2:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MessageId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageNum", wireType)
 			}
-			m.MessageId = 0
+			m.MessageNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -5376,7 +5376,7 @@ func (m *CommandRequest) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.MessageId |= MessageID(b&0x7F) << shift
+				m.MessageNum |= MessageID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -5470,9 +5470,9 @@ func (m *CommandReply) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MessageId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageNum", wireType)
 			}
-			m.MessageId = 0
+			m.MessageNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -5482,14 +5482,14 @@ func (m *CommandReply) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.MessageId |= MessageID(b&0x7F) << shift
+				m.MessageNum |= MessageID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SenderId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -5517,11 +5517,11 @@ func (m *CommandReply) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.SenderId = MemberID(dAtA[iNdEx:postIndex])
+			m.Sender = MemberID(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ViewId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -5548,18 +5548,18 @@ func (m *CommandReply) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ViewId == nil {
-				m.ViewId = &ViewId{}
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
 			}
-			if err := m.ViewId.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
 		case 4:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SlotId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SlotNum", wireType)
 			}
-			m.SlotId = 0
+			m.SlotNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -5569,7 +5569,7 @@ func (m *CommandReply) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.SlotId |= LogSlotID(b&0x7F) << shift
+				m.SlotNum |= LogSlotID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -5663,9 +5663,9 @@ func (m *QueryRequest) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SessionId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SessionNum", wireType)
 			}
-			m.SessionId = 0
+			m.SessionNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -5675,7 +5675,7 @@ func (m *QueryRequest) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.SessionId |= SessionID(b&0x7F) << shift
+				m.SessionNum |= SessionID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -5769,9 +5769,9 @@ func (m *QueryReply) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MessageId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageNum", wireType)
 			}
-			m.MessageId = 0
+			m.MessageNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -5781,14 +5781,14 @@ func (m *QueryReply) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.MessageId |= MessageID(b&0x7F) << shift
+				m.MessageNum |= MessageID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SenderId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -5816,11 +5816,11 @@ func (m *QueryReply) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.SenderId = MemberID(dAtA[iNdEx:postIndex])
+			m.Sender = MemberID(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ViewId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -5847,10 +5847,10 @@ func (m *QueryReply) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ViewId == nil {
-				m.ViewId = &ViewId{}
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
 			}
-			if err := m.ViewId.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -5943,7 +5943,7 @@ func (m *SlotLookup) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SenderId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -5971,11 +5971,11 @@ func (m *SlotLookup) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.SenderId = MemberID(dAtA[iNdEx:postIndex])
+			m.Sender = MemberID(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ViewId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -6002,18 +6002,18 @@ func (m *SlotLookup) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ViewId == nil {
-				m.ViewId = &ViewId{}
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
 			}
-			if err := m.ViewId.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
 		case 3:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MessageId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageNum", wireType)
 			}
-			m.MessageId = 0
+			m.MessageNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -6023,7 +6023,7 @@ func (m *SlotLookup) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.MessageId |= MessageID(b&0x7F) << shift
+				m.MessageNum |= MessageID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -6083,7 +6083,7 @@ func (m *GapCommitRequest) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ViewId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -6110,18 +6110,18 @@ func (m *GapCommitRequest) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ViewId == nil {
-				m.ViewId = &ViewId{}
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
 			}
-			if err := m.ViewId.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
 		case 2:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SlotId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SlotNum", wireType)
 			}
-			m.SlotId = 0
+			m.SlotNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -6131,7 +6131,7 @@ func (m *GapCommitRequest) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.SlotId |= LogSlotID(b&0x7F) << shift
+				m.SlotNum |= LogSlotID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -6191,7 +6191,7 @@ func (m *GapCommitReply) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SenderId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -6219,11 +6219,11 @@ func (m *GapCommitReply) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.SenderId = MemberID(dAtA[iNdEx:postIndex])
+			m.Sender = MemberID(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ViewId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -6250,18 +6250,18 @@ func (m *GapCommitReply) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ViewId == nil {
-				m.ViewId = &ViewId{}
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
 			}
-			if err := m.ViewId.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
 		case 3:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SlotId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SlotNum", wireType)
 			}
-			m.SlotId = 0
+			m.SlotNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -6271,7 +6271,7 @@ func (m *GapCommitReply) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.SlotId |= LogSlotID(b&0x7F) << shift
+				m.SlotNum |= LogSlotID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -6331,7 +6331,7 @@ func (m *ViewChangeRequest) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ViewId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -6358,10 +6358,10 @@ func (m *ViewChangeRequest) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ViewId == nil {
-				m.ViewId = &ViewId{}
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
 			}
-			if err := m.ViewId.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -6420,7 +6420,7 @@ func (m *ViewChange) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MemberId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -6448,11 +6448,11 @@ func (m *ViewChange) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.MemberId = MemberID(dAtA[iNdEx:postIndex])
+			m.Sender = MemberID(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ViewId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -6479,10 +6479,10 @@ func (m *ViewChange) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ViewId == nil {
-				m.ViewId = &ViewId{}
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
 			}
-			if err := m.ViewId.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -6524,9 +6524,9 @@ func (m *ViewChange) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 4:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MessageId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageNum", wireType)
 			}
-			m.MessageId = 0
+			m.MessageNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -6536,7 +6536,7 @@ func (m *ViewChange) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.MessageId |= MessageID(b&0x7F) << shift
+				m.MessageNum |= MessageID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -6630,7 +6630,7 @@ func (m *StartView) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ViewId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -6657,18 +6657,18 @@ func (m *StartView) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ViewId == nil {
-				m.ViewId = &ViewId{}
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
 			}
-			if err := m.ViewId.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
 		case 2:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MessageId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageNum", wireType)
 			}
-			m.MessageId = 0
+			m.MessageNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -6678,7 +6678,7 @@ func (m *StartView) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.MessageId |= MessageID(b&0x7F) << shift
+				m.MessageNum |= MessageID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -6772,7 +6772,7 @@ func (m *SyncPrepare) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SenderId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -6800,11 +6800,11 @@ func (m *SyncPrepare) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.SenderId = MemberID(dAtA[iNdEx:postIndex])
+			m.Sender = MemberID(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ViewId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -6831,18 +6831,18 @@ func (m *SyncPrepare) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ViewId == nil {
-				m.ViewId = &ViewId{}
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
 			}
-			if err := m.ViewId.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
 		case 3:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MessageId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageNum", wireType)
 			}
-			m.MessageId = 0
+			m.MessageNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -6852,7 +6852,7 @@ func (m *SyncPrepare) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.MessageId |= MessageID(b&0x7F) << shift
+				m.MessageNum |= MessageID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -6946,7 +6946,7 @@ func (m *SyncReply) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SenderId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -6974,11 +6974,11 @@ func (m *SyncReply) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.SenderId = MemberID(dAtA[iNdEx:postIndex])
+			m.Sender = MemberID(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ViewId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -7005,18 +7005,18 @@ func (m *SyncReply) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ViewId == nil {
-				m.ViewId = &ViewId{}
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
 			}
-			if err := m.ViewId.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
 		case 3:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SlotId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SlotNum", wireType)
 			}
-			m.SlotId = 0
+			m.SlotNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -7026,7 +7026,7 @@ func (m *SyncReply) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.SlotId |= LogSlotID(b&0x7F) << shift
+				m.SlotNum |= LogSlotID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -7086,7 +7086,7 @@ func (m *SyncCommit) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SenderId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -7114,11 +7114,11 @@ func (m *SyncCommit) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.SenderId = MemberID(dAtA[iNdEx:postIndex])
+			m.Sender = MemberID(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ViewId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -7145,18 +7145,18 @@ func (m *SyncCommit) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.ViewId == nil {
-				m.ViewId = &ViewId{}
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
 			}
-			if err := m.ViewId.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
 		case 3:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MessageId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageNum", wireType)
 			}
-			m.MessageId = 0
+			m.MessageNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -7166,7 +7166,7 @@ func (m *SyncCommit) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.MessageId |= MessageID(b&0x7F) << shift
+				m.MessageNum |= MessageID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

@@ -28,15 +28,11 @@ var _ = time.Kitchen
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// NOPaxos log entry
 type LogEntry struct {
-	LogSlotId LogSlotID `protobuf:"varint,1,opt,name=log_slot_id,json=logSlotId,proto3,casttype=LogSlotID" json:"log_slot_id,omitempty"`
-	Timestamp time.Time `protobuf:"bytes,2,opt,name=timestamp,proto3,stdtime" json:"timestamp"`
-	// Types that are valid to be assigned to Entry:
-	//	*LogEntry_NoOp
-	//	*LogEntry_Command
-	//	*LogEntry_Query
-	Entry isLogEntry_Entry `protobuf_oneof:"entry"`
+	SlotNum    LogSlotID `protobuf:"varint,1,opt,name=slot_num,json=slotNum,proto3,casttype=LogSlotID" json:"slot_num,omitempty"`
+	Timestamp  time.Time `protobuf:"bytes,2,opt,name=timestamp,proto3,stdtime" json:"timestamp"`
+	MessageNum MessageID `protobuf:"varint,3,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
+	Value      []byte    `protobuf:"bytes,4,opt,name=value,proto3" json:"value,omitempty"`
 }
 
 func (m *LogEntry) Reset()         { *m = LogEntry{} }
@@ -72,37 +68,9 @@ func (m *LogEntry) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_LogEntry proto.InternalMessageInfo
 
-type isLogEntry_Entry interface {
-	isLogEntry_Entry()
-	Equal(interface{}) bool
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-
-type LogEntry_NoOp struct {
-	NoOp *NoOpEntry `protobuf:"bytes,3,opt,name=no_op,json=noOp,proto3,oneof" json:"no_op,omitempty"`
-}
-type LogEntry_Command struct {
-	Command *CommandEntry `protobuf:"bytes,4,opt,name=command,proto3,oneof" json:"command,omitempty"`
-}
-type LogEntry_Query struct {
-	Query *QueryEntry `protobuf:"bytes,5,opt,name=query,proto3,oneof" json:"query,omitempty"`
-}
-
-func (*LogEntry_NoOp) isLogEntry_Entry()    {}
-func (*LogEntry_Command) isLogEntry_Entry() {}
-func (*LogEntry_Query) isLogEntry_Entry()   {}
-
-func (m *LogEntry) GetEntry() isLogEntry_Entry {
+func (m *LogEntry) GetSlotNum() LogSlotID {
 	if m != nil {
-		return m.Entry
-	}
-	return nil
-}
-
-func (m *LogEntry) GetLogSlotId() LogSlotID {
-	if m != nil {
-		return m.LogSlotId
+		return m.SlotNum
 	}
 	return 0
 }
@@ -114,162 +82,14 @@ func (m *LogEntry) GetTimestamp() time.Time {
 	return time.Time{}
 }
 
-func (m *LogEntry) GetNoOp() *NoOpEntry {
-	if x, ok := m.GetEntry().(*LogEntry_NoOp); ok {
-		return x.NoOp
-	}
-	return nil
-}
-
-func (m *LogEntry) GetCommand() *CommandEntry {
-	if x, ok := m.GetEntry().(*LogEntry_Command); ok {
-		return x.Command
-	}
-	return nil
-}
-
-func (m *LogEntry) GetQuery() *QueryEntry {
-	if x, ok := m.GetEntry().(*LogEntry_Query); ok {
-		return x.Query
-	}
-	return nil
-}
-
-// XXX_OneofWrappers is for the internal use of the proto package.
-func (*LogEntry) XXX_OneofWrappers() []interface{} {
-	return []interface{}{
-		(*LogEntry_NoOp)(nil),
-		(*LogEntry_Command)(nil),
-		(*LogEntry_Query)(nil),
-	}
-}
-
-type NoOpEntry struct {
-}
-
-func (m *NoOpEntry) Reset()         { *m = NoOpEntry{} }
-func (m *NoOpEntry) String() string { return proto.CompactTextString(m) }
-func (*NoOpEntry) ProtoMessage()    {}
-func (*NoOpEntry) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4596185f93bef6b8, []int{1}
-}
-func (m *NoOpEntry) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *NoOpEntry) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_NoOpEntry.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *NoOpEntry) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_NoOpEntry.Merge(m, src)
-}
-func (m *NoOpEntry) XXX_Size() int {
-	return m.Size()
-}
-func (m *NoOpEntry) XXX_DiscardUnknown() {
-	xxx_messageInfo_NoOpEntry.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_NoOpEntry proto.InternalMessageInfo
-
-type CommandEntry struct {
-	MessageId MessageID `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3,casttype=MessageID" json:"message_id,omitempty"`
-	Value     []byte    `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
-}
-
-func (m *CommandEntry) Reset()         { *m = CommandEntry{} }
-func (m *CommandEntry) String() string { return proto.CompactTextString(m) }
-func (*CommandEntry) ProtoMessage()    {}
-func (*CommandEntry) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4596185f93bef6b8, []int{2}
-}
-func (m *CommandEntry) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *CommandEntry) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_CommandEntry.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *CommandEntry) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CommandEntry.Merge(m, src)
-}
-func (m *CommandEntry) XXX_Size() int {
-	return m.Size()
-}
-func (m *CommandEntry) XXX_DiscardUnknown() {
-	xxx_messageInfo_CommandEntry.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_CommandEntry proto.InternalMessageInfo
-
-func (m *CommandEntry) GetMessageId() MessageID {
+func (m *LogEntry) GetMessageNum() MessageID {
 	if m != nil {
-		return m.MessageId
+		return m.MessageNum
 	}
 	return 0
 }
 
-func (m *CommandEntry) GetValue() []byte {
-	if m != nil {
-		return m.Value
-	}
-	return nil
-}
-
-type QueryEntry struct {
-	Value []byte `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
-}
-
-func (m *QueryEntry) Reset()         { *m = QueryEntry{} }
-func (m *QueryEntry) String() string { return proto.CompactTextString(m) }
-func (*QueryEntry) ProtoMessage()    {}
-func (*QueryEntry) Descriptor() ([]byte, []int) {
-	return fileDescriptor_4596185f93bef6b8, []int{3}
-}
-func (m *QueryEntry) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryEntry) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryEntry.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryEntry) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryEntry.Merge(m, src)
-}
-func (m *QueryEntry) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryEntry) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryEntry.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryEntry proto.InternalMessageInfo
-
-func (m *QueryEntry) GetValue() []byte {
+func (m *LogEntry) GetValue() []byte {
 	if m != nil {
 		return m.Value
 	}
@@ -278,39 +98,30 @@ func (m *QueryEntry) GetValue() []byte {
 
 func init() {
 	proto.RegisterType((*LogEntry)(nil), "atomix.nopaxos.protocol.LogEntry")
-	proto.RegisterType((*NoOpEntry)(nil), "atomix.nopaxos.protocol.NoOpEntry")
-	proto.RegisterType((*CommandEntry)(nil), "atomix.nopaxos.protocol.CommandEntry")
-	proto.RegisterType((*QueryEntry)(nil), "atomix.nopaxos.protocol.QueryEntry")
 }
 
 func init() { proto.RegisterFile("atomix/nopaxos/protocol/log.proto", fileDescriptor_4596185f93bef6b8) }
 
 var fileDescriptor_4596185f93bef6b8 = []byte{
-	// 384 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x90, 0x31, 0x6f, 0xda, 0x40,
-	0x14, 0xc7, 0x7d, 0x14, 0x17, 0x7c, 0xd0, 0xe5, 0x84, 0x54, 0x8b, 0xe1, 0x4c, 0xdd, 0x56, 0x62,
-	0x68, 0xcf, 0x52, 0x3b, 0x55, 0x9d, 0xea, 0xb6, 0x52, 0x91, 0x68, 0x51, 0xdd, 0xee, 0xc8, 0x60,
-	0xe7, 0x84, 0x74, 0xf6, 0x73, 0xb0, 0x89, 0xe0, 0x5b, 0xf0, 0x31, 0xf2, 0x11, 0xb2, 0x66, 0x63,
-	0x64, 0xcc, 0x44, 0x12, 0xf3, 0x25, 0xa2, 0x4c, 0x91, 0xef, 0x30, 0xa0, 0x48, 0x6c, 0xef, 0x9e,
-	0x7e, 0xbf, 0x7b, 0xff, 0xf7, 0xf0, 0x1b, 0x3f, 0x83, 0x68, 0x32, 0x77, 0x62, 0x48, 0xfc, 0x39,
-	0xa4, 0x4e, 0x32, 0x85, 0x0c, 0xc6, 0x20, 0x1c, 0x01, 0x9c, 0xc9, 0x07, 0x79, 0xad, 0x10, 0xb6,
-	0x43, 0x58, 0x89, 0xb4, 0x2d, 0x0e, 0xc0, 0x45, 0xa8, 0x9c, 0xd1, 0xec, 0xcc, 0xc9, 0x26, 0x51,
-	0x98, 0x66, 0x7e, 0x94, 0x28, 0xa6, 0xdd, 0xe2, 0xc0, 0x41, 0x96, 0x4e, 0x51, 0xa9, 0xae, 0x7d,
-	0x5d, 0xc1, 0xf5, 0x3e, 0xf0, 0x9f, 0x71, 0x36, 0x5d, 0x90, 0x8f, 0xb8, 0x21, 0x80, 0x0f, 0x53,
-	0x01, 0xd9, 0x70, 0x12, 0x98, 0xa8, 0x83, 0xba, 0x55, 0xf7, 0xd5, 0xe3, 0xc6, 0x32, 0xfa, 0xc0,
-	0xff, 0x09, 0xc8, 0x7a, 0x3f, 0x3c, 0x43, 0xec, 0xca, 0x80, 0xb8, 0xd8, 0xd8, 0x0f, 0x31, 0x2b,
-	0x1d, 0xd4, 0x6d, 0x7c, 0x6a, 0x33, 0x15, 0x83, 0x95, 0x31, 0xd8, 0xff, 0x92, 0x70, 0xeb, 0xab,
-	0x8d, 0xa5, 0x2d, 0x6f, 0x2d, 0xe4, 0x1d, 0x34, 0xf2, 0x05, 0xeb, 0x31, 0x0c, 0x21, 0x31, 0x5f,
-	0x48, 0xdf, 0x66, 0x27, 0xf6, 0x63, 0x7f, 0x60, 0x90, 0xc8, 0x94, 0xbf, 0x34, 0xaf, 0x1a, 0xc3,
-	0x20, 0x21, 0xdf, 0x70, 0x6d, 0x0c, 0x51, 0xe4, 0xc7, 0x81, 0x59, 0x95, 0xf2, 0xfb, 0x93, 0xf2,
-	0x77, 0xc5, 0x95, 0x7e, 0xe9, 0x91, 0xaf, 0x58, 0x3f, 0x9f, 0x85, 0xd3, 0x85, 0xa9, 0xcb, 0x0f,
-	0xde, 0x9e, 0xfc, 0xe0, 0x6f, 0x41, 0x95, 0xba, 0x72, 0xdc, 0x1a, 0xd6, 0xc3, 0xa2, 0x63, 0x37,
-	0xb0, 0xb1, 0x4f, 0x67, 0x7b, 0xb8, 0x79, 0x3c, 0x8d, 0x7c, 0xc0, 0x38, 0x0a, 0xd3, 0xd4, 0xe7,
-	0xe1, 0xb3, 0x93, 0xfe, 0x56, 0xdd, 0xe2, 0xa4, 0x3b, 0xa0, 0x17, 0x90, 0x16, 0xd6, 0x2f, 0x7c,
-	0x31, 0x0b, 0xe5, 0x39, 0x9b, 0x9e, 0x7a, 0xd8, 0x36, 0xc6, 0x87, 0x00, 0x07, 0x06, 0x1d, 0x31,
-	0xee, 0xbb, 0x87, 0x7b, 0x8a, 0x2e, 0x73, 0x8a, 0xae, 0x72, 0x8a, 0x56, 0x39, 0x45, 0xeb, 0x9c,
-	0xa2, 0xbb, 0x9c, 0xa2, 0xe5, 0x96, 0x6a, 0xeb, 0x2d, 0xd5, 0x6e, 0xb6, 0x54, 0x1b, 0xbd, 0x94,
-	0x1b, 0x7d, 0x7e, 0x0a, 0x00, 0x00, 0xff, 0xff, 0xc3, 0xb6, 0xb0, 0x4a, 0x6a, 0x02, 0x00, 0x00,
+	// 283 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x44, 0x8e, 0x31, 0x4e, 0xc3, 0x30,
+	0x18, 0x85, 0xf3, 0x43, 0x81, 0xd4, 0x85, 0x25, 0xaa, 0x44, 0x94, 0xc1, 0x09, 0x88, 0x21, 0x93,
+	0x23, 0xc1, 0x0d, 0xa2, 0x32, 0x54, 0x2a, 0x0c, 0x81, 0x1d, 0xa5, 0x28, 0x58, 0x95, 0xec, 0xfc,
+	0x51, 0xe3, 0xa0, 0x72, 0x8b, 0x1e, 0x83, 0x23, 0x30, 0x31, 0x77, 0xec, 0xc8, 0x54, 0xc0, 0xb9,
+	0x04, 0x62, 0x42, 0x89, 0x1b, 0xba, 0xfd, 0xef, 0xf9, 0x7b, 0x7e, 0x8f, 0x9c, 0xa5, 0x0a, 0xe5,
+	0x6c, 0x11, 0xe5, 0x58, 0xa4, 0x0b, 0x2c, 0xa3, 0x62, 0x8e, 0x0a, 0x1f, 0x51, 0x44, 0x02, 0x39,
+	0x6b, 0x85, 0x73, 0x6a, 0x10, 0xb6, 0x45, 0x58, 0x87, 0x78, 0x3e, 0x47, 0xe4, 0x22, 0x33, 0x99,
+	0x69, 0xf5, 0x14, 0xa9, 0x99, 0xcc, 0x4a, 0x95, 0xca, 0xc2, 0x30, 0xde, 0x90, 0x23, 0xc7, 0xf6,
+	0x8c, 0x9a, 0xcb, 0xb8, 0xe7, 0xef, 0x40, 0xec, 0x09, 0xf2, 0xeb, 0x5c, 0xcd, 0x5f, 0x9c, 0x90,
+	0xd8, 0xa5, 0x40, 0xf5, 0x90, 0x57, 0xd2, 0x85, 0x00, 0xc2, 0x5e, 0x7c, 0xf2, 0xbb, 0xf1, 0xfb,
+	0x13, 0xe4, 0x77, 0x02, 0xd5, 0x78, 0x94, 0x1c, 0x35, 0xcf, 0xb7, 0x95, 0x74, 0x62, 0xd2, 0xff,
+	0xff, 0xdf, 0xdd, 0x0b, 0x20, 0x1c, 0x5c, 0x7a, 0xcc, 0x2c, 0x60, 0xdd, 0x02, 0x76, 0xdf, 0x11,
+	0xb1, 0xbd, 0xda, 0xf8, 0xd6, 0xf2, 0xd3, 0x87, 0x64, 0x17, 0x73, 0x18, 0x19, 0xc8, 0xac, 0x2c,
+	0x53, 0x9e, 0xb5, 0x85, 0xfb, 0xbb, 0xc2, 0x1b, 0x63, 0x8f, 0x47, 0x09, 0xd9, 0x12, 0x4d, 0xe7,
+	0x90, 0x1c, 0x3c, 0xa7, 0xa2, 0xca, 0xdc, 0x5e, 0x00, 0xe1, 0x71, 0x62, 0x44, 0x7c, 0xf1, 0xf3,
+	0x4d, 0xe1, 0x55, 0x53, 0x78, 0xd3, 0x14, 0x56, 0x9a, 0xc2, 0x5a, 0x53, 0xf8, 0xd2, 0x14, 0x96,
+	0x35, 0xb5, 0xd6, 0x35, 0xb5, 0x3e, 0x6a, 0x6a, 0x4d, 0x0f, 0xdb, 0x51, 0x57, 0x7f, 0x01, 0x00,
+	0x00, 0xff, 0xff, 0x79, 0x85, 0x73, 0x77, 0x62, 0x01, 0x00, 0x00,
 }
 
 func (this *LogEntry) Equal(that interface{}) bool {
@@ -332,160 +143,13 @@ func (this *LogEntry) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.LogSlotId != that1.LogSlotId {
+	if this.SlotNum != that1.SlotNum {
 		return false
 	}
 	if !this.Timestamp.Equal(that1.Timestamp) {
 		return false
 	}
-	if that1.Entry == nil {
-		if this.Entry != nil {
-			return false
-		}
-	} else if this.Entry == nil {
-		return false
-	} else if !this.Entry.Equal(that1.Entry) {
-		return false
-	}
-	return true
-}
-func (this *LogEntry_NoOp) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*LogEntry_NoOp)
-	if !ok {
-		that2, ok := that.(LogEntry_NoOp)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.NoOp.Equal(that1.NoOp) {
-		return false
-	}
-	return true
-}
-func (this *LogEntry_Command) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*LogEntry_Command)
-	if !ok {
-		that2, ok := that.(LogEntry_Command)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Command.Equal(that1.Command) {
-		return false
-	}
-	return true
-}
-func (this *LogEntry_Query) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*LogEntry_Query)
-	if !ok {
-		that2, ok := that.(LogEntry_Query)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if !this.Query.Equal(that1.Query) {
-		return false
-	}
-	return true
-}
-func (this *NoOpEntry) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*NoOpEntry)
-	if !ok {
-		that2, ok := that.(NoOpEntry)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	return true
-}
-func (this *CommandEntry) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*CommandEntry)
-	if !ok {
-		that2, ok := that.(CommandEntry)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
-		return false
-	}
-	if this.MessageId != that1.MessageId {
-		return false
-	}
-	if !bytes.Equal(this.Value, that1.Value) {
-		return false
-	}
-	return true
-}
-func (this *QueryEntry) Equal(that interface{}) bool {
-	if that == nil {
-		return this == nil
-	}
-
-	that1, ok := that.(*QueryEntry)
-	if !ok {
-		that2, ok := that.(QueryEntry)
-		if ok {
-			that1 = &that2
-		} else {
-			return false
-		}
-	}
-	if that1 == nil {
-		return this == nil
-	} else if this == nil {
+	if this.MessageNum != that1.MessageNum {
 		return false
 	}
 	if !bytes.Equal(this.Value, that1.Value) {
@@ -513,14 +177,17 @@ func (m *LogEntry) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if m.Entry != nil {
-		{
-			size := m.Entry.Size()
-			i -= size
-			if _, err := m.Entry.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
+	if len(m.Value) > 0 {
+		i -= len(m.Value)
+		copy(dAtA[i:], m.Value)
+		i = encodeVarintLog(dAtA, i, uint64(len(m.Value)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.MessageNum != 0 {
+		i = encodeVarintLog(dAtA, i, uint64(m.MessageNum))
+		i--
+		dAtA[i] = 0x18
 	}
 	n1, err1 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.Timestamp, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.Timestamp):])
 	if err1 != nil {
@@ -530,161 +197,10 @@ func (m *LogEntry) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i = encodeVarintLog(dAtA, i, uint64(n1))
 	i--
 	dAtA[i] = 0x12
-	if m.LogSlotId != 0 {
-		i = encodeVarintLog(dAtA, i, uint64(m.LogSlotId))
+	if m.SlotNum != 0 {
+		i = encodeVarintLog(dAtA, i, uint64(m.SlotNum))
 		i--
 		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *LogEntry_NoOp) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *LogEntry_NoOp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.NoOp != nil {
-		{
-			size, err := m.NoOp.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintLog(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x1a
-	}
-	return len(dAtA) - i, nil
-}
-func (m *LogEntry_Command) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *LogEntry_Command) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.Command != nil {
-		{
-			size, err := m.Command.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintLog(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x22
-	}
-	return len(dAtA) - i, nil
-}
-func (m *LogEntry_Query) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *LogEntry_Query) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	if m.Query != nil {
-		{
-			size, err := m.Query.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintLog(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x2a
-	}
-	return len(dAtA) - i, nil
-}
-func (m *NoOpEntry) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *NoOpEntry) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *NoOpEntry) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	return len(dAtA) - i, nil
-}
-
-func (m *CommandEntry) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *CommandEntry) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *CommandEntry) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Value) > 0 {
-		i -= len(m.Value)
-		copy(dAtA[i:], m.Value)
-		i = encodeVarintLog(dAtA, i, uint64(len(m.Value)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if m.MessageId != 0 {
-		i = encodeVarintLog(dAtA, i, uint64(m.MessageId))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryEntry) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryEntry) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryEntry) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Value) > 0 {
-		i -= len(m.Value)
-		copy(dAtA[i:], m.Value)
-		i = encodeVarintLog(dAtA, i, uint64(len(m.Value)))
-		i--
-		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
@@ -702,63 +218,13 @@ func encodeVarintLog(dAtA []byte, offset int, v uint64) int {
 }
 func NewPopulatedLogEntry(r randyLog, easy bool) *LogEntry {
 	this := &LogEntry{}
-	this.LogSlotId = LogSlotID(uint64(r.Uint32()))
+	this.SlotNum = LogSlotID(uint64(r.Uint32()))
 	v1 := github_com_gogo_protobuf_types.NewPopulatedStdTime(r, easy)
 	this.Timestamp = *v1
-	oneofNumber_Entry := []int32{3, 4, 5}[r.Intn(3)]
-	switch oneofNumber_Entry {
-	case 3:
-		this.Entry = NewPopulatedLogEntry_NoOp(r, easy)
-	case 4:
-		this.Entry = NewPopulatedLogEntry_Command(r, easy)
-	case 5:
-		this.Entry = NewPopulatedLogEntry_Query(r, easy)
-	}
-	if !easy && r.Intn(10) != 0 {
-	}
-	return this
-}
-
-func NewPopulatedLogEntry_NoOp(r randyLog, easy bool) *LogEntry_NoOp {
-	this := &LogEntry_NoOp{}
-	this.NoOp = NewPopulatedNoOpEntry(r, easy)
-	return this
-}
-func NewPopulatedLogEntry_Command(r randyLog, easy bool) *LogEntry_Command {
-	this := &LogEntry_Command{}
-	this.Command = NewPopulatedCommandEntry(r, easy)
-	return this
-}
-func NewPopulatedLogEntry_Query(r randyLog, easy bool) *LogEntry_Query {
-	this := &LogEntry_Query{}
-	this.Query = NewPopulatedQueryEntry(r, easy)
-	return this
-}
-func NewPopulatedNoOpEntry(r randyLog, easy bool) *NoOpEntry {
-	this := &NoOpEntry{}
-	if !easy && r.Intn(10) != 0 {
-	}
-	return this
-}
-
-func NewPopulatedCommandEntry(r randyLog, easy bool) *CommandEntry {
-	this := &CommandEntry{}
-	this.MessageId = MessageID(uint64(r.Uint32()))
+	this.MessageNum = MessageID(uint64(r.Uint32()))
 	v2 := r.Intn(100)
 	this.Value = make([]byte, v2)
 	for i := 0; i < v2; i++ {
-		this.Value[i] = byte(r.Intn(256))
-	}
-	if !easy && r.Intn(10) != 0 {
-	}
-	return this
-}
-
-func NewPopulatedQueryEntry(r randyLog, easy bool) *QueryEntry {
-	this := &QueryEntry{}
-	v3 := r.Intn(100)
-	this.Value = make([]byte, v3)
-	for i := 0; i < v3; i++ {
 		this.Value[i] = byte(r.Intn(256))
 	}
 	if !easy && r.Intn(10) != 0 {
@@ -785,9 +251,9 @@ func randUTF8RuneLog(r randyLog) rune {
 	return rune(ru + 61)
 }
 func randStringLog(r randyLog) string {
-	v4 := r.Intn(100)
-	tmps := make([]rune, v4)
-	for i := 0; i < v4; i++ {
+	v3 := r.Intn(100)
+	tmps := make([]rune, v3)
+	for i := 0; i < v3; i++ {
 		tmps[i] = randUTF8RuneLog(r)
 	}
 	return string(tmps)
@@ -809,11 +275,11 @@ func randFieldLog(dAtA []byte, r randyLog, fieldNumber int, wire int) []byte {
 	switch wire {
 	case 0:
 		dAtA = encodeVarintPopulateLog(dAtA, uint64(key))
-		v5 := r.Int63()
+		v4 := r.Int63()
 		if r.Intn(2) == 0 {
-			v5 *= -1
+			v4 *= -1
 		}
-		dAtA = encodeVarintPopulateLog(dAtA, uint64(v5))
+		dAtA = encodeVarintPopulateLog(dAtA, uint64(v4))
 	case 1:
 		dAtA = encodeVarintPopulateLog(dAtA, uint64(key))
 		dAtA = append(dAtA, byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)))
@@ -844,84 +310,14 @@ func (m *LogEntry) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.LogSlotId != 0 {
-		n += 1 + sovLog(uint64(m.LogSlotId))
+	if m.SlotNum != 0 {
+		n += 1 + sovLog(uint64(m.SlotNum))
 	}
 	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.Timestamp)
 	n += 1 + l + sovLog(uint64(l))
-	if m.Entry != nil {
-		n += m.Entry.Size()
+	if m.MessageNum != 0 {
+		n += 1 + sovLog(uint64(m.MessageNum))
 	}
-	return n
-}
-
-func (m *LogEntry_NoOp) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.NoOp != nil {
-		l = m.NoOp.Size()
-		n += 1 + l + sovLog(uint64(l))
-	}
-	return n
-}
-func (m *LogEntry_Command) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Command != nil {
-		l = m.Command.Size()
-		n += 1 + l + sovLog(uint64(l))
-	}
-	return n
-}
-func (m *LogEntry_Query) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Query != nil {
-		l = m.Query.Size()
-		n += 1 + l + sovLog(uint64(l))
-	}
-	return n
-}
-func (m *NoOpEntry) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	return n
-}
-
-func (m *CommandEntry) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.MessageId != 0 {
-		n += 1 + sovLog(uint64(m.MessageId))
-	}
-	l = len(m.Value)
-	if l > 0 {
-		n += 1 + l + sovLog(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryEntry) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
 	l = len(m.Value)
 	if l > 0 {
 		n += 1 + l + sovLog(uint64(l))
@@ -966,9 +362,9 @@ func (m *LogEntry) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field LogSlotId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field SlotNum", wireType)
 			}
-			m.LogSlotId = 0
+			m.SlotNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowLog
@@ -978,7 +374,7 @@ func (m *LogEntry) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.LogSlotId |= LogSlotID(b&0x7F) << shift
+				m.SlotNum |= LogSlotID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1017,221 +413,10 @@ func (m *LogEntry) Unmarshal(dAtA []byte) error {
 			}
 			iNdEx = postIndex
 		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field NoOp", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowLog
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthLog
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthLog
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &NoOpEntry{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.Entry = &LogEntry_NoOp{v}
-			iNdEx = postIndex
-		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Command", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowLog
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthLog
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthLog
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &CommandEntry{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.Entry = &LogEntry_Command{v}
-			iNdEx = postIndex
-		case 5:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Query", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowLog
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthLog
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthLog
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			v := &QueryEntry{}
-			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			m.Entry = &LogEntry_Query{v}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipLog(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthLog
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthLog
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *NoOpEntry) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowLog
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: NoOpEntry: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: NoOpEntry: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		default:
-			iNdEx = preIndex
-			skippy, err := skipLog(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthLog
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthLog
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *CommandEntry) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowLog
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: CommandEntry: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: CommandEntry: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MessageId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageNum", wireType)
 			}
-			m.MessageId = 0
+			m.MessageNum = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowLog
@@ -1241,99 +426,12 @@ func (m *CommandEntry) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.MessageId |= MessageID(b&0x7F) << shift
+				m.MessageNum |= MessageID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
-			}
-			var byteLen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowLog
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				byteLen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if byteLen < 0 {
-				return ErrInvalidLengthLog
-			}
-			postIndex := iNdEx + byteLen
-			if postIndex < 0 {
-				return ErrInvalidLengthLog
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Value = append(m.Value[:0], dAtA[iNdEx:postIndex]...)
-			if m.Value == nil {
-				m.Value = []byte{}
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipLog(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if skippy < 0 {
-				return ErrInvalidLengthLog
-			}
-			if (iNdEx + skippy) < 0 {
-				return ErrInvalidLengthLog
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryEntry) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowLog
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryEntry: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryEntry: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
+		case 4:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
 			}

@@ -15,10 +15,9 @@
 package protocol
 
 import (
+	"github.com/atomix/atomix-go-node/pkg/atomix/node"
+	"github.com/atomix/atomix-go-node/pkg/atomix/service"
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/config"
-	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/state"
-	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/store"
-	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/store/log"
 	"io"
 	"math"
 	"sync"
@@ -26,15 +25,26 @@ import (
 )
 
 // NewNOPaxos returns a new NOPaxos protocol state struct
-func NewNOPaxos(cluster Cluster, state state.Manager, store store.Store, config *config.ProtocolConfig) *NOPaxos {
-	nopaxos := &NOPaxos{
-		state:   state,
-		store:   store,
+func NewNOPaxos(cluster Cluster, registry *node.Registry, config *config.ProtocolConfig) *NOPaxos {
+	return &NOPaxos{
 		config:  config,
 		cluster: cluster,
+		state:   newStateMachine(string(cluster.Member()), registry),
+		viewID: &ViewId{
+			SessionNum: 1,
+			LeaderNum:  1,
+		},
+		lastNormView: &ViewId{
+			SessionNum: 1,
+			LeaderNum:  1,
+		},
+		sessionMessageCount: 1,
+		log:                 make(map[LogSlotID]*LogEntry),
+		firstSlotNum:        1,
+		viewChanges:         make(map[MemberID]*ViewChange),
+		gapCommitReps:       make(map[MemberID]*GapCommitReply),
+		syncReps:            make(map[MemberID]*SyncReply),
 	}
-	nopaxos.setLog(store.NewLog())
-	return nopaxos
 }
 
 // MemberID is the ID of a NOPaxos cluster member
@@ -68,12 +78,11 @@ const (
 type NOPaxos struct {
 	config              *config.ProtocolConfig
 	cluster             Cluster
-	store               store.Store
-	state               state.Manager
+	state               *stateMachine
 	sequencer           ClientService_ClientStreamServer
-	log                 log.Log
-	reader              log.Reader
-	writer              log.Writer
+	log                 map[LogSlotID]*LogEntry
+	firstSlotNum        LogSlotID
+	lastSlotNum         LogSlotID
 	status              Status
 	sessionMessageCount MessageID
 	viewID              *ViewId
@@ -85,12 +94,6 @@ type NOPaxos struct {
 	syncPoint           LogSlotID
 	syncReps            map[MemberID]*SyncReply
 	mu                  sync.RWMutex
-}
-
-func (s *NOPaxos) setLog(log log.Log) {
-	s.log = log
-	s.reader = log.OpenReader(0)
-	s.writer = log.Writer()
 }
 
 func (s *NOPaxos) ClientStream(stream ClientService_ClientStreamServer) error {
@@ -158,7 +161,7 @@ func (s *NOPaxos) handleReplica(message *ReplicaMessage, stream ReplicaService_R
 
 func (s *NOPaxos) getLeader(viewID *ViewId) MemberID {
 	members := s.cluster.Members()
-	return members[int(uint64(viewID.LeaderId)%uint64(len(members)))]
+	return members[int(uint64(viewID.LeaderNum)%uint64(len(members)))]
 }
 
 func (s *NOPaxos) slot(request *CommandRequest) {
@@ -171,52 +174,49 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 		return
 	}
 
-	if request.SessionId == s.viewID.SessionId && request.MessageId == s.sessionMessageCount {
+	if request.SessionNum == s.viewID.SessionNum && request.MessageNum == s.sessionMessageCount {
 		// Command received in the normal case
-		slotID := s.writer.LastSlotID() + 1
-		s.writer.Append(&LogEntry{
-			LogSlotId: slotID,
-			Timestamp: time.Now(),
-			Entry: &LogEntry_Command{
-				Command: &CommandEntry{
-					MessageId: request.MessageId,
-					Value:     request.Value,
-				},
-			},
-		})
+		slotID := s.lastSlotNum + 1
+		s.log[slotID] = &LogEntry{
+			SlotNum:    slotID,
+			Timestamp:  time.Now(),
+			MessageNum: request.MessageNum,
+			Value:      request.Value,
+		}
+		s.lastSlotNum = slotID
 
 		// TODO: Apply the command to the state machine before responding if leader
 		if stream != nil {
 			_ = stream.Send(&ClientMessage{
 				Message: &ClientMessage_CommandReply{
 					CommandReply: &CommandReply{
-						MessageId: request.MessageId,
-						SenderId:  s.cluster.Member(),
-						ViewId:    s.viewID,
-						SlotId:    slotID,
-						Value:     nil, // TODO
+						MessageNum: request.MessageNum,
+						Sender:     s.cluster.Member(),
+						ViewID:     s.viewID,
+						SlotNum:    slotID,
+						Value:      nil, // TODO
 					},
 				},
 			})
 		}
-	} else if request.SessionId > s.viewID.SessionId {
+	} else if request.SessionNum > s.viewID.SessionNum {
 		// Command received in the session terminated case
 		newViewID := &ViewId{
-			SessionId: request.SessionId,
-			LeaderId:  s.viewID.LeaderId,
+			SessionNum: request.SessionNum,
+			LeaderNum:  s.viewID.LeaderNum,
 		}
 		for _, member := range s.cluster.Members() {
 			if stream, err := s.cluster.GetStream(member); err == nil {
 				_ = stream.Send(&ReplicaMessage{
 					Message: &ReplicaMessage_ViewChangeRequest{
 						ViewChangeRequest: &ViewChangeRequest{
-							ViewId: newViewID,
+							ViewID: newViewID,
 						},
 					},
 				})
 			}
 		}
-	} else if request.SessionId == s.viewID.SessionId && request.MessageId > s.sessionMessageCount {
+	} else if request.SessionNum == s.viewID.SessionNum && request.MessageNum > s.sessionMessageCount {
 		// Drop notification. If leader commit a gap, otherwise ask the leader for the slot
 		if s.getLeader(s.viewID) == s.cluster.Member() {
 			s.sendGapCommit()
@@ -228,9 +228,9 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 			_ = stream.Send(&ReplicaMessage{
 				Message: &ReplicaMessage_SlotLookup{
 					SlotLookup: &SlotLookup{
-						SenderId:  s.cluster.Member(),
-						ViewId:    s.viewID,
-						MessageId: request.MessageId,
+						Sender:     s.cluster.Member(),
+						ViewID:     s.viewID,
+						MessageNum: request.MessageNum,
 					},
 				},
 			})
@@ -244,7 +244,7 @@ func (s *NOPaxos) query(request *QueryRequest) {
 
 func (s *NOPaxos) slotLookup(request *SlotLookup, stream ReplicaService_ReplicaStreamServer) {
 	// If the view ID does not match the sender's view ID, skip the message
-	if s.viewID == nil || s.viewID.LeaderId != request.ViewId.LeaderId || s.viewID.SessionId != request.ViewId.SessionId {
+	if s.viewID == nil || s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
 		return
 	}
 
@@ -258,23 +258,24 @@ func (s *NOPaxos) slotLookup(request *SlotLookup, stream ReplicaService_ReplicaS
 		return
 	}
 
-	slotID := s.writer.LastSlotID() + 1 - LogSlotID(s.sessionMessageCount-request.MessageId)
+	slotID := s.lastSlotNum + 1 - LogSlotID(s.sessionMessageCount-request.MessageNum)
 
-	if slotID <= s.writer.LastSlotID() {
-		s.reader.Reset(slotID)
-		entry := s.reader.NextEntry()
-		if e, ok := entry.Entry.Entry.(*LogEntry_Command); ok {
-			_ = stream.Send(&ReplicaMessage{
-				Message: &ReplicaMessage_Command{
-					Command: &CommandRequest{
-						SessionId: s.viewID.SessionId,
-						MessageId: e.Command.MessageId,
-						Value:     e.Command.Value,
+	if slotID <= s.lastSlotNum {
+		for i := slotID; i <= s.lastSlotNum; i++ {
+			entry := s.log[i]
+			if entry != nil {
+				_ = stream.Send(&ReplicaMessage{
+					Message: &ReplicaMessage_Command{
+						Command: &CommandRequest{
+							SessionNum: s.viewID.SessionNum,
+							MessageNum: entry.MessageNum,
+							Value:      entry.Value,
+						},
 					},
-				},
-			})
+				})
+			}
 		}
-	} else if slotID == s.writer.LastSlotID()+1 {
+	} else if slotID == s.lastSlotNum+1 {
 		s.sendGapCommit()
 	}
 }
@@ -290,7 +291,7 @@ func (s *NOPaxos) sendGapCommit() {
 		return
 	}
 
-	slotID := s.writer.LastSlotID() + 1
+	slotID := s.lastSlotNum + 1
 
 	// Set the replica's status to GapCommit
 	s.status = StatusGapCommit
@@ -304,8 +305,8 @@ func (s *NOPaxos) sendGapCommit() {
 			_ = stream.Send(&ReplicaMessage{
 				Message: &ReplicaMessage_GapCommit{
 					GapCommit: &GapCommitRequest{
-						ViewId: s.viewID,
-						SlotId: slotID,
+						ViewID:  s.viewID,
+						SlotNum: slotID,
 					},
 				},
 			})
@@ -318,7 +319,7 @@ func (s *NOPaxos) gapCommit(request *GapCommitRequest, stream ReplicaService_Rep
 	defer s.mu.Unlock()
 
 	// If the view ID does not match the sender's view ID, skip the message
-	if s.viewID == nil || s.viewID.LeaderId != request.ViewId.LeaderId || s.viewID.SessionId != request.ViewId.SessionId {
+	if s.viewID == nil || s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
 		return
 	}
 
@@ -328,29 +329,23 @@ func (s *NOPaxos) gapCommit(request *GapCommitRequest, stream ReplicaService_Rep
 	}
 
 	// If the request slot ID is not the next slot in the replica's log, skip the message
-	lastSlotID := s.writer.LastSlotID()
-	if request.SlotId > lastSlotID+1 {
+	lastSlotID := s.lastSlotNum
+	if request.SlotNum > lastSlotID+1 {
 		return
 	}
 
-	// TODO: This operation should be a replace rather than truncate/append
-	// TODO: This can be done trivially by flipping a bit in the written entry
-	s.writer.Truncate(request.SlotId)
-	s.writer.Append(&LogEntry{
-		LogSlotId: request.SlotId,
-		Timestamp: time.Now(),
-		Entry:     &LogEntry_NoOp{},
-	})
+	// A no-op entry is represented as a missing entry
+	delete(s.log, request.SlotNum)
 
-	// Increment the session message ID if neccessary
-	if request.SlotId > s.writer.LastSlotID() {
+	// Increment the session message ID if necessary
+	if request.SlotNum > s.lastSlotNum {
 		s.sessionMessageCount++
 	}
 
 	_ = stream.SendMsg(&GapCommitReply{
-		SenderId: s.cluster.Member(),
-		ViewId:   s.viewID,
-		SlotId:   request.SlotId,
+		Sender:  s.cluster.Member(),
+		ViewID:  s.viewID,
+		SlotNum: request.SlotNum,
 	})
 }
 
@@ -359,7 +354,7 @@ func (s *NOPaxos) gapCommitReply(reply *GapCommitReply) {
 	defer s.mu.Unlock()
 
 	// If the view ID does not match the sender's view ID, skip the message
-	if s.viewID == nil || s.viewID.LeaderId != reply.ViewId.LeaderId || s.viewID.SessionId != reply.ViewId.SessionId {
+	if s.viewID == nil || s.viewID.LeaderNum != reply.ViewID.LeaderNum || s.viewID.SessionNum != reply.ViewID.SessionNum {
 		return
 	}
 
@@ -374,16 +369,16 @@ func (s *NOPaxos) gapCommitReply(reply *GapCommitReply) {
 	}
 
 	// If the gap commit slot does not match the current gap slot, skip the message
-	if reply.SlotId != s.currentGapSlot {
+	if reply.SlotNum != s.currentGapSlot {
 		return
 	}
 
-	s.gapCommitReps[reply.SenderId] = reply
+	s.gapCommitReps[reply.Sender] = reply
 
 	// Get the set of gap commit replies for the current slot
 	gapCommits := make([]*GapCommitReply, 0, len(s.gapCommitReps))
 	for _, gapCommit := range s.gapCommitReps {
-		if gapCommit.ViewId.SessionId == s.viewID.SessionId && gapCommit.ViewId.LeaderId == s.viewID.LeaderId && gapCommit.SlotId == s.currentGapSlot {
+		if gapCommit.ViewID.SessionNum == s.viewID.SessionNum && gapCommit.ViewID.LeaderNum == s.viewID.LeaderNum && gapCommit.SlotNum == s.currentGapSlot {
 			gapCommits = append(gapCommits, gapCommit)
 		}
 	}
@@ -396,8 +391,8 @@ func (s *NOPaxos) gapCommitReply(reply *GapCommitReply) {
 
 func (s *NOPaxos) startLeaderChange() {
 	newViewID := &ViewId{
-		SessionId: s.viewID.SessionId,
-		LeaderId:  s.viewID.LeaderId + 1,
+		SessionNum: s.viewID.SessionNum,
+		LeaderNum:  s.viewID.LeaderNum + 1,
 	}
 
 	for _, member := range s.cluster.Members() {
@@ -406,7 +401,7 @@ func (s *NOPaxos) startLeaderChange() {
 				_ = stream.Send(&ReplicaMessage{
 					Message: &ReplicaMessage_ViewChangeRequest{
 						ViewChangeRequest: &ViewChangeRequest{
-							ViewId: newViewID,
+							ViewID: newViewID,
 						},
 					},
 				})
@@ -416,18 +411,18 @@ func (s *NOPaxos) startLeaderChange() {
 }
 
 func (s *NOPaxos) viewChangeRequest(request *ViewChangeRequest) {
-	newLeaderID := LeaderID(math.Max(float64(s.viewID.LeaderId), float64(request.ViewId.LeaderId)))
-	newSessionID := SessionID(math.Max(float64(s.viewID.SessionId), float64(request.ViewId.SessionId)))
+	newLeaderID := LeaderID(math.Max(float64(s.viewID.LeaderNum), float64(request.ViewID.LeaderNum)))
+	newSessionID := SessionID(math.Max(float64(s.viewID.SessionNum), float64(request.ViewID.SessionNum)))
 	newViewID := &ViewId{
-		LeaderId:  newLeaderID,
-		SessionId: newSessionID,
+		LeaderNum:  newLeaderID,
+		SessionNum: newSessionID,
 	}
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	// If the view IDs match, ignore the request
-	if s.viewID != nil && s.viewID.LeaderId == newViewID.LeaderId && s.viewID.SessionId == newViewID.SessionId {
+	if s.viewID != nil && s.viewID.LeaderNum == newViewID.LeaderNum && s.viewID.SessionNum == newViewID.SessionNum {
 		return
 	}
 
@@ -447,21 +442,17 @@ func (s *NOPaxos) viewChangeRequest(request *ViewChangeRequest) {
 	}
 
 	// TODO: We probably can't send the entire log in a single message here
-	reader := s.log.OpenReader(0)
-	log := make([]*LogEntry, 0, reader.LastSlotID()-reader.FirstSlotID()+1)
-	reader.Reset(0)
-	entry := reader.NextEntry()
-	for entry != nil {
-		log = append(log, entry.Entry)
-		entry = reader.NextEntry()
+	log := make([]*LogEntry, 0, len(s.log))
+	for _, entry := range s.log {
+		log = append(log, entry)
 	}
 	_ = stream.Send(&ReplicaMessage{
 		Message: &ReplicaMessage_ViewChange{
 			ViewChange: &ViewChange{
-				MemberId:   s.cluster.Member(),
-				ViewId:     newViewID,
+				Sender:     s.cluster.Member(),
+				ViewID:     newViewID,
 				LastNormal: s.lastNormView,
-				MessageId:  s.sessionMessageCount,
+				MessageNum: s.sessionMessageCount,
 				Log:        log,
 			},
 		},
@@ -474,7 +465,7 @@ func (s *NOPaxos) viewChangeRequest(request *ViewChangeRequest) {
 				_ = stream.Send(&ReplicaMessage{
 					Message: &ReplicaMessage_ViewChangeRequest{
 						ViewChangeRequest: &ViewChangeRequest{
-							ViewId: newViewID,
+							ViewID: newViewID,
 						},
 					},
 				})
@@ -488,7 +479,7 @@ func (s *NOPaxos) viewChange(request *ViewChange) {
 	defer s.mu.Unlock()
 
 	// If the view IDs do not match, ignore the request
-	if s.viewID == nil || s.viewID.LeaderId != request.ViewId.LeaderId || s.viewID.SessionId != request.ViewId.SessionId {
+	if s.viewID == nil || s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
 		return
 	}
 
@@ -498,17 +489,17 @@ func (s *NOPaxos) viewChange(request *ViewChange) {
 	}
 
 	// If this replica is not the leader of the view, ignore the request
-	if s.getLeader(request.ViewId) != s.cluster.Member() {
+	if s.getLeader(request.ViewID) != s.cluster.Member() {
 		return
 	}
 
 	// Add the view change to the set of view changes
-	s.viewChanges[request.MemberId] = request
+	s.viewChanges[request.Sender] = request
 
 	// Aggregate the view changes for the current view
 	viewChanges := make([]*ViewChange, 0, len(s.viewChanges))
 	for _, viewChange := range s.viewChanges {
-		if viewChange.ViewId.SessionId == s.viewID.SessionId && viewChange.ViewId.LeaderId == s.viewID.LeaderId {
+		if viewChange.ViewID.SessionNum == s.viewID.SessionNum && viewChange.ViewID.LeaderNum == s.viewID.LeaderNum {
 			viewChanges = append(viewChanges, viewChange)
 		}
 	}
@@ -518,7 +509,7 @@ func (s *NOPaxos) viewChange(request *ViewChange) {
 		// Create the state for the new view
 		var lastNormal *ViewChange
 		for _, viewChange := range viewChanges {
-			if viewChange.ViewId.SessionId <= s.viewID.SessionId && viewChange.ViewId.LeaderId <= s.viewID.LeaderId {
+			if viewChange.ViewID.SessionNum <= s.viewID.SessionNum && viewChange.ViewID.LeaderNum <= s.viewID.LeaderNum {
 				lastNormal = viewChange
 			}
 		}
@@ -526,12 +517,12 @@ func (s *NOPaxos) viewChange(request *ViewChange) {
 		var newMessageID MessageID
 		goodLogs := make([][]*LogEntry, 0, len(viewChanges))
 		for _, viewChange := range viewChanges {
-			if viewChange.LastNormal.SessionId == lastNormal.ViewId.SessionId && viewChange.LastNormal.LeaderId == lastNormal.ViewId.LeaderId {
+			if viewChange.LastNormal.SessionNum == lastNormal.ViewID.SessionNum && viewChange.LastNormal.LeaderNum == lastNormal.ViewID.LeaderNum {
 				goodLogs = append(goodLogs, viewChange.Log)
 
 				// If the session has changed, take the maximum message ID
-				if lastNormal.ViewId.SessionId == s.viewID.SessionId && viewChange.MessageId > newMessageID {
-					newMessageID = viewChange.MessageId
+				if lastNormal.ViewID.SessionNum == s.viewID.SessionNum && viewChange.MessageNum > newMessageID {
+					newMessageID = viewChange.MessageNum
 				}
 			}
 		}
@@ -540,14 +531,14 @@ func (s *NOPaxos) viewChange(request *ViewChange) {
 		newLog := make(map[LogSlotID]*LogEntry)
 		for _, goodLog := range goodLogs {
 			for _, entry := range goodLog {
-				newEntry := newLog[entry.LogSlotId]
-				if _, ok := entry.Entry.(*LogEntry_NoOp); ok || newEntry == nil {
-					newLog[entry.LogSlotId] = entry
-					if firstSlotID == 0 || entry.LogSlotId < firstSlotID {
-						firstSlotID = entry.LogSlotId
+				newEntry := newLog[entry.SlotNum]
+				if newEntry == nil {
+					newLog[entry.SlotNum] = entry
+					if firstSlotID == 0 || entry.SlotNum < firstSlotID {
+						firstSlotID = entry.SlotNum
 					}
-					if lastSlotID == 0 || entry.LogSlotId > lastSlotID {
-						lastSlotID = entry.LogSlotId
+					if lastSlotID == 0 || entry.SlotNum > lastSlotID {
+						lastSlotID = entry.SlotNum
 					}
 				}
 			}
@@ -556,14 +547,9 @@ func (s *NOPaxos) viewChange(request *ViewChange) {
 		log := make([]*LogEntry, 0, len(newLog))
 		for slotID := firstSlotID; slotID <= lastSlotID; slotID++ {
 			entry := newLog[slotID]
-			if entry == nil {
-				entry = &LogEntry{
-					LogSlotId: slotID,
-					Timestamp: time.Now(),
-					Entry:     &LogEntry_NoOp{},
-				}
+			if entry != nil {
+				log = append(log, entry)
 			}
-			log = append(log, entry)
 		}
 
 		// Send a StartView to each replica
@@ -572,9 +558,9 @@ func (s *NOPaxos) viewChange(request *ViewChange) {
 				_ = stream.Send(&ReplicaMessage{
 					Message: &ReplicaMessage_StartView{
 						StartView: &StartView{
-							ViewId:    s.viewID,
-							MessageId: newMessageID,
-							Log:       log,
+							ViewID:     s.viewID,
+							MessageNum: newMessageID,
+							Log:        log,
 						},
 					},
 				})
@@ -599,15 +585,11 @@ func (s *NOPaxos) startSync() {
 	}
 
 	s.syncReps = make(map[MemberID]*SyncReply)
-	s.tentativeSync = s.writer.LastSlotID()
+	s.tentativeSync = s.lastSlotNum
 
-	reader := s.log.OpenReader(0)
-	log := make([]*LogEntry, 0, reader.LastSlotID()-reader.FirstSlotID()+1)
-	reader.Reset(0)
-	entry := reader.NextEntry()
-	for entry != nil {
-		log = append(log, entry.Entry)
-		entry = reader.NextEntry()
+	log := make([]*LogEntry, 0, len(s.log))
+	for _, entry := range s.log {
+		log = append(log, entry)
 	}
 
 	for _, member := range s.cluster.Members() {
@@ -616,10 +598,10 @@ func (s *NOPaxos) startSync() {
 				_ = stream.Send(&ReplicaMessage{
 					Message: &ReplicaMessage_SyncPrepare{
 						SyncPrepare: &SyncPrepare{
-							SenderId:  s.cluster.Member(),
-							ViewId:    s.viewID,
-							MessageId: s.sessionMessageCount,
-							Log:       log,
+							Sender:     s.cluster.Member(),
+							ViewID:     s.viewID,
+							MessageNum: s.sessionMessageCount,
+							Log:        log,
 						},
 					},
 				})
@@ -635,41 +617,47 @@ func (s *NOPaxos) syncPrepare(request *SyncPrepare, stream ReplicaService_Replic
 	}
 
 	// If the view IDs do not match, ignore the request
-	if s.viewID == nil || s.viewID.LeaderId != request.ViewId.LeaderId || s.viewID.SessionId != request.ViewId.SessionId {
+	if s.viewID == nil || s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
 		return
 	}
 
 	// If the sender is not the leader for the current view, ignore the request
-	if request.SenderId != s.getLeader(request.ViewId) {
+	if request.Sender != s.getLeader(request.ViewID) {
 		return
 	}
 
-	newLog := s.store.NewLog()
+	newLog := make(map[LogSlotID]*LogEntry)
 	var firstSlotID LogSlotID
 	if len(request.Log) > 0 {
-		firstSlotID = request.Log[0].LogSlotId
+		firstSlotID = request.Log[0].SlotNum
 	}
-	newReader := newLog.OpenReader(0)
-	newWriter := newLog.Writer()
-	newWriter.Reset(firstSlotID)
+
+	var lastSlotID = firstSlotID
 	for _, entry := range request.Log {
-		newWriter.Append(entry)
+		newLog[entry.SlotNum] = entry
+		if entry.SlotNum > lastSlotID {
+			lastSlotID = entry.SlotNum
+		}
 	}
-	reader := s.log.OpenReader(newWriter.LastSlotID() + 1)
-	entry := reader.NextEntry()
-	for entry != nil {
-		newWriter.Append(entry.Entry)
+
+	for i := lastSlotID; i < s.lastSlotNum; i++ {
+		entry := s.log[i]
+		if entry != nil {
+			newLog[entry.SlotNum] = entry
+		}
 	}
-	s.sessionMessageCount = s.sessionMessageCount + MessageID(newWriter.LastSlotID()-s.writer.LastSlotID())
-	s.setLog(newLog)
+	s.sessionMessageCount = s.sessionMessageCount + MessageID(lastSlotID-s.lastSlotNum)
+	s.log = newLog
+	s.firstSlotNum = firstSlotID
+	s.lastSlotNum = lastSlotID
 
 	// Send a SyncReply back to the leader
 	_ = stream.Send(&ReplicaMessage{
 		Message: &ReplicaMessage_SyncReply{
 			SyncReply: &SyncReply{
-				SenderId: s.cluster.Member(),
-				ViewId:   s.viewID,
-				SlotId:   newWriter.LastSlotID(),
+				Sender:  s.cluster.Member(),
+				ViewID:  s.viewID,
+				SlotNum: lastSlotID,
 			},
 		},
 	})
@@ -680,28 +668,27 @@ func (s *NOPaxos) syncPrepare(request *SyncPrepare, stream ReplicaService_Replic
 	s.mu.RUnlock()
 
 	if sequencer != nil {
-		entry = newReader.NextEntry()
-		for entry != nil {
-			if e, ok := entry.Entry.Entry.(*LogEntry_Command); ok {
+		for slotNum := s.firstSlotNum; slotNum <= s.lastSlotNum; slotNum++ {
+			entry := s.log[slotNum]
+			if entry != nil {
 				_ = sequencer.Send(&ClientMessage{
 					Message: &ClientMessage_CommandReply{
 						CommandReply: &CommandReply{
-							MessageId: e.Command.MessageId,
-							SenderId:  s.cluster.Member(),
-							ViewId:    s.viewID,
-							SlotId:    entry.SlotID,
+							MessageNum: entry.MessageNum,
+							Sender:     s.cluster.Member(),
+							ViewID:     s.viewID,
+							SlotNum:    slotNum,
 						},
 					},
 				})
 			}
-			entry = newReader.NextEntry()
 		}
 	}
 }
 
 func (s *NOPaxos) syncReply(reply *SyncReply) {
 	// If the view IDs do not match, ignore the request
-	if s.viewID == nil || s.viewID.LeaderId != reply.ViewId.LeaderId || s.viewID.SessionId != reply.ViewId.SessionId {
+	if s.viewID == nil || s.viewID.LeaderNum != reply.ViewID.LeaderNum || s.viewID.SessionNum != reply.ViewID.SessionNum {
 		return
 	}
 
@@ -711,23 +698,19 @@ func (s *NOPaxos) syncReply(reply *SyncReply) {
 	}
 
 	// Add the reply to the set of sync replies
-	s.syncReps[reply.SenderId] = reply
+	s.syncReps[reply.Sender] = reply
 
 	syncReps := make([]*SyncReply, 0, len(s.syncReps))
 	for _, syncRep := range s.syncReps {
-		if syncRep.ViewId.LeaderId == s.viewID.LeaderId && syncRep.ViewId.SessionId == s.viewID.SessionId && syncRep.SlotId == s.tentativeSync {
+		if syncRep.ViewID.LeaderNum == s.viewID.LeaderNum && syncRep.ViewID.SessionNum == s.viewID.SessionNum && syncRep.SlotNum == s.tentativeSync {
 			syncReps = append(syncReps, syncRep)
 		}
 	}
 
 	if len(syncReps) >= s.cluster.QuorumSize() {
-		reader := s.log.OpenReader(0)
-		log := make([]*LogEntry, 0, reader.LastSlotID()-reader.FirstSlotID()+1)
-		reader.Reset(0)
-		entry := reader.NextEntry()
-		for entry != nil {
-			log = append(log, entry.Entry)
-			entry = reader.NextEntry()
+		log := make([]*LogEntry, 0, len(s.log))
+		for _, entry := range s.log {
+			log = append(log, entry)
 		}
 
 		for _, member := range s.cluster.Members() {
@@ -736,10 +719,10 @@ func (s *NOPaxos) syncReply(reply *SyncReply) {
 					_ = stream.Send(&ReplicaMessage{
 						Message: &ReplicaMessage_SyncCommit{
 							SyncCommit: &SyncCommit{
-								SenderId:  s.cluster.Member(),
-								ViewId:    s.viewID,
-								MessageId: s.sessionMessageCount,
-								Log:       log,
+								Sender:     s.cluster.Member(),
+								ViewID:     s.viewID,
+								MessageNum: s.sessionMessageCount,
+								Log:        log,
 							},
 						},
 					})
@@ -756,31 +739,84 @@ func (s *NOPaxos) syncCommit(request *SyncCommit) {
 	}
 
 	// If the view IDs do not match, ignore the request
-	if s.viewID == nil || s.viewID.LeaderId != request.ViewId.LeaderId || s.viewID.SessionId != request.ViewId.SessionId {
+	if s.viewID == nil || s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
 		return
 	}
 
 	// If the sender is not the leader for the current view, ignore the request
-	if request.SenderId != s.getLeader(request.ViewId) {
+	if request.Sender != s.getLeader(request.ViewID) {
 		return
 	}
 
-	newLog := s.store.NewLog()
+	newLog := make(map[LogSlotID]*LogEntry)
 	var firstSlotID LogSlotID
 	if len(request.Log) > 0 {
-		firstSlotID = request.Log[0].LogSlotId
+		firstSlotID = request.Log[0].SlotNum
 	}
-	newWriter := newLog.Writer()
-	newWriter.Reset(firstSlotID)
+
+	var lastSlotID = firstSlotID
 	for _, entry := range request.Log {
-		newWriter.Append(entry)
+		newLog[entry.SlotNum] = entry
+		if entry.SlotNum > lastSlotID {
+			lastSlotID = entry.SlotNum
+		}
 	}
-	reader := s.log.OpenReader(newWriter.LastSlotID() + 1)
-	entry := reader.NextEntry()
-	for entry != nil {
-		newWriter.Append(entry.Entry)
+
+	for i := lastSlotID; i < s.lastSlotNum; i++ {
+		entry := s.log[i]
+		if entry != nil {
+			newLog[entry.SlotNum] = entry
+		}
 	}
-	s.sessionMessageCount = s.sessionMessageCount + MessageID(newWriter.LastSlotID()-s.writer.LastSlotID())
-	s.syncPoint = newWriter.LastSlotID()
-	s.setLog(newLog)
+	s.sessionMessageCount = s.sessionMessageCount + MessageID(lastSlotID-s.lastSlotNum)
+	s.log = newLog
+	s.firstSlotNum = firstSlotID
+	s.lastSlotNum = lastSlotID
+}
+
+func newStateMachine(node string, registry *node.Registry) *stateMachine {
+	sm := &stateMachine{
+		node:     node,
+		registry: registry,
+	}
+	sm.reset()
+	return sm
+}
+
+// stateMachine is the replica state machine
+type stateMachine struct {
+	node     string
+	registry *node.Registry
+	state    node.StateMachine
+	context  node.Context
+}
+
+// reset resets the state machine
+func (s *stateMachine) reset() {
+	s.context = &stateMachineContext{}
+	s.state = node.NewPrimitiveStateMachine(s.registry, s.context)
+}
+
+// stateMachineContext is a replica state machine context
+type stateMachineContext struct {
+	node      string
+	index     uint64
+	timestamp time.Time
+	op        service.OperationType
+}
+
+func (c *stateMachineContext) Node() string {
+	return c.node
+}
+
+func (c *stateMachineContext) Index() uint64 {
+	return c.index
+}
+
+func (c *stateMachineContext) Timestamp() time.Time {
+	return c.timestamp
+}
+
+func (c *stateMachineContext) OperationType() service.OperationType {
+	return c.op
 }

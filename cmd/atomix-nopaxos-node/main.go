@@ -18,7 +18,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/atomix/atomix-api/proto/atomix/controller"
-	"github.com/atomix/atomix-go-node/pkg/atomix"
+	"github.com/atomix/atomix-go-node/pkg/atomix/cluster"
 	"github.com/atomix/atomix-go-node/pkg/atomix/registry"
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos"
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/config"
@@ -37,9 +37,23 @@ func main() {
 	partitionConfig := parsePartitionConfig()
 	protocolConfig := parseProtocolConfig()
 
+	members := make(map[string]cluster.Member)
+	for _, member := range partitionConfig.Members {
+		members[member.ID] = cluster.Member{
+			ID:   member.ID,
+			Host: member.Host,
+			Port: int(member.Port),
+		}
+	}
+
+	cluster := cluster.Cluster{
+		MemberID: nodeID,
+		Members:  members,
+	}
+
 	// Start the node. The node will be started in its own goroutine.
-	node := atomix.NewNode(nodeID, partitionConfig, nopaxos.NewProtocol(protocolConfig), registry.Registry)
-	if err := node.Start(); err != nil {
+	server := nopaxos.NewServer(cluster, registry.Registry, protocolConfig)
+	if err := server.Start(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -50,7 +64,7 @@ func main() {
 	<-ch
 
 	// Stop the node after an interrupt
-	if err := node.Stop(); err != nil {
+	if err := server.Stop(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}

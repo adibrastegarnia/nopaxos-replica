@@ -53,88 +53,88 @@ message ReplicaMessage {
 }
 
 message ViewId {
-    string leader_id = 1 [(gogoproto.casttype) = "LeaderID"];
-    uint64 session_id = 2 [(gogoproto.casttype) = "SessionID"];
+    string leader_num = 1 [(gogoproto.casttype) = "LeaderID"];
+    uint64 session_num = 2 [(gogoproto.casttype) = "SessionID"];
 }
 
 message CommandRequest {
-    uint64 session_id = 1 [(gogoproto.casttype) = "SessionID"];
-    uint64 message_id = 2 [(gogoproto.casttype) = "MessageID"];
+    uint64 session_num = 1 [(gogoproto.casttype) = "SessionID"];
+    uint64 message_num = 2 [(gogoproto.casttype) = "MessageID"];
     bytes value = 3;
 }
 
 message CommandReply {
-    uint64 message_id = 1 [(gogoproto.casttype) = "MessageID"];
-    string sender_id = 2 [(gogoproto.casttype) = "MemberID"];
-    ViewId view_id = 3;
-    uint64 slot_id = 4 [(gogoproto.casttype) = "LogSlotID"];
+    uint64 message_num = 1 [(gogoproto.casttype) = "MessageID"];
+    string sender = 2 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 3 [(gogoproto.customname) = "ViewID"];
+    uint64 slot_num = 4 [(gogoproto.casttype) = "LogSlotID"];
     bytes value = 5;
 }
 
 message QueryRequest {
-    uint64 session_id = 1 [(gogoproto.casttype) = "SessionID"];
+    uint64 session_num = 1 [(gogoproto.casttype) = "SessionID"];
     bytes value = 2;
 }
 
 message QueryReply {
-    uint64 message_id = 1 [(gogoproto.casttype) = "MessageID"];
-    string sender_id = 2 [(gogoproto.casttype) = "MemberID"];
-    ViewId view_id = 3;
+    uint64 message_num = 1 [(gogoproto.casttype) = "MessageID"];
+    string sender = 2 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 3 [(gogoproto.customname) = "ViewID"];
     bytes value = 4;
 }
 
 message SlotLookup {
-    string sender_id = 1 [(gogoproto.casttype) = "MemberID"];
-    ViewId view_id = 2;
-    uint64 message_id = 3 [(gogoproto.casttype) = "MessageID"];
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
+    uint64 message_num = 3 [(gogoproto.casttype) = "MessageID"];
 }
 
 message GapCommitRequest {
-    ViewId view_id = 1;
-    uint64 slot_id = 2 [(gogoproto.casttype) = "LogSlotID"];
+    ViewId view_id = 1 [(gogoproto.customname) = "ViewID"];
+    uint64 slot_num = 2 [(gogoproto.casttype) = "LogSlotID"];
 }
 
 message GapCommitReply {
-    string sender_id = 1 [(gogoproto.casttype) = "MemberID"];
-    ViewId view_id = 2;
-    uint64 slot_id = 3 [(gogoproto.casttype) = "LogSlotID"];
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
+    uint64 slot_num = 3 [(gogoproto.casttype) = "LogSlotID"];
 }
 
 message ViewChangeRequest {
-    ViewId view_id = 1;
+    ViewId view_id = 1 [(gogoproto.customname) = "ViewID"];
 }
 
 message ViewChange {
-    string member_id = 1 [(gogoproto.casttype) = "MemberID"];
-    ViewId view_id = 2;
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
     ViewId last_normal = 3;
-    uint64 message_id = 4 [(gogoproto.casttype) = "MessageID"];
+    uint64 message_num = 4 [(gogoproto.casttype) = "MessageID"];
     repeated LogEntry log = 5;
 }
 
 message StartView {
-    ViewId view_id = 1;
-    uint64 message_id = 2 [(gogoproto.casttype) = "MessageID"];
+    ViewId view_id = 1 [(gogoproto.customname) = "ViewID"];
+    uint64 message_num = 2 [(gogoproto.casttype) = "MessageID"];
     repeated LogEntry log = 3;
 }
 
 message SyncPrepare {
-    string sender_id = 1 [(gogoproto.casttype) = "MemberID"];
-    ViewId view_id = 2;
-    uint64 message_id = 3 [(gogoproto.casttype) = "MessageID"];
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
+    uint64 message_num = 3 [(gogoproto.casttype) = "MessageID"];
     repeated LogEntry log = 4;
 }
 
 message SyncReply {
-    string sender_id = 1 [(gogoproto.casttype) = "MemberID"];
-    ViewId view_id = 2;
-    uint64 slot_id = 3 [(gogoproto.casttype) = "LogSlotID"];
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
+    uint64 slot_num = 3 [(gogoproto.casttype) = "LogSlotID"];
 }
 
 message SyncCommit {
-    string sender_id = 1 [(gogoproto.casttype) = "MemberID"];
-    ViewId view_id = 2;
-    uint64 message_id = 3 [(gogoproto.casttype) = "MessageID"];
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
+    uint64 message_num = 3 [(gogoproto.casttype) = "MessageID"];
     repeated LogEntry log = 4;
 }
 

@@ -20,8 +20,6 @@ import (
 	"github.com/atomix/atomix-go-node/pkg/atomix/node"
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/config"
 	nopaxos "github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/protocol"
-	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/state"
-	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/store"
 	"google.golang.org/grpc"
 	"net"
 	"sync"
@@ -35,13 +33,9 @@ func NewServer(clusterConfig cluster.Cluster, registry *node.Registry, protocolC
 	}
 
 	cluster := nopaxos.NewCluster(clusterConfig)
-	store := store.NewMemoryStore()
-	state := state.NewManager(cluster.Member(), store, registry)
-	nopaxos := nopaxos.NewNOPaxos(cluster, state, store, protocolConfig)
+	nopaxos := nopaxos.NewNOPaxos(cluster, registry, protocolConfig)
 	server := &Server{
 		nopaxos: nopaxos,
-		state:   state,
-		store:   store,
 		port:    member.Port,
 		mu:      sync.Mutex{},
 	}
@@ -51,8 +45,6 @@ func NewServer(clusterConfig cluster.Cluster, registry *node.Registry, protocolC
 // Server implements the NOPaxos consensus protocol server
 type Server struct {
 	nopaxos *nopaxos.NOPaxos
-	state   state.Manager
-	store   store.Store
 	server  *grpc.Server
 	port    int
 	mu      sync.Mutex
@@ -68,7 +60,8 @@ func (s *Server) Start() error {
 	}
 
 	s.server = grpc.NewServer()
-	nopaxos.RegisterNOPaxosServiceServer(s.server, s.nopaxos)
+	nopaxos.RegisterClientServiceServer(s.server, s.nopaxos)
+	nopaxos.RegisterReplicaServiceServer(s.server, s.nopaxos)
 	s.mu.Unlock()
 	return s.server.Serve(lis)
 }
@@ -80,7 +73,5 @@ func (s *Server) Stop() error {
 	if s.server != nil {
 		s.server.Stop()
 	}
-	s.state.Close()
-	s.store.Close()
 	return nil
 }

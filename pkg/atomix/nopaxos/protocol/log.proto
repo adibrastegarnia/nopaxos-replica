@@ -25,27 +25,9 @@ option (gogoproto.testgen_all) = true;
 option (gogoproto.populate_all) = true;
 option (gogoproto.equal_all) = true;
 
-// NOPaxos log entry
 message LogEntry {
-    uint64 log_slot_id = 1 [(gogoproto.casttype) = "LogSlotID"];
+    uint64 slot_num = 1 [(gogoproto.casttype) = "LogSlotID"];
     google.protobuf.Timestamp timestamp = 2 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
-
-    oneof entry {
-        NoOpEntry no_op = 3;
-        CommandEntry command = 4;
-        QueryEntry query = 5;
-    }
-}
-
-message NoOpEntry {
-
-}
-
-message CommandEntry {
-    uint64 message_id = 1 [(gogoproto.casttype) = "MessageID"];
-    bytes value = 2;
-}
-
-message QueryEntry {
-    bytes value = 1;
+    uint64 message_num = 3 [(gogoproto.casttype) = "MessageID"];
+    bytes value = 4;
 }
