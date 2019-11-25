@@ -93,13 +93,14 @@ type NOPaxos struct {
 	tentativeSync       LogSlotID
 	syncPoint           LogSlotID
 	syncReps            map[MemberID]*SyncReply
-	mu                  sync.RWMutex
+	stateMu             sync.RWMutex
+	logMu               sync.RWMutex
 }
 
 func (s *NOPaxos) ClientStream(stream ClientService_ClientStreamServer) error {
-	s.mu.Lock()
+	s.stateMu.Lock()
 	s.sequencer = stream
-	s.mu.Unlock()
+	s.stateMu.Unlock()
 	for {
 		message, err := stream.Recv()
 		if err == io.EOF {
@@ -169,6 +170,9 @@ func (s *NOPaxos) slot(request *CommandRequest) {
 }
 
 func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientStreamServer) {
+	s.stateMu.RLock()
+	defer s.stateMu.RUnlock()
+
 	// If the replica's status is not Normal, skip the commit
 	if s.status != StatusNormal {
 		return
@@ -176,6 +180,7 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 
 	if request.SessionNum == s.viewID.SessionNum && request.MessageNum == s.sessionMessageCount {
 		// Command received in the normal case
+		s.logMu.Lock()
 		slotNum := s.lastSlotNum + 1
 		entry := &LogEntry{
 			SlotNum:    slotNum,
@@ -185,6 +190,7 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 		}
 		s.log[slotNum] = entry
 		s.lastSlotNum = slotNum
+		s.logMu.Unlock()
 
 		// Apply the command to the state machine before responding if leader
 		if stream != nil && s.getLeader(s.viewID) == s.cluster.Member() {
@@ -247,6 +253,9 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 }
 
 func (s *NOPaxos) query(request *QueryRequest, stream ClientService_ClientStreamServer) {
+	s.stateMu.RLock()
+	defer s.stateMu.RUnlock()
+
 	// If the replica's status is not Normal, skip the commit
 	if s.status != StatusNormal {
 		return
@@ -276,18 +285,23 @@ func (s *NOPaxos) query(request *QueryRequest, stream ClientService_ClientStream
 }
 
 func (s *NOPaxos) slotLookup(request *SlotLookup, stream ReplicaService_ReplicaStreamServer) {
+	s.stateMu.RLock()
+
 	// If the view ID does not match the sender's view ID, skip the message
 	if s.viewID == nil || s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
+		s.stateMu.RUnlock()
 		return
 	}
 
 	// If this replica is not the leader, skip the message
 	if s.getLeader(s.viewID) != s.cluster.Member() {
+		s.stateMu.RUnlock()
 		return
 	}
 
 	// If the replica's status is not Normal, skip the message
 	if s.status != StatusNormal {
+		s.stateMu.RUnlock()
 		return
 	}
 
@@ -308,12 +322,17 @@ func (s *NOPaxos) slotLookup(request *SlotLookup, stream ReplicaService_ReplicaS
 				})
 			}
 		}
+		s.stateMu.RUnlock()
 	} else if slotID == s.lastSlotNum+1 {
+		s.stateMu.RUnlock()
 		s.sendGapCommit()
 	}
 }
 
 func (s *NOPaxos) sendGapCommit() {
+	s.stateMu.Lock()
+	defer s.stateMu.Unlock()
+
 	// If this replica is not the leader, skip the commit
 	if s.getLeader(s.viewID) != s.cluster.Member() {
 		return
@@ -348,18 +367,24 @@ func (s *NOPaxos) sendGapCommit() {
 }
 
 func (s *NOPaxos) gapCommit(request *GapCommitRequest, stream ReplicaService_ReplicaStreamServer) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.stateMu.RLock()
 
 	// If the view ID does not match the sender's view ID, skip the message
 	if s.viewID == nil || s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
+		s.stateMu.RUnlock()
 		return
 	}
 
 	// If the replica's status is not Normal or GapCommit, skip the message
 	if s.status != StatusNormal && s.status != StatusGapCommit {
+		s.stateMu.RUnlock()
 		return
 	}
+
+	s.stateMu.RUnlock()
+
+	s.stateMu.Lock()
+	defer s.stateMu.Unlock()
 
 	// If the request slot ID is not the next slot in the replica's log, skip the message
 	lastSlotID := s.lastSlotNum
@@ -383,8 +408,8 @@ func (s *NOPaxos) gapCommit(request *GapCommitRequest, stream ReplicaService_Rep
 }
 
 func (s *NOPaxos) gapCommitReply(reply *GapCommitReply) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.stateMu.Lock()
+	defer s.stateMu.Unlock()
 
 	// If the view ID does not match the sender's view ID, skip the message
 	if s.viewID == nil || s.viewID.LeaderNum != reply.ViewID.LeaderNum || s.viewID.SessionNum != reply.ViewID.SessionNum {
@@ -423,10 +448,12 @@ func (s *NOPaxos) gapCommitReply(reply *GapCommitReply) {
 }
 
 func (s *NOPaxos) startLeaderChange() {
+	s.stateMu.RLock()
 	newViewID := &ViewId{
 		SessionNum: s.viewID.SessionNum,
 		LeaderNum:  s.viewID.LeaderNum + 1,
 	}
+	s.stateMu.RUnlock()
 
 	for _, member := range s.cluster.Members() {
 		if member != s.getLeader(newViewID) {
@@ -444,15 +471,14 @@ func (s *NOPaxos) startLeaderChange() {
 }
 
 func (s *NOPaxos) viewChangeRequest(request *ViewChangeRequest) {
+	s.stateMu.RLock()
 	newLeaderID := LeaderID(math.Max(float64(s.viewID.LeaderNum), float64(request.ViewID.LeaderNum)))
 	newSessionID := SessionID(math.Max(float64(s.viewID.SessionNum), float64(request.ViewID.SessionNum)))
 	newViewID := &ViewId{
 		LeaderNum:  newLeaderID,
 		SessionNum: newSessionID,
 	}
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.stateMu.RUnlock()
 
 	// If the view IDs match, ignore the request
 	if s.viewID != nil && s.viewID.LeaderNum == newViewID.LeaderNum && s.viewID.SessionNum == newViewID.SessionNum {
@@ -508,8 +534,8 @@ func (s *NOPaxos) viewChangeRequest(request *ViewChangeRequest) {
 }
 
 func (s *NOPaxos) viewChange(request *ViewChange) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.stateMu.RLock()
+	defer s.stateMu.RUnlock()
 
 	// If the view IDs do not match, ignore the request
 	if s.viewID == nil || s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
@@ -527,7 +553,9 @@ func (s *NOPaxos) viewChange(request *ViewChange) {
 	}
 
 	// Add the view change to the set of view changes
+	s.stateMu.Lock()
 	s.viewChanges[request.Sender] = request
+	s.stateMu.Unlock()
 
 	// Aggregate the view changes for the current view
 	viewChanges := make([]*ViewChange, 0, len(s.viewChanges))
@@ -644,6 +672,9 @@ func (s *NOPaxos) startSync() {
 }
 
 func (s *NOPaxos) syncPrepare(request *SyncPrepare, stream ReplicaService_ReplicaStreamServer) {
+	s.stateMu.RLock()
+	defer s.stateMu.RUnlock()
+
 	// If the replica's status is not Normal, ignore the request
 	if s.status != StatusNormal {
 		return
@@ -673,6 +704,7 @@ func (s *NOPaxos) syncPrepare(request *SyncPrepare, stream ReplicaService_Replic
 		}
 	}
 
+	s.logMu.Lock()
 	for i := lastSlotID; i < s.lastSlotNum; i++ {
 		entry := s.log[i]
 		if entry != nil {
@@ -683,6 +715,7 @@ func (s *NOPaxos) syncPrepare(request *SyncPrepare, stream ReplicaService_Replic
 	s.log = newLog
 	s.firstSlotNum = firstSlotID
 	s.lastSlotNum = lastSlotID
+	s.logMu.Unlock()
 
 	// Send a SyncReply back to the leader
 	_ = stream.Send(&ReplicaMessage{
@@ -696,11 +729,12 @@ func (s *NOPaxos) syncPrepare(request *SyncPrepare, stream ReplicaService_Replic
 	})
 
 	// Send a RequestReply for all entries in the new log
-	s.mu.RLock()
 	sequencer := s.sequencer
-	s.mu.RUnlock()
 
 	if sequencer != nil {
+		s.logMu.Lock()
+		defer s.logMu.Unlock()
+
 		for slotNum := s.firstSlotNum; slotNum <= s.lastSlotNum; slotNum++ {
 			entry := s.log[slotNum]
 			if entry != nil {
@@ -720,6 +754,9 @@ func (s *NOPaxos) syncPrepare(request *SyncPrepare, stream ReplicaService_Replic
 }
 
 func (s *NOPaxos) syncReply(reply *SyncReply) {
+	s.stateMu.RLock()
+	defer s.stateMu.RUnlock()
+
 	// If the view IDs do not match, ignore the request
 	if s.viewID == nil || s.viewID.LeaderNum != reply.ViewID.LeaderNum || s.viewID.SessionNum != reply.ViewID.SessionNum {
 		return
@@ -766,6 +803,9 @@ func (s *NOPaxos) syncReply(reply *SyncReply) {
 }
 
 func (s *NOPaxos) syncCommit(request *SyncCommit) {
+	s.stateMu.RLock()
+	defer s.stateMu.RUnlock()
+
 	// If the replica's status is not Normal, ignore the request
 	if s.status != StatusNormal {
 		return
@@ -794,6 +834,9 @@ func (s *NOPaxos) syncCommit(request *SyncCommit) {
 			lastSlotID = entry.SlotNum
 		}
 	}
+
+	s.logMu.Lock()
+	defer s.logMu.Unlock()
 
 	for i := lastSlotID; i < s.lastSlotNum; i++ {
 		entry := s.log[i]
