@@ -54,7 +54,7 @@ message ReplicaMessage {
 }
 
 message ViewId {
-    string leader_num = 1 [(gogoproto.casttype) = "LeaderID"];
+    uint64 leader_num = 1 [(gogoproto.casttype) = "LeaderID"];
     uint64 session_num = 2 [(gogoproto.casttype) = "SessionID"];
 }
 
