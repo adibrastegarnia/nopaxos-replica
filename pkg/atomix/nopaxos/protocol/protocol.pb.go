@@ -28,36 +28,27 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-type Message struct {
+type ClientMessage struct {
 	// Types that are valid to be assigned to Message:
-	//	*Message_Command
-	//	*Message_CommandReply
-	//	*Message_Query
-	//	*Message_QueryReply
-	//	*Message_SlotLookup
-	//	*Message_GapCommit
-	//	*Message_GapCommitReply
-	//	*Message_ViewChangeRequest
-	//	*Message_ViewChange
-	//	*Message_StartView
-	//	*Message_SyncPrepare
-	//	*Message_SyncReply
-	//	*Message_SyncCommit
-	Message isMessage_Message `protobuf_oneof:"message"`
+	//	*ClientMessage_Command
+	//	*ClientMessage_CommandReply
+	//	*ClientMessage_Query
+	//	*ClientMessage_QueryReply
+	Message isClientMessage_Message `protobuf_oneof:"message"`
 }
 
-func (m *Message) Reset()         { *m = Message{} }
-func (m *Message) String() string { return proto.CompactTextString(m) }
-func (*Message) ProtoMessage()    {}
-func (*Message) Descriptor() ([]byte, []int) {
+func (m *ClientMessage) Reset()         { *m = ClientMessage{} }
+func (m *ClientMessage) String() string { return proto.CompactTextString(m) }
+func (*ClientMessage) ProtoMessage()    {}
+func (*ClientMessage) Descriptor() ([]byte, []int) {
 	return fileDescriptor_5bf22afbce485451, []int{0}
 }
-func (m *Message) XXX_Unmarshal(b []byte) error {
+func (m *ClientMessage) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *Message) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *ClientMessage) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_Message.Marshal(b, m, deterministic)
+		return xxx_messageInfo_ClientMessage.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -67,193 +58,314 @@ func (m *Message) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *Message) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Message.Merge(m, src)
+func (m *ClientMessage) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClientMessage.Merge(m, src)
 }
-func (m *Message) XXX_Size() int {
+func (m *ClientMessage) XXX_Size() int {
 	return m.Size()
 }
-func (m *Message) XXX_DiscardUnknown() {
-	xxx_messageInfo_Message.DiscardUnknown(m)
+func (m *ClientMessage) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClientMessage.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_Message proto.InternalMessageInfo
+var xxx_messageInfo_ClientMessage proto.InternalMessageInfo
 
-type isMessage_Message interface {
-	isMessage_Message()
+type isClientMessage_Message interface {
+	isClientMessage_Message()
 	Equal(interface{}) bool
 	MarshalTo([]byte) (int, error)
 	Size() int
 }
 
-type Message_Command struct {
+type ClientMessage_Command struct {
 	Command *CommandRequest `protobuf:"bytes,1,opt,name=command,proto3,oneof" json:"command,omitempty"`
 }
-type Message_CommandReply struct {
+type ClientMessage_CommandReply struct {
 	CommandReply *CommandReply `protobuf:"bytes,2,opt,name=command_reply,json=commandReply,proto3,oneof" json:"command_reply,omitempty"`
 }
-type Message_Query struct {
+type ClientMessage_Query struct {
 	Query *QueryRequest `protobuf:"bytes,3,opt,name=query,proto3,oneof" json:"query,omitempty"`
 }
-type Message_QueryReply struct {
+type ClientMessage_QueryReply struct {
 	QueryReply *QueryReply `protobuf:"bytes,4,opt,name=query_reply,json=queryReply,proto3,oneof" json:"query_reply,omitempty"`
 }
-type Message_SlotLookup struct {
-	SlotLookup *SlotLookup `protobuf:"bytes,5,opt,name=slot_lookup,json=slotLookup,proto3,oneof" json:"slot_lookup,omitempty"`
-}
-type Message_GapCommit struct {
-	GapCommit *GapCommitRequest `protobuf:"bytes,6,opt,name=gap_commit,json=gapCommit,proto3,oneof" json:"gap_commit,omitempty"`
-}
-type Message_GapCommitReply struct {
-	GapCommitReply *GapCommitReply `protobuf:"bytes,7,opt,name=gap_commit_reply,json=gapCommitReply,proto3,oneof" json:"gap_commit_reply,omitempty"`
-}
-type Message_ViewChangeRequest struct {
-	ViewChangeRequest *ViewChangeRequest `protobuf:"bytes,8,opt,name=view_change_request,json=viewChangeRequest,proto3,oneof" json:"view_change_request,omitempty"`
-}
-type Message_ViewChange struct {
-	ViewChange *ViewChange `protobuf:"bytes,9,opt,name=view_change,json=viewChange,proto3,oneof" json:"view_change,omitempty"`
-}
-type Message_StartView struct {
-	StartView *StartView `protobuf:"bytes,10,opt,name=start_view,json=startView,proto3,oneof" json:"start_view,omitempty"`
-}
-type Message_SyncPrepare struct {
-	SyncPrepare *SyncPrepare `protobuf:"bytes,11,opt,name=sync_prepare,json=syncPrepare,proto3,oneof" json:"sync_prepare,omitempty"`
-}
-type Message_SyncReply struct {
-	SyncReply *SyncReply `protobuf:"bytes,12,opt,name=sync_reply,json=syncReply,proto3,oneof" json:"sync_reply,omitempty"`
-}
-type Message_SyncCommit struct {
-	SyncCommit *SyncCommit `protobuf:"bytes,13,opt,name=sync_commit,json=syncCommit,proto3,oneof" json:"sync_commit,omitempty"`
-}
 
-func (*Message_Command) isMessage_Message()           {}
-func (*Message_CommandReply) isMessage_Message()      {}
-func (*Message_Query) isMessage_Message()             {}
-func (*Message_QueryReply) isMessage_Message()        {}
-func (*Message_SlotLookup) isMessage_Message()        {}
-func (*Message_GapCommit) isMessage_Message()         {}
-func (*Message_GapCommitReply) isMessage_Message()    {}
-func (*Message_ViewChangeRequest) isMessage_Message() {}
-func (*Message_ViewChange) isMessage_Message()        {}
-func (*Message_StartView) isMessage_Message()         {}
-func (*Message_SyncPrepare) isMessage_Message()       {}
-func (*Message_SyncReply) isMessage_Message()         {}
-func (*Message_SyncCommit) isMessage_Message()        {}
+func (*ClientMessage_Command) isClientMessage_Message()      {}
+func (*ClientMessage_CommandReply) isClientMessage_Message() {}
+func (*ClientMessage_Query) isClientMessage_Message()        {}
+func (*ClientMessage_QueryReply) isClientMessage_Message()   {}
 
-func (m *Message) GetMessage() isMessage_Message {
+func (m *ClientMessage) GetMessage() isClientMessage_Message {
 	if m != nil {
 		return m.Message
 	}
 	return nil
 }
 
-func (m *Message) GetCommand() *CommandRequest {
-	if x, ok := m.GetMessage().(*Message_Command); ok {
+func (m *ClientMessage) GetCommand() *CommandRequest {
+	if x, ok := m.GetMessage().(*ClientMessage_Command); ok {
 		return x.Command
 	}
 	return nil
 }
 
-func (m *Message) GetCommandReply() *CommandReply {
-	if x, ok := m.GetMessage().(*Message_CommandReply); ok {
+func (m *ClientMessage) GetCommandReply() *CommandReply {
+	if x, ok := m.GetMessage().(*ClientMessage_CommandReply); ok {
 		return x.CommandReply
 	}
 	return nil
 }
 
-func (m *Message) GetQuery() *QueryRequest {
-	if x, ok := m.GetMessage().(*Message_Query); ok {
+func (m *ClientMessage) GetQuery() *QueryRequest {
+	if x, ok := m.GetMessage().(*ClientMessage_Query); ok {
 		return x.Query
 	}
 	return nil
 }
 
-func (m *Message) GetQueryReply() *QueryReply {
-	if x, ok := m.GetMessage().(*Message_QueryReply); ok {
+func (m *ClientMessage) GetQueryReply() *QueryReply {
+	if x, ok := m.GetMessage().(*ClientMessage_QueryReply); ok {
 		return x.QueryReply
 	}
 	return nil
 }
 
-func (m *Message) GetSlotLookup() *SlotLookup {
-	if x, ok := m.GetMessage().(*Message_SlotLookup); ok {
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*ClientMessage) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*ClientMessage_Command)(nil),
+		(*ClientMessage_CommandReply)(nil),
+		(*ClientMessage_Query)(nil),
+		(*ClientMessage_QueryReply)(nil),
+	}
+}
+
+type ReplicaMessage struct {
+	// Types that are valid to be assigned to Message:
+	//	*ReplicaMessage_Command
+	//	*ReplicaMessage_CommandReply
+	//	*ReplicaMessage_Query
+	//	*ReplicaMessage_QueryReply
+	//	*ReplicaMessage_SlotLookup
+	//	*ReplicaMessage_GapCommit
+	//	*ReplicaMessage_GapCommitReply
+	//	*ReplicaMessage_ViewChangeRequest
+	//	*ReplicaMessage_ViewChange
+	//	*ReplicaMessage_StartView
+	//	*ReplicaMessage_SyncPrepare
+	//	*ReplicaMessage_SyncReply
+	//	*ReplicaMessage_SyncCommit
+	Message isReplicaMessage_Message `protobuf_oneof:"message"`
+}
+
+func (m *ReplicaMessage) Reset()         { *m = ReplicaMessage{} }
+func (m *ReplicaMessage) String() string { return proto.CompactTextString(m) }
+func (*ReplicaMessage) ProtoMessage()    {}
+func (*ReplicaMessage) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5bf22afbce485451, []int{1}
+}
+func (m *ReplicaMessage) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ReplicaMessage) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ReplicaMessage.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ReplicaMessage) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReplicaMessage.Merge(m, src)
+}
+func (m *ReplicaMessage) XXX_Size() int {
+	return m.Size()
+}
+func (m *ReplicaMessage) XXX_DiscardUnknown() {
+	xxx_messageInfo_ReplicaMessage.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ReplicaMessage proto.InternalMessageInfo
+
+type isReplicaMessage_Message interface {
+	isReplicaMessage_Message()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type ReplicaMessage_Command struct {
+	Command *CommandRequest `protobuf:"bytes,1,opt,name=command,proto3,oneof" json:"command,omitempty"`
+}
+type ReplicaMessage_CommandReply struct {
+	CommandReply *CommandReply `protobuf:"bytes,2,opt,name=command_reply,json=commandReply,proto3,oneof" json:"command_reply,omitempty"`
+}
+type ReplicaMessage_Query struct {
+	Query *QueryRequest `protobuf:"bytes,3,opt,name=query,proto3,oneof" json:"query,omitempty"`
+}
+type ReplicaMessage_QueryReply struct {
+	QueryReply *QueryReply `protobuf:"bytes,4,opt,name=query_reply,json=queryReply,proto3,oneof" json:"query_reply,omitempty"`
+}
+type ReplicaMessage_SlotLookup struct {
+	SlotLookup *SlotLookup `protobuf:"bytes,5,opt,name=slot_lookup,json=slotLookup,proto3,oneof" json:"slot_lookup,omitempty"`
+}
+type ReplicaMessage_GapCommit struct {
+	GapCommit *GapCommitRequest `protobuf:"bytes,6,opt,name=gap_commit,json=gapCommit,proto3,oneof" json:"gap_commit,omitempty"`
+}
+type ReplicaMessage_GapCommitReply struct {
+	GapCommitReply *GapCommitReply `protobuf:"bytes,7,opt,name=gap_commit_reply,json=gapCommitReply,proto3,oneof" json:"gap_commit_reply,omitempty"`
+}
+type ReplicaMessage_ViewChangeRequest struct {
+	ViewChangeRequest *ViewChangeRequest `protobuf:"bytes,8,opt,name=view_change_request,json=viewChangeRequest,proto3,oneof" json:"view_change_request,omitempty"`
+}
+type ReplicaMessage_ViewChange struct {
+	ViewChange *ViewChange `protobuf:"bytes,9,opt,name=view_change,json=viewChange,proto3,oneof" json:"view_change,omitempty"`
+}
+type ReplicaMessage_StartView struct {
+	StartView *StartView `protobuf:"bytes,10,opt,name=start_view,json=startView,proto3,oneof" json:"start_view,omitempty"`
+}
+type ReplicaMessage_SyncPrepare struct {
+	SyncPrepare *SyncPrepare `protobuf:"bytes,11,opt,name=sync_prepare,json=syncPrepare,proto3,oneof" json:"sync_prepare,omitempty"`
+}
+type ReplicaMessage_SyncReply struct {
+	SyncReply *SyncReply `protobuf:"bytes,12,opt,name=sync_reply,json=syncReply,proto3,oneof" json:"sync_reply,omitempty"`
+}
+type ReplicaMessage_SyncCommit struct {
+	SyncCommit *SyncCommit `protobuf:"bytes,13,opt,name=sync_commit,json=syncCommit,proto3,oneof" json:"sync_commit,omitempty"`
+}
+
+func (*ReplicaMessage_Command) isReplicaMessage_Message()           {}
+func (*ReplicaMessage_CommandReply) isReplicaMessage_Message()      {}
+func (*ReplicaMessage_Query) isReplicaMessage_Message()             {}
+func (*ReplicaMessage_QueryReply) isReplicaMessage_Message()        {}
+func (*ReplicaMessage_SlotLookup) isReplicaMessage_Message()        {}
+func (*ReplicaMessage_GapCommit) isReplicaMessage_Message()         {}
+func (*ReplicaMessage_GapCommitReply) isReplicaMessage_Message()    {}
+func (*ReplicaMessage_ViewChangeRequest) isReplicaMessage_Message() {}
+func (*ReplicaMessage_ViewChange) isReplicaMessage_Message()        {}
+func (*ReplicaMessage_StartView) isReplicaMessage_Message()         {}
+func (*ReplicaMessage_SyncPrepare) isReplicaMessage_Message()       {}
+func (*ReplicaMessage_SyncReply) isReplicaMessage_Message()         {}
+func (*ReplicaMessage_SyncCommit) isReplicaMessage_Message()        {}
+
+func (m *ReplicaMessage) GetMessage() isReplicaMessage_Message {
+	if m != nil {
+		return m.Message
+	}
+	return nil
+}
+
+func (m *ReplicaMessage) GetCommand() *CommandRequest {
+	if x, ok := m.GetMessage().(*ReplicaMessage_Command); ok {
+		return x.Command
+	}
+	return nil
+}
+
+func (m *ReplicaMessage) GetCommandReply() *CommandReply {
+	if x, ok := m.GetMessage().(*ReplicaMessage_CommandReply); ok {
+		return x.CommandReply
+	}
+	return nil
+}
+
+func (m *ReplicaMessage) GetQuery() *QueryRequest {
+	if x, ok := m.GetMessage().(*ReplicaMessage_Query); ok {
+		return x.Query
+	}
+	return nil
+}
+
+func (m *ReplicaMessage) GetQueryReply() *QueryReply {
+	if x, ok := m.GetMessage().(*ReplicaMessage_QueryReply); ok {
+		return x.QueryReply
+	}
+	return nil
+}
+
+func (m *ReplicaMessage) GetSlotLookup() *SlotLookup {
+	if x, ok := m.GetMessage().(*ReplicaMessage_SlotLookup); ok {
 		return x.SlotLookup
 	}
 	return nil
 }
 
-func (m *Message) GetGapCommit() *GapCommitRequest {
-	if x, ok := m.GetMessage().(*Message_GapCommit); ok {
+func (m *ReplicaMessage) GetGapCommit() *GapCommitRequest {
+	if x, ok := m.GetMessage().(*ReplicaMessage_GapCommit); ok {
 		return x.GapCommit
 	}
 	return nil
 }
 
-func (m *Message) GetGapCommitReply() *GapCommitReply {
-	if x, ok := m.GetMessage().(*Message_GapCommitReply); ok {
+func (m *ReplicaMessage) GetGapCommitReply() *GapCommitReply {
+	if x, ok := m.GetMessage().(*ReplicaMessage_GapCommitReply); ok {
 		return x.GapCommitReply
 	}
 	return nil
 }
 
-func (m *Message) GetViewChangeRequest() *ViewChangeRequest {
-	if x, ok := m.GetMessage().(*Message_ViewChangeRequest); ok {
+func (m *ReplicaMessage) GetViewChangeRequest() *ViewChangeRequest {
+	if x, ok := m.GetMessage().(*ReplicaMessage_ViewChangeRequest); ok {
 		return x.ViewChangeRequest
 	}
 	return nil
 }
 
-func (m *Message) GetViewChange() *ViewChange {
-	if x, ok := m.GetMessage().(*Message_ViewChange); ok {
+func (m *ReplicaMessage) GetViewChange() *ViewChange {
+	if x, ok := m.GetMessage().(*ReplicaMessage_ViewChange); ok {
 		return x.ViewChange
 	}
 	return nil
 }
 
-func (m *Message) GetStartView() *StartView {
-	if x, ok := m.GetMessage().(*Message_StartView); ok {
+func (m *ReplicaMessage) GetStartView() *StartView {
+	if x, ok := m.GetMessage().(*ReplicaMessage_StartView); ok {
 		return x.StartView
 	}
 	return nil
 }
 
-func (m *Message) GetSyncPrepare() *SyncPrepare {
-	if x, ok := m.GetMessage().(*Message_SyncPrepare); ok {
+func (m *ReplicaMessage) GetSyncPrepare() *SyncPrepare {
+	if x, ok := m.GetMessage().(*ReplicaMessage_SyncPrepare); ok {
 		return x.SyncPrepare
 	}
 	return nil
 }
 
-func (m *Message) GetSyncReply() *SyncReply {
-	if x, ok := m.GetMessage().(*Message_SyncReply); ok {
+func (m *ReplicaMessage) GetSyncReply() *SyncReply {
+	if x, ok := m.GetMessage().(*ReplicaMessage_SyncReply); ok {
 		return x.SyncReply
 	}
 	return nil
 }
 
-func (m *Message) GetSyncCommit() *SyncCommit {
-	if x, ok := m.GetMessage().(*Message_SyncCommit); ok {
+func (m *ReplicaMessage) GetSyncCommit() *SyncCommit {
+	if x, ok := m.GetMessage().(*ReplicaMessage_SyncCommit); ok {
 		return x.SyncCommit
 	}
 	return nil
 }
 
 // XXX_OneofWrappers is for the internal use of the proto package.
-func (*Message) XXX_OneofWrappers() []interface{} {
+func (*ReplicaMessage) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
-		(*Message_Command)(nil),
-		(*Message_CommandReply)(nil),
-		(*Message_Query)(nil),
-		(*Message_QueryReply)(nil),
-		(*Message_SlotLookup)(nil),
-		(*Message_GapCommit)(nil),
-		(*Message_GapCommitReply)(nil),
-		(*Message_ViewChangeRequest)(nil),
-		(*Message_ViewChange)(nil),
-		(*Message_StartView)(nil),
-		(*Message_SyncPrepare)(nil),
-		(*Message_SyncReply)(nil),
-		(*Message_SyncCommit)(nil),
+		(*ReplicaMessage_Command)(nil),
+		(*ReplicaMessage_CommandReply)(nil),
+		(*ReplicaMessage_Query)(nil),
+		(*ReplicaMessage_QueryReply)(nil),
+		(*ReplicaMessage_SlotLookup)(nil),
+		(*ReplicaMessage_GapCommit)(nil),
+		(*ReplicaMessage_GapCommitReply)(nil),
+		(*ReplicaMessage_ViewChangeRequest)(nil),
+		(*ReplicaMessage_ViewChange)(nil),
+		(*ReplicaMessage_StartView)(nil),
+		(*ReplicaMessage_SyncPrepare)(nil),
+		(*ReplicaMessage_SyncReply)(nil),
+		(*ReplicaMessage_SyncCommit)(nil),
 	}
 }
 
@@ -266,7 +378,7 @@ func (m *ViewId) Reset()         { *m = ViewId{} }
 func (m *ViewId) String() string { return proto.CompactTextString(m) }
 func (*ViewId) ProtoMessage()    {}
 func (*ViewId) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{1}
+	return fileDescriptor_5bf22afbce485451, []int{2}
 }
 func (m *ViewId) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -319,7 +431,7 @@ func (m *CommandRequest) Reset()         { *m = CommandRequest{} }
 func (m *CommandRequest) String() string { return proto.CompactTextString(m) }
 func (*CommandRequest) ProtoMessage()    {}
 func (*CommandRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{2}
+	return fileDescriptor_5bf22afbce485451, []int{3}
 }
 func (m *CommandRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -370,19 +482,18 @@ func (m *CommandRequest) GetValue() []byte {
 }
 
 type CommandReply struct {
-	SessionId SessionID `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3,casttype=SessionID" json:"session_id,omitempty"`
-	MessageId MessageID `protobuf:"varint,2,opt,name=message_id,json=messageId,proto3,casttype=MessageID" json:"message_id,omitempty"`
-	SenderId  MemberID  `protobuf:"bytes,3,opt,name=sender_id,json=senderId,proto3,casttype=MemberID" json:"sender_id,omitempty"`
-	ViewId    *ViewId   `protobuf:"bytes,4,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	SlotId    LogSlotID `protobuf:"varint,5,opt,name=slot_id,json=slotId,proto3,casttype=LogSlotID" json:"slot_id,omitempty"`
-	Value     []byte    `protobuf:"bytes,6,opt,name=value,proto3" json:"value,omitempty"`
+	MessageId MessageID `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3,casttype=MessageID" json:"message_id,omitempty"`
+	SenderId  MemberID  `protobuf:"bytes,2,opt,name=sender_id,json=senderId,proto3,casttype=MemberID" json:"sender_id,omitempty"`
+	ViewId    *ViewId   `protobuf:"bytes,3,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	SlotId    LogSlotID `protobuf:"varint,4,opt,name=slot_id,json=slotId,proto3,casttype=LogSlotID" json:"slot_id,omitempty"`
+	Value     []byte    `protobuf:"bytes,5,opt,name=value,proto3" json:"value,omitempty"`
 }
 
 func (m *CommandReply) Reset()         { *m = CommandReply{} }
 func (m *CommandReply) String() string { return proto.CompactTextString(m) }
 func (*CommandReply) ProtoMessage()    {}
 func (*CommandReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{3}
+	return fileDescriptor_5bf22afbce485451, []int{4}
 }
 func (m *CommandReply) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -410,13 +521,6 @@ func (m *CommandReply) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_CommandReply proto.InternalMessageInfo
-
-func (m *CommandReply) GetSessionId() SessionID {
-	if m != nil {
-		return m.SessionId
-	}
-	return 0
-}
 
 func (m *CommandReply) GetMessageId() MessageID {
 	if m != nil {
@@ -462,7 +566,7 @@ func (m *QueryRequest) Reset()         { *m = QueryRequest{} }
 func (m *QueryRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryRequest) ProtoMessage()    {}
 func (*QueryRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{4}
+	return fileDescriptor_5bf22afbce485451, []int{5}
 }
 func (m *QueryRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -506,18 +610,17 @@ func (m *QueryRequest) GetValue() []byte {
 }
 
 type QueryReply struct {
-	SessionId SessionID `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3,casttype=SessionID" json:"session_id,omitempty"`
-	MessageId MessageID `protobuf:"varint,2,opt,name=message_id,json=messageId,proto3,casttype=MessageID" json:"message_id,omitempty"`
-	SenderId  MemberID  `protobuf:"bytes,3,opt,name=sender_id,json=senderId,proto3,casttype=MemberID" json:"sender_id,omitempty"`
-	ViewId    *ViewId   `protobuf:"bytes,4,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	Value     []byte    `protobuf:"bytes,5,opt,name=value,proto3" json:"value,omitempty"`
+	MessageId MessageID `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3,casttype=MessageID" json:"message_id,omitempty"`
+	SenderId  MemberID  `protobuf:"bytes,2,opt,name=sender_id,json=senderId,proto3,casttype=MemberID" json:"sender_id,omitempty"`
+	ViewId    *ViewId   `protobuf:"bytes,3,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	Value     []byte    `protobuf:"bytes,4,opt,name=value,proto3" json:"value,omitempty"`
 }
 
 func (m *QueryReply) Reset()         { *m = QueryReply{} }
 func (m *QueryReply) String() string { return proto.CompactTextString(m) }
 func (*QueryReply) ProtoMessage()    {}
 func (*QueryReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{5}
+	return fileDescriptor_5bf22afbce485451, []int{6}
 }
 func (m *QueryReply) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -545,13 +648,6 @@ func (m *QueryReply) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_QueryReply proto.InternalMessageInfo
-
-func (m *QueryReply) GetSessionId() SessionID {
-	if m != nil {
-		return m.SessionId
-	}
-	return 0
-}
 
 func (m *QueryReply) GetMessageId() MessageID {
 	if m != nil {
@@ -591,7 +687,7 @@ func (m *SlotLookup) Reset()         { *m = SlotLookup{} }
 func (m *SlotLookup) String() string { return proto.CompactTextString(m) }
 func (*SlotLookup) ProtoMessage()    {}
 func (*SlotLookup) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{6}
+	return fileDescriptor_5bf22afbce485451, []int{7}
 }
 func (m *SlotLookup) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -650,7 +746,7 @@ func (m *GapCommitRequest) Reset()         { *m = GapCommitRequest{} }
 func (m *GapCommitRequest) String() string { return proto.CompactTextString(m) }
 func (*GapCommitRequest) ProtoMessage()    {}
 func (*GapCommitRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{7}
+	return fileDescriptor_5bf22afbce485451, []int{8}
 }
 func (m *GapCommitRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -703,7 +799,7 @@ func (m *GapCommitReply) Reset()         { *m = GapCommitReply{} }
 func (m *GapCommitReply) String() string { return proto.CompactTextString(m) }
 func (*GapCommitReply) ProtoMessage()    {}
 func (*GapCommitReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{8}
+	return fileDescriptor_5bf22afbce485451, []int{9}
 }
 func (m *GapCommitReply) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -761,7 +857,7 @@ func (m *ViewChangeRequest) Reset()         { *m = ViewChangeRequest{} }
 func (m *ViewChangeRequest) String() string { return proto.CompactTextString(m) }
 func (*ViewChangeRequest) ProtoMessage()    {}
 func (*ViewChangeRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{9}
+	return fileDescriptor_5bf22afbce485451, []int{10}
 }
 func (m *ViewChangeRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -809,7 +905,7 @@ func (m *ViewChange) Reset()         { *m = ViewChange{} }
 func (m *ViewChange) String() string { return proto.CompactTextString(m) }
 func (*ViewChange) ProtoMessage()    {}
 func (*ViewChange) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{10}
+	return fileDescriptor_5bf22afbce485451, []int{11}
 }
 func (m *ViewChange) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -883,7 +979,7 @@ func (m *StartView) Reset()         { *m = StartView{} }
 func (m *StartView) String() string { return proto.CompactTextString(m) }
 func (*StartView) ProtoMessage()    {}
 func (*StartView) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{11}
+	return fileDescriptor_5bf22afbce485451, []int{12}
 }
 func (m *StartView) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -944,7 +1040,7 @@ func (m *SyncPrepare) Reset()         { *m = SyncPrepare{} }
 func (m *SyncPrepare) String() string { return proto.CompactTextString(m) }
 func (*SyncPrepare) ProtoMessage()    {}
 func (*SyncPrepare) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{12}
+	return fileDescriptor_5bf22afbce485451, []int{13}
 }
 func (m *SyncPrepare) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1011,7 +1107,7 @@ func (m *SyncReply) Reset()         { *m = SyncReply{} }
 func (m *SyncReply) String() string { return proto.CompactTextString(m) }
 func (*SyncReply) ProtoMessage()    {}
 func (*SyncReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{13}
+	return fileDescriptor_5bf22afbce485451, []int{14}
 }
 func (m *SyncReply) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1072,7 +1168,7 @@ func (m *SyncCommit) Reset()         { *m = SyncCommit{} }
 func (m *SyncCommit) String() string { return proto.CompactTextString(m) }
 func (*SyncCommit) ProtoMessage()    {}
 func (*SyncCommit) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{14}
+	return fileDescriptor_5bf22afbce485451, []int{15}
 }
 func (m *SyncCommit) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1130,7 +1226,8 @@ func (m *SyncCommit) GetLog() []*LogEntry {
 }
 
 func init() {
-	proto.RegisterType((*Message)(nil), "atomix.nopaxos.protocol.Message")
+	proto.RegisterType((*ClientMessage)(nil), "atomix.nopaxos.protocol.ClientMessage")
+	proto.RegisterType((*ReplicaMessage)(nil), "atomix.nopaxos.protocol.ReplicaMessage")
 	proto.RegisterType((*ViewId)(nil), "atomix.nopaxos.protocol.ViewId")
 	proto.RegisterType((*CommandRequest)(nil), "atomix.nopaxos.protocol.CommandRequest")
 	proto.RegisterType((*CommandReply)(nil), "atomix.nopaxos.protocol.CommandReply")
@@ -1152,75 +1249,77 @@ func init() {
 }
 
 var fileDescriptor_5bf22afbce485451 = []byte{
-	// 913 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xdc, 0x56, 0x41, 0x6f, 0xe3, 0x44,
-	0x14, 0xce, 0x24, 0x4d, 0x52, 0xbf, 0xa4, 0xd5, 0xee, 0xb0, 0x12, 0x56, 0x0f, 0x6e, 0xd7, 0x2c,
-	0x4b, 0x8b, 0x50, 0x8a, 0xba, 0x17, 0x2e, 0x48, 0xa8, 0x29, 0x50, 0xa3, 0x74, 0x29, 0x8e, 0xc4,
-	0x09, 0xc9, 0x72, 0xed, 0x91, 0xb1, 0x70, 0x3c, 0xae, 0xc7, 0xcd, 0xae, 0xaf, 0xdc, 0x91, 0x38,
-	0x21, 0x2e, 0x88, 0xeb, 0xfe, 0x04, 0x7e, 0x02, 0xc7, 0x3d, 0x80, 0x84, 0x38, 0xac, 0x20, 0xfd,
-	0x13, 0x68, 0x4f, 0x68, 0x66, 0x1c, 0xdb, 0x09, 0x72, 0x4c, 0x76, 0x05, 0x2a, 0xdc, 0xe6, 0x8d,
-	0xbf, 0xf9, 0xe6, 0x7b, 0xdf, 0xbc, 0x79, 0x63, 0xb8, 0x6f, 0x27, 0x74, 0xe2, 0x3f, 0x3e, 0x0c,
-	0x69, 0x64, 0x3f, 0xa6, 0xec, 0x30, 0x8a, 0x69, 0x42, 0x1d, 0x1a, 0xe4, 0x83, 0x81, 0x18, 0xe0,
-	0x57, 0x25, 0x6e, 0x90, 0xe1, 0x06, 0xf3, 0xcf, 0x3b, 0x77, 0xab, 0x08, 0x02, 0xea, 0x49, 0xd4,
-	0xce, 0x1d, 0x8f, 0x7a, 0x54, 0x0c, 0x0f, 0xf9, 0x48, 0xce, 0xea, 0xbf, 0x76, 0xa1, 0x7b, 0x46,
-	0x18, 0xb3, 0x3d, 0x82, 0x87, 0xd0, 0x75, 0xe8, 0x64, 0x62, 0x87, 0xae, 0x8a, 0xf6, 0xd0, 0x7e,
-	0xef, 0xe8, 0x8d, 0x41, 0xc5, 0x7e, 0x83, 0xa1, 0xc4, 0x99, 0xe4, 0xf2, 0x8a, 0xb0, 0xe4, 0xb4,
-	0x61, 0xce, 0x57, 0xe2, 0x11, 0x6c, 0x65, 0x43, 0x2b, 0x26, 0x51, 0x90, 0xaa, 0x4d, 0x41, 0xf5,
-	0x7a, 0x3d, 0x55, 0x14, 0xa4, 0xa7, 0x0d, 0xb3, 0xef, 0x94, 0x62, 0xfc, 0x2e, 0xb4, 0x2f, 0xaf,
-	0x48, 0x9c, 0xaa, 0xad, 0x1a, 0x96, 0x4f, 0x38, 0xaa, 0x90, 0x23, 0x57, 0xe1, 0x0f, 0xa0, 0x27,
-	0x06, 0x99, 0x94, 0x0d, 0x41, 0xf2, 0x5a, 0x1d, 0x89, 0x14, 0x02, 0x97, 0x79, 0xc4, 0x79, 0x58,
-	0x40, 0x13, 0x2b, 0xa0, 0xf4, 0x8b, 0xab, 0x48, 0x6d, 0xd7, 0xf0, 0x8c, 0x03, 0x9a, 0x8c, 0x04,
-	0x94, 0xf3, 0xb0, 0x3c, 0xc2, 0x1f, 0x01, 0x78, 0x76, 0x64, 0xf1, 0x14, 0xfd, 0x44, 0xed, 0x08,
-	0x9a, 0x83, 0x4a, 0x9a, 0x0f, 0xed, 0x68, 0x28, 0x90, 0x45, 0x5e, 0x8a, 0x37, 0x9f, 0xc3, 0x63,
-	0xb8, 0x55, 0x70, 0x65, 0x09, 0x76, 0x6b, 0x8e, 0xad, 0xc4, 0x28, 0x93, 0xdc, 0xf6, 0x16, 0x66,
-	0xf0, 0x67, 0xf0, 0xca, 0xd4, 0x27, 0x8f, 0x2c, 0xe7, 0x73, 0x3b, 0xf4, 0x88, 0x15, 0xcb, 0x8d,
-	0xd5, 0x4d, 0xc1, 0xfb, 0x66, 0x25, 0xef, 0xa7, 0x3e, 0x79, 0x34, 0x14, 0x4b, 0x0a, 0xa9, 0xb7,
-	0xa7, 0xcb, 0x93, 0xdc, 0xc6, 0x12, 0xbb, 0xaa, 0xd4, 0xd8, 0x58, 0xb0, 0x72, 0x1b, 0x0b, 0x3a,
-	0x3c, 0x04, 0x60, 0x89, 0x1d, 0x27, 0x16, 0x9f, 0x53, 0x41, 0xd0, 0xe8, 0xd5, 0xa7, 0xc1, 0xa1,
-	0x9c, 0x8b, 0xfb, 0xc7, 0xe6, 0x01, 0x36, 0xa0, 0xcf, 0xd2, 0xd0, 0xb1, 0xa2, 0x98, 0x44, 0x76,
-	0x4c, 0xd4, 0x9e, 0xa0, 0xb9, 0x57, 0x4d, 0x93, 0x86, 0xce, 0xb9, 0xc4, 0x9e, 0x36, 0xcc, 0x1e,
-	0x2b, 0x42, 0xa1, 0x87, 0x53, 0xc9, 0x43, 0xe8, 0xd7, 0xe9, 0x49, 0x43, 0x67, 0xee, 0xbf, 0xc2,
-	0xe6, 0x81, 0xa8, 0x31, 0x4e, 0x92, 0x15, 0xc7, 0x56, 0x5d, 0x8d, 0xa5, 0xa1, 0x23, 0x4f, 0x4e,
-	0xd4, 0x58, 0x1e, 0x1d, 0x2b, 0xd0, 0x9d, 0xc8, 0x0b, 0xad, 0xdb, 0xd0, 0xe1, 0xa9, 0x1a, 0x2e,
-	0x3e, 0x00, 0x25, 0x20, 0xb6, 0x4b, 0x62, 0xcb, 0x97, 0x97, 0x5b, 0x39, 0xee, 0x3f, 0x7f, 0xb6,
-	0xbb, 0x39, 0x12, 0x93, 0xc6, 0x89, 0xb9, 0x29, 0x3f, 0x1b, 0x2e, 0x7e, 0x0b, 0x80, 0x11, 0xc6,
-	0x7c, 0x1a, 0x72, 0x2c, 0xbf, 0xbd, 0x1b, 0xc7, 0x5b, 0xcf, 0x9f, 0xed, 0x2a, 0x63, 0x39, 0x6b,
-	0x9c, 0x98, 0x4a, 0x06, 0x30, 0x5c, 0xfd, 0x4b, 0x04, 0xdb, 0x8b, 0xcd, 0x60, 0x89, 0x00, 0xad,
-	0x26, 0xe0, 0xe8, 0x4c, 0xee, 0xd2, 0x76, 0x59, 0x57, 0xe2, 0xe8, 0x0c, 0x60, 0xb8, 0xf8, 0x0e,
-	0xb4, 0xa7, 0x76, 0x70, 0x45, 0x44, 0x3f, 0xe8, 0x9b, 0x32, 0xd0, 0xbf, 0x6a, 0x42, 0xbf, 0xdc,
-	0x46, 0xfe, 0x51, 0x09, 0x07, 0xa0, 0x30, 0x12, 0x66, 0x56, 0xb6, 0x0a, 0x2b, 0xcf, 0xc8, 0xe4,
-	0x42, 0x5a, 0x29, 0x3f, 0x1b, 0x2e, 0x7e, 0x07, 0xba, 0xa2, 0xde, 0x7d, 0x37, 0x6b, 0x3d, 0xbb,
-	0x2b, 0x6b, 0xdd, 0x70, 0xcd, 0xce, 0x54, 0x9e, 0xd7, 0x7d, 0xe8, 0x8a, 0x86, 0xe3, 0xbb, 0xa2,
-	0xd9, 0x64, 0x7a, 0x46, 0xd4, 0xe3, 0xad, 0xc5, 0x38, 0x31, 0x3b, 0xfc, 0x6b, 0xd9, 0x8f, 0x4e,
-	0xd9, 0x0f, 0x13, 0xfa, 0xe5, 0x7e, 0xb8, 0xa6, 0x1d, 0x39, 0x67, 0xb3, 0xcc, 0x79, 0x8d, 0x00,
-	0x8a, 0xfe, 0xf8, 0xdf, 0x77, 0x38, 0xcf, 0xb2, 0x5d, 0xce, 0xf2, 0x7b, 0x04, 0x50, 0x74, 0xef,
-	0x45, 0x25, 0xe8, 0xef, 0x2a, 0x69, 0xae, 0xa7, 0x64, 0xd1, 0x9c, 0xd6, 0x6a, 0x73, 0xf4, 0x04,
-	0x6e, 0x2d, 0xbf, 0x0b, 0xe5, 0xbd, 0xd1, 0x0b, 0xd7, 0x59, 0x73, 0x45, 0x9d, 0xe9, 0xdf, 0x21,
-	0xd8, 0x5e, 0x7c, 0x3c, 0xfe, 0x1d, 0x6f, 0x4a, 0xfa, 0x5a, 0xab, 0xf4, 0x9d, 0xc1, 0xed, 0xbf,
-	0xbc, 0x41, 0x2f, 0x6e, 0x8b, 0xfe, 0x4d, 0x13, 0xa0, 0xe0, 0xe3, 0xa9, 0x4e, 0x44, 0x56, 0x95,
-	0xa9, 0xca, 0xcf, 0x2f, 0x95, 0xea, 0x7b, 0xd0, 0x0b, 0x6c, 0x96, 0x58, 0x21, 0x8d, 0x27, 0x76,
-	0x90, 0xfd, 0xf0, 0xd4, 0xae, 0x06, 0xbe, 0xe6, 0xa1, 0x58, 0xb2, 0x54, 0x48, 0x1b, 0x35, 0xb7,
-	0xec, 0x01, 0xb4, 0x02, 0xea, 0xa9, 0xed, 0xbd, 0xd6, 0x7e, 0xef, 0xe8, 0x6e, 0xe5, 0x3e, 0x23,
-	0xea, 0xbd, 0x1f, 0x26, 0x71, 0x6a, 0x72, 0xb4, 0xfe, 0x04, 0x81, 0x92, 0xbf, 0xa7, 0x2f, 0x51,
-	0x77, 0xeb, 0x35, 0x84, 0x4c, 0x6a, 0x6b, 0x2d, 0xa9, 0x3f, 0x23, 0xe8, 0x95, 0xde, 0xec, 0x1b,
-	0x78, 0x97, 0xe7, 0x79, 0x6d, 0xac, 0x95, 0xd7, 0xb7, 0xfc, 0x08, 0xf2, 0xbf, 0x86, 0x1b, 0x75,
-	0x0b, 0x7f, 0xe2, 0xdd, 0x33, 0xff, 0x13, 0xf9, 0xbf, 0x38, 0x7e, 0x74, 0x01, 0xdb, 0x0f, 0x3f,
-	0x3e, 0xe7, 0x88, 0x31, 0x89, 0xa7, 0xbe, 0x43, 0xf0, 0x39, 0x74, 0xc6, 0x49, 0x4c, 0xec, 0x09,
-	0xde, 0xab, 0xe4, 0xc8, 0xf6, 0xdf, 0xa9, 0x45, 0xec, 0xa3, 0xb7, 0xd1, 0xf1, 0xbd, 0x3f, 0x7e,
-	0xd7, 0xd0, 0x93, 0x99, 0x86, 0x7e, 0x98, 0x69, 0xe8, 0xc7, 0x99, 0x86, 0x9e, 0xce, 0x34, 0xf4,
-	0xdb, 0x4c, 0x43, 0x5f, 0x5f, 0x6b, 0x8d, 0xa7, 0xd7, 0x5a, 0xe3, 0x97, 0x6b, 0xad, 0x71, 0xd1,
-	0x11, 0x6b, 0x1f, 0xfc, 0x19, 0x00, 0x00, 0xff, 0xff, 0x0b, 0x78, 0xae, 0xe1, 0x30, 0x0e, 0x00,
-	0x00,
+	// 954 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x57, 0xcd, 0x6e, 0xe4, 0x44,
+	0x10, 0x9e, 0x9e, 0xdf, 0xb8, 0x66, 0x26, 0xda, 0x35, 0x2b, 0x61, 0xe5, 0xe0, 0xec, 0x9a, 0x25,
+	0x24, 0x08, 0x4d, 0x50, 0xf6, 0xc2, 0x05, 0x09, 0x65, 0x02, 0xc4, 0x68, 0x82, 0xc0, 0x91, 0x38,
+	0x21, 0x59, 0x8e, 0xdd, 0x32, 0x16, 0x1e, 0xb7, 0xe3, 0x76, 0x26, 0xeb, 0x2b, 0x4f, 0xc0, 0x09,
+	0x71, 0x41, 0x5c, 0xf7, 0x01, 0x40, 0xe2, 0x11, 0x38, 0xee, 0x01, 0x24, 0x4e, 0x0b, 0x3b, 0x79,
+	0x09, 0xb4, 0x27, 0xd4, 0xdd, 0xfe, 0x9b, 0x41, 0x1e, 0x67, 0x36, 0x12, 0x8a, 0xd0, 0xde, 0xba,
+	0xab, 0xab, 0xbf, 0xfa, 0xea, 0xeb, 0xea, 0xb2, 0x1b, 0x76, 0xac, 0x98, 0x4c, 0xbd, 0xc7, 0xfb,
+	0x01, 0x09, 0xad, 0xc7, 0x84, 0xee, 0x87, 0x11, 0x89, 0x89, 0x4d, 0xfc, 0x7c, 0x30, 0xe2, 0x03,
+	0xf9, 0x75, 0xe1, 0x37, 0x4a, 0xfd, 0x46, 0xd9, 0xf2, 0xd6, 0x83, 0x2a, 0x00, 0x9f, 0xb8, 0xc2,
+	0x6b, 0xeb, 0x9e, 0x4b, 0x5c, 0xc2, 0x87, 0xfb, 0x6c, 0x24, 0xac, 0xda, 0x4f, 0x4d, 0x18, 0x8e,
+	0x7d, 0x0f, 0x07, 0xf1, 0x09, 0xa6, 0xd4, 0x72, 0xb1, 0x3c, 0x86, 0x9e, 0x4d, 0xa6, 0x53, 0x2b,
+	0x70, 0x14, 0x74, 0x1f, 0xed, 0xf6, 0x0f, 0xde, 0x1a, 0x55, 0x44, 0x1d, 0x8d, 0x85, 0x9f, 0x81,
+	0xcf, 0x2f, 0x30, 0x8d, 0x8f, 0x1b, 0x46, 0xb6, 0x53, 0x9e, 0xc0, 0x30, 0x1d, 0x9a, 0x11, 0x0e,
+	0xfd, 0x44, 0x69, 0x72, 0xa8, 0x37, 0xeb, 0xa1, 0x42, 0x3f, 0x39, 0x6e, 0x18, 0x03, 0xbb, 0x34,
+	0x97, 0xdf, 0x87, 0xce, 0xf9, 0x05, 0x8e, 0x12, 0xa5, 0x55, 0x83, 0xf2, 0x39, 0xf3, 0x2a, 0xe8,
+	0x88, 0x5d, 0xf2, 0x47, 0xd0, 0xe7, 0x83, 0x94, 0x4a, 0x9b, 0x83, 0xbc, 0x51, 0x07, 0x22, 0x88,
+	0xc0, 0x79, 0x3e, 0x3b, 0x94, 0xa0, 0x37, 0x15, 0x22, 0x69, 0xcf, 0x7b, 0xb0, 0xc9, 0x8c, 0x9e,
+	0x6d, 0xbd, 0xd2, 0xad, 0x46, 0x37, 0x86, 0x43, 0x7d, 0x12, 0x9b, 0x3e, 0x21, 0x5f, 0x5f, 0x84,
+	0x4a, 0xa7, 0x06, 0xe7, 0xd4, 0x27, 0xf1, 0x84, 0xbb, 0x32, 0x1c, 0x9a, 0xcf, 0xe4, 0x4f, 0x00,
+	0x5c, 0x2b, 0x34, 0x59, 0x8a, 0x5e, 0xac, 0x74, 0x39, 0xcc, 0x5e, 0x25, 0xcc, 0xc7, 0x56, 0x38,
+	0xe6, 0x9e, 0x45, 0x5e, 0x92, 0x9b, 0xd9, 0xe4, 0x53, 0xb8, 0x53, 0x60, 0xa5, 0x09, 0xf6, 0x6a,
+	0x8e, 0xad, 0x84, 0x28, 0x92, 0xdc, 0x74, 0x17, 0x2c, 0xf2, 0x97, 0xf0, 0xda, 0xcc, 0xc3, 0x97,
+	0xa6, 0xfd, 0x95, 0x15, 0xb8, 0xd8, 0x8c, 0x44, 0x60, 0x65, 0x83, 0xe3, 0xbe, 0x5d, 0x89, 0xfb,
+	0x85, 0x87, 0x2f, 0xc7, 0x7c, 0x4b, 0x41, 0xf5, 0xee, 0x6c, 0xd9, 0xc8, 0x64, 0x2c, 0xa1, 0x2b,
+	0x52, 0x8d, 0x8c, 0x05, 0x2a, 0x93, 0xb1, 0x80, 0x93, 0xc7, 0x00, 0x34, 0xb6, 0xa2, 0xd8, 0x64,
+	0x36, 0x05, 0x38, 0x8c, 0x56, 0x7d, 0x1a, 0xcc, 0x95, 0x61, 0x31, 0xfd, 0x68, 0x36, 0x91, 0x75,
+	0x18, 0xd0, 0x24, 0xb0, 0xcd, 0x30, 0xc2, 0xa1, 0x15, 0x61, 0xa5, 0xcf, 0x61, 0x1e, 0x56, 0xc3,
+	0x24, 0x81, 0xfd, 0x99, 0xf0, 0x3d, 0x6e, 0x18, 0x7d, 0x5a, 0x4c, 0x39, 0x1f, 0x06, 0x25, 0x0e,
+	0x61, 0x50, 0xc7, 0x27, 0x09, 0xec, 0x4c, 0x7f, 0x89, 0x66, 0x13, 0x5e, 0x63, 0x0c, 0x24, 0x2d,
+	0x8e, 0x61, 0x5d, 0x8d, 0x25, 0x81, 0x2d, 0x4e, 0x8e, 0xd7, 0x58, 0x3e, 0x2b, 0xdf, 0x71, 0x0b,
+	0xba, 0x2c, 0x55, 0xdd, 0x91, 0xf7, 0x40, 0xf2, 0xb1, 0xe5, 0xe0, 0xc8, 0xf4, 0xc4, 0xe5, 0x96,
+	0x0e, 0x07, 0x2f, 0x9e, 0x6d, 0x6f, 0x4c, 0xb8, 0x51, 0x3f, 0x32, 0x36, 0xc4, 0xb2, 0xee, 0xc8,
+	0xef, 0x00, 0x50, 0x4c, 0xa9, 0x47, 0x02, 0xe6, 0xcb, 0x6e, 0x6f, 0xfb, 0x70, 0xf8, 0xe2, 0xd9,
+	0xb6, 0x74, 0x2a, 0xac, 0xfa, 0x91, 0x21, 0xa5, 0x0e, 0xba, 0xa3, 0x7d, 0x83, 0x60, 0x73, 0xb1,
+	0x19, 0x2c, 0x01, 0xa0, 0xd5, 0x00, 0xcc, 0x3b, 0xa5, 0xbb, 0x14, 0x2e, 0xed, 0x4a, 0xcc, 0x3b,
+	0x75, 0xd0, 0x1d, 0xf9, 0x1e, 0x74, 0x66, 0x96, 0x7f, 0x81, 0x79, 0x3f, 0x18, 0x18, 0x62, 0xa2,
+	0xfd, 0x89, 0x60, 0x50, 0x6e, 0x23, 0x4b, 0xa0, 0xa8, 0x06, 0x74, 0x0f, 0x24, 0x8a, 0x83, 0x54,
+	0x9c, 0x66, 0x21, 0xce, 0x09, 0x9e, 0x9e, 0x09, 0x71, 0xc4, 0xb2, 0xee, 0xc8, 0xef, 0x41, 0x8f,
+	0x57, 0xb0, 0xe7, 0xa4, 0x1d, 0x69, 0x7b, 0x65, 0xf5, 0xea, 0x8e, 0xd1, 0x9d, 0x89, 0x13, 0xd8,
+	0x81, 0x1e, 0x6f, 0x21, 0x9e, 0xc3, 0xdb, 0x50, 0xca, 0x67, 0x42, 0x5c, 0xd6, 0x2c, 0xf4, 0x23,
+	0xa3, 0xcb, 0x56, 0xcb, 0x19, 0x76, 0xca, 0x19, 0x1a, 0x30, 0x28, 0x77, 0xb8, 0x35, 0x35, 0xce,
+	0x31, 0x9b, 0x65, 0xcc, 0x9f, 0x11, 0x40, 0xd1, 0xf1, 0x6e, 0xa3, 0x66, 0x39, 0xef, 0x76, 0x99,
+	0xf7, 0x8f, 0x08, 0xa0, 0xe8, 0xb0, 0x8b, 0x4c, 0xd0, 0x75, 0x99, 0x34, 0xd7, 0x63, 0xb2, 0x28,
+	0x4e, 0x6b, 0xb5, 0x38, 0x5a, 0x0c, 0x77, 0x96, 0x7b, 0x77, 0x39, 0x36, 0x7a, 0xe9, 0xca, 0x69,
+	0xae, 0xa8, 0x1c, 0xed, 0x07, 0x04, 0x9b, 0x8b, 0x0d, 0xfe, 0xbf, 0xd1, 0xa6, 0xc4, 0xaf, 0xb5,
+	0x8a, 0xdf, 0x09, 0xdc, 0xfd, 0xd7, 0x77, 0xe2, 0xe5, 0x65, 0xd1, 0xbe, 0x6b, 0x02, 0x14, 0x78,
+	0x2c, 0xd5, 0x29, 0xcf, 0xaa, 0x32, 0x55, 0xb1, 0x7c, 0xa3, 0x54, 0x3f, 0x80, 0xbe, 0x6f, 0xd1,
+	0xd8, 0x0c, 0x48, 0x34, 0xb5, 0xfc, 0xeb, 0x96, 0x33, 0xb0, 0x3d, 0x9f, 0xf2, 0x2d, 0x4b, 0x85,
+	0xd4, 0xae, 0xb9, 0x65, 0x8f, 0xa0, 0xe5, 0x13, 0x57, 0xe9, 0xdc, 0x6f, 0xed, 0xf6, 0x0f, 0x1e,
+	0x54, 0xc6, 0x99, 0x10, 0xf7, 0xc3, 0x20, 0x8e, 0x12, 0x83, 0x79, 0x6b, 0x4f, 0x10, 0x48, 0xf9,
+	0x37, 0xef, 0x06, 0x75, 0xb7, 0x5e, 0x67, 0x4e, 0xa9, 0xb6, 0xd6, 0xa2, 0xfa, 0x3b, 0x82, 0x7e,
+	0xe9, 0xbb, 0x7a, 0x0b, 0xef, 0x72, 0x96, 0x57, 0x7b, 0xad, 0xbc, 0xbe, 0x67, 0x47, 0x90, 0x7f,
+	0xd9, 0x6f, 0xd5, 0x2d, 0xfc, 0x8d, 0x75, 0xcf, 0xfc, 0x6f, 0xe1, 0xff, 0xa2, 0xf8, 0x01, 0xcd,
+	0x1e, 0x81, 0xa7, 0x38, 0x9a, 0x79, 0x36, 0x96, 0xcf, 0x60, 0x90, 0x1a, 0xe2, 0x08, 0x5b, 0x53,
+	0x79, 0xa7, 0xfa, 0x01, 0x52, 0x7e, 0x3c, 0x6e, 0x5d, 0xd3, 0x6f, 0x17, 0xbd, 0x8b, 0x0e, 0x2e,
+	0xf3, 0x27, 0x54, 0x16, 0x15, 0xc3, 0x30, 0xb3, 0x88, 0xb0, 0xd5, 0xff, 0xe2, 0x8b, 0x8f, 0xaf,
+	0xad, 0xeb, 0x3a, 0xb2, 0xc0, 0x87, 0x0f, 0xff, 0x7e, 0xae, 0xa2, 0x27, 0x73, 0x15, 0xfd, 0x32,
+	0x57, 0xd1, 0xaf, 0x73, 0x15, 0x3d, 0x9d, 0xab, 0xe8, 0xaf, 0xb9, 0x8a, 0xbe, 0xbd, 0x52, 0x1b,
+	0x4f, 0xaf, 0xd4, 0xc6, 0x1f, 0x57, 0x6a, 0xe3, 0xac, 0xcb, 0x21, 0x1e, 0xfd, 0x13, 0x00, 0x00,
+	0xff, 0xff, 0xe3, 0x1f, 0xe0, 0xc7, 0x9c, 0x0f, 0x00, 0x00,
 }
 
-func (this *Message) Equal(that interface{}) bool {
+func (this *ClientMessage) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Message)
+	that1, ok := that.(*ClientMessage)
 	if !ok {
-		that2, ok := that.(Message)
+		that2, ok := that.(ClientMessage)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1243,14 +1342,14 @@ func (this *Message) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *Message_Command) Equal(that interface{}) bool {
+func (this *ClientMessage_Command) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Message_Command)
+	that1, ok := that.(*ClientMessage_Command)
 	if !ok {
-		that2, ok := that.(Message_Command)
+		that2, ok := that.(ClientMessage_Command)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1267,14 +1366,14 @@ func (this *Message_Command) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *Message_CommandReply) Equal(that interface{}) bool {
+func (this *ClientMessage_CommandReply) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Message_CommandReply)
+	that1, ok := that.(*ClientMessage_CommandReply)
 	if !ok {
-		that2, ok := that.(Message_CommandReply)
+		that2, ok := that.(ClientMessage_CommandReply)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1291,14 +1390,14 @@ func (this *Message_CommandReply) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *Message_Query) Equal(that interface{}) bool {
+func (this *ClientMessage_Query) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Message_Query)
+	that1, ok := that.(*ClientMessage_Query)
 	if !ok {
-		that2, ok := that.(Message_Query)
+		that2, ok := that.(ClientMessage_Query)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1315,14 +1414,14 @@ func (this *Message_Query) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *Message_QueryReply) Equal(that interface{}) bool {
+func (this *ClientMessage_QueryReply) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Message_QueryReply)
+	that1, ok := that.(*ClientMessage_QueryReply)
 	if !ok {
-		that2, ok := that.(Message_QueryReply)
+		that2, ok := that.(ClientMessage_QueryReply)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1339,14 +1438,140 @@ func (this *Message_QueryReply) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *Message_SlotLookup) Equal(that interface{}) bool {
+func (this *ReplicaMessage) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Message_SlotLookup)
+	that1, ok := that.(*ReplicaMessage)
 	if !ok {
-		that2, ok := that.(Message_SlotLookup)
+		that2, ok := that.(ReplicaMessage)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if that1.Message == nil {
+		if this.Message != nil {
+			return false
+		}
+	} else if this.Message == nil {
+		return false
+	} else if !this.Message.Equal(that1.Message) {
+		return false
+	}
+	return true
+}
+func (this *ReplicaMessage_Command) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplicaMessage_Command)
+	if !ok {
+		that2, ok := that.(ReplicaMessage_Command)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Command.Equal(that1.Command) {
+		return false
+	}
+	return true
+}
+func (this *ReplicaMessage_CommandReply) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplicaMessage_CommandReply)
+	if !ok {
+		that2, ok := that.(ReplicaMessage_CommandReply)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.CommandReply.Equal(that1.CommandReply) {
+		return false
+	}
+	return true
+}
+func (this *ReplicaMessage_Query) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplicaMessage_Query)
+	if !ok {
+		that2, ok := that.(ReplicaMessage_Query)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Query.Equal(that1.Query) {
+		return false
+	}
+	return true
+}
+func (this *ReplicaMessage_QueryReply) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplicaMessage_QueryReply)
+	if !ok {
+		that2, ok := that.(ReplicaMessage_QueryReply)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.QueryReply.Equal(that1.QueryReply) {
+		return false
+	}
+	return true
+}
+func (this *ReplicaMessage_SlotLookup) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplicaMessage_SlotLookup)
+	if !ok {
+		that2, ok := that.(ReplicaMessage_SlotLookup)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1363,14 +1588,14 @@ func (this *Message_SlotLookup) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *Message_GapCommit) Equal(that interface{}) bool {
+func (this *ReplicaMessage_GapCommit) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Message_GapCommit)
+	that1, ok := that.(*ReplicaMessage_GapCommit)
 	if !ok {
-		that2, ok := that.(Message_GapCommit)
+		that2, ok := that.(ReplicaMessage_GapCommit)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1387,14 +1612,14 @@ func (this *Message_GapCommit) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *Message_GapCommitReply) Equal(that interface{}) bool {
+func (this *ReplicaMessage_GapCommitReply) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Message_GapCommitReply)
+	that1, ok := that.(*ReplicaMessage_GapCommitReply)
 	if !ok {
-		that2, ok := that.(Message_GapCommitReply)
+		that2, ok := that.(ReplicaMessage_GapCommitReply)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1411,14 +1636,14 @@ func (this *Message_GapCommitReply) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *Message_ViewChangeRequest) Equal(that interface{}) bool {
+func (this *ReplicaMessage_ViewChangeRequest) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Message_ViewChangeRequest)
+	that1, ok := that.(*ReplicaMessage_ViewChangeRequest)
 	if !ok {
-		that2, ok := that.(Message_ViewChangeRequest)
+		that2, ok := that.(ReplicaMessage_ViewChangeRequest)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1435,14 +1660,14 @@ func (this *Message_ViewChangeRequest) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *Message_ViewChange) Equal(that interface{}) bool {
+func (this *ReplicaMessage_ViewChange) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Message_ViewChange)
+	that1, ok := that.(*ReplicaMessage_ViewChange)
 	if !ok {
-		that2, ok := that.(Message_ViewChange)
+		that2, ok := that.(ReplicaMessage_ViewChange)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1459,14 +1684,14 @@ func (this *Message_ViewChange) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *Message_StartView) Equal(that interface{}) bool {
+func (this *ReplicaMessage_StartView) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Message_StartView)
+	that1, ok := that.(*ReplicaMessage_StartView)
 	if !ok {
-		that2, ok := that.(Message_StartView)
+		that2, ok := that.(ReplicaMessage_StartView)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1483,14 +1708,14 @@ func (this *Message_StartView) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *Message_SyncPrepare) Equal(that interface{}) bool {
+func (this *ReplicaMessage_SyncPrepare) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Message_SyncPrepare)
+	that1, ok := that.(*ReplicaMessage_SyncPrepare)
 	if !ok {
-		that2, ok := that.(Message_SyncPrepare)
+		that2, ok := that.(ReplicaMessage_SyncPrepare)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1507,14 +1732,14 @@ func (this *Message_SyncPrepare) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *Message_SyncReply) Equal(that interface{}) bool {
+func (this *ReplicaMessage_SyncReply) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Message_SyncReply)
+	that1, ok := that.(*ReplicaMessage_SyncReply)
 	if !ok {
-		that2, ok := that.(Message_SyncReply)
+		that2, ok := that.(ReplicaMessage_SyncReply)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1531,14 +1756,14 @@ func (this *Message_SyncReply) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *Message_SyncCommit) Equal(that interface{}) bool {
+func (this *ReplicaMessage_SyncCommit) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Message_SyncCommit)
+	that1, ok := that.(*ReplicaMessage_SyncCommit)
 	if !ok {
-		that2, ok := that.(Message_SyncCommit)
+		that2, ok := that.(ReplicaMessage_SyncCommit)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1631,9 +1856,6 @@ func (this *CommandReply) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.SessionId != that1.SessionId {
-		return false
-	}
 	if this.MessageId != that1.MessageId {
 		return false
 	}
@@ -1695,9 +1917,6 @@ func (this *QueryReply) Equal(that interface{}) bool {
 	if that1 == nil {
 		return this == nil
 	} else if this == nil {
-		return false
-	}
-	if this.SessionId != that1.SessionId {
 		return false
 	}
 	if this.MessageId != that1.MessageId {
@@ -2016,103 +2235,103 @@ var _ grpc.ClientConn
 // is compatible with the grpc package it is being compiled against.
 const _ = grpc.SupportPackageIsVersion4
 
-// NOPaxosServiceClient is the client API for NOPaxosService service.
+// ClientServiceClient is the client API for ClientService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type NOPaxosServiceClient interface {
-	Stream(ctx context.Context, opts ...grpc.CallOption) (NOPaxosService_StreamClient, error)
+type ClientServiceClient interface {
+	ClientStream(ctx context.Context, opts ...grpc.CallOption) (ClientService_ClientStreamClient, error)
 }
 
-type nOPaxosServiceClient struct {
+type clientServiceClient struct {
 	cc *grpc.ClientConn
 }
 
-func NewNOPaxosServiceClient(cc *grpc.ClientConn) NOPaxosServiceClient {
-	return &nOPaxosServiceClient{cc}
+func NewClientServiceClient(cc *grpc.ClientConn) ClientServiceClient {
+	return &clientServiceClient{cc}
 }
 
-func (c *nOPaxosServiceClient) Stream(ctx context.Context, opts ...grpc.CallOption) (NOPaxosService_StreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_NOPaxosService_serviceDesc.Streams[0], "/atomix.nopaxos.protocol.NOPaxosService/Stream", opts...)
+func (c *clientServiceClient) ClientStream(ctx context.Context, opts ...grpc.CallOption) (ClientService_ClientStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_ClientService_serviceDesc.Streams[0], "/atomix.nopaxos.protocol.ClientService/ClientStream", opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &nOPaxosServiceStreamClient{stream}
+	x := &clientServiceClientStreamClient{stream}
 	return x, nil
 }
 
-type NOPaxosService_StreamClient interface {
-	Send(*Message) error
-	Recv() (*Message, error)
+type ClientService_ClientStreamClient interface {
+	Send(*ClientMessage) error
+	Recv() (*ClientMessage, error)
 	grpc.ClientStream
 }
 
-type nOPaxosServiceStreamClient struct {
+type clientServiceClientStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *nOPaxosServiceStreamClient) Send(m *Message) error {
+func (x *clientServiceClientStreamClient) Send(m *ClientMessage) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *nOPaxosServiceStreamClient) Recv() (*Message, error) {
-	m := new(Message)
+func (x *clientServiceClientStreamClient) Recv() (*ClientMessage, error) {
+	m := new(ClientMessage)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-// NOPaxosServiceServer is the server API for NOPaxosService service.
-type NOPaxosServiceServer interface {
-	Stream(NOPaxosService_StreamServer) error
+// ClientServiceServer is the server API for ClientService service.
+type ClientServiceServer interface {
+	ClientStream(ClientService_ClientStreamServer) error
 }
 
-// UnimplementedNOPaxosServiceServer can be embedded to have forward compatible implementations.
-type UnimplementedNOPaxosServiceServer struct {
+// UnimplementedClientServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedClientServiceServer struct {
 }
 
-func (*UnimplementedNOPaxosServiceServer) Stream(srv NOPaxosService_StreamServer) error {
-	return status.Errorf(codes.Unimplemented, "method Stream not implemented")
+func (*UnimplementedClientServiceServer) ClientStream(srv ClientService_ClientStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method ClientStream not implemented")
 }
 
-func RegisterNOPaxosServiceServer(s *grpc.Server, srv NOPaxosServiceServer) {
-	s.RegisterService(&_NOPaxosService_serviceDesc, srv)
+func RegisterClientServiceServer(s *grpc.Server, srv ClientServiceServer) {
+	s.RegisterService(&_ClientService_serviceDesc, srv)
 }
 
-func _NOPaxosService_Stream_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(NOPaxosServiceServer).Stream(&nOPaxosServiceStreamServer{stream})
+func _ClientService_ClientStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ClientServiceServer).ClientStream(&clientServiceClientStreamServer{stream})
 }
 
-type NOPaxosService_StreamServer interface {
-	Send(*Message) error
-	Recv() (*Message, error)
+type ClientService_ClientStreamServer interface {
+	Send(*ClientMessage) error
+	Recv() (*ClientMessage, error)
 	grpc.ServerStream
 }
 
-type nOPaxosServiceStreamServer struct {
+type clientServiceClientStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *nOPaxosServiceStreamServer) Send(m *Message) error {
+func (x *clientServiceClientStreamServer) Send(m *ClientMessage) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *nOPaxosServiceStreamServer) Recv() (*Message, error) {
-	m := new(Message)
+func (x *clientServiceClientStreamServer) Recv() (*ClientMessage, error) {
+	m := new(ClientMessage)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-var _NOPaxosService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "atomix.nopaxos.protocol.NOPaxosService",
-	HandlerType: (*NOPaxosServiceServer)(nil),
+var _ClientService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "atomix.nopaxos.protocol.ClientService",
+	HandlerType: (*ClientServiceServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "Stream",
-			Handler:       _NOPaxosService_Stream_Handler,
+			StreamName:    "ClientStream",
+			Handler:       _ClientService_ClientStream_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},
@@ -2120,7 +2339,111 @@ var _NOPaxosService_serviceDesc = grpc.ServiceDesc{
 	Metadata: "atomix/nopaxos/protocol/protocol.proto",
 }
 
-func (m *Message) Marshal() (dAtA []byte, err error) {
+// ReplicaServiceClient is the client API for ReplicaService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type ReplicaServiceClient interface {
+	ReplicaStream(ctx context.Context, opts ...grpc.CallOption) (ReplicaService_ReplicaStreamClient, error)
+}
+
+type replicaServiceClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewReplicaServiceClient(cc *grpc.ClientConn) ReplicaServiceClient {
+	return &replicaServiceClient{cc}
+}
+
+func (c *replicaServiceClient) ReplicaStream(ctx context.Context, opts ...grpc.CallOption) (ReplicaService_ReplicaStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_ReplicaService_serviceDesc.Streams[0], "/atomix.nopaxos.protocol.ReplicaService/ReplicaStream", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &replicaServiceReplicaStreamClient{stream}
+	return x, nil
+}
+
+type ReplicaService_ReplicaStreamClient interface {
+	Send(*ReplicaMessage) error
+	Recv() (*ReplicaMessage, error)
+	grpc.ClientStream
+}
+
+type replicaServiceReplicaStreamClient struct {
+	grpc.ClientStream
+}
+
+func (x *replicaServiceReplicaStreamClient) Send(m *ReplicaMessage) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *replicaServiceReplicaStreamClient) Recv() (*ReplicaMessage, error) {
+	m := new(ReplicaMessage)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// ReplicaServiceServer is the server API for ReplicaService service.
+type ReplicaServiceServer interface {
+	ReplicaStream(ReplicaService_ReplicaStreamServer) error
+}
+
+// UnimplementedReplicaServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedReplicaServiceServer struct {
+}
+
+func (*UnimplementedReplicaServiceServer) ReplicaStream(srv ReplicaService_ReplicaStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method ReplicaStream not implemented")
+}
+
+func RegisterReplicaServiceServer(s *grpc.Server, srv ReplicaServiceServer) {
+	s.RegisterService(&_ReplicaService_serviceDesc, srv)
+}
+
+func _ReplicaService_ReplicaStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ReplicaServiceServer).ReplicaStream(&replicaServiceReplicaStreamServer{stream})
+}
+
+type ReplicaService_ReplicaStreamServer interface {
+	Send(*ReplicaMessage) error
+	Recv() (*ReplicaMessage, error)
+	grpc.ServerStream
+}
+
+type replicaServiceReplicaStreamServer struct {
+	grpc.ServerStream
+}
+
+func (x *replicaServiceReplicaStreamServer) Send(m *ReplicaMessage) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *replicaServiceReplicaStreamServer) Recv() (*ReplicaMessage, error) {
+	m := new(ReplicaMessage)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+var _ReplicaService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "atomix.nopaxos.protocol.ReplicaService",
+	HandlerType: (*ReplicaServiceServer)(nil),
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "ReplicaStream",
+			Handler:       _ReplicaService_ReplicaStream_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
+	Metadata: "atomix/nopaxos/protocol/protocol.proto",
+}
+
+func (m *ClientMessage) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -2130,12 +2453,12 @@ func (m *Message) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *Message) MarshalTo(dAtA []byte) (int, error) {
+func (m *ClientMessage) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Message) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ClientMessage) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -2152,12 +2475,12 @@ func (m *Message) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *Message_Command) MarshalTo(dAtA []byte) (int, error) {
+func (m *ClientMessage_Command) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Message_Command) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ClientMessage_Command) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.Command != nil {
 		{
@@ -2173,12 +2496,12 @@ func (m *Message_Command) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *Message_CommandReply) MarshalTo(dAtA []byte) (int, error) {
+func (m *ClientMessage_CommandReply) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Message_CommandReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ClientMessage_CommandReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.CommandReply != nil {
 		{
@@ -2194,12 +2517,12 @@ func (m *Message_CommandReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *Message_Query) MarshalTo(dAtA []byte) (int, error) {
+func (m *ClientMessage_Query) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Message_Query) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ClientMessage_Query) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.Query != nil {
 		{
@@ -2215,12 +2538,12 @@ func (m *Message_Query) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *Message_QueryReply) MarshalTo(dAtA []byte) (int, error) {
+func (m *ClientMessage_QueryReply) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Message_QueryReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ClientMessage_QueryReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.QueryReply != nil {
 		{
@@ -2236,12 +2559,128 @@ func (m *Message_QueryReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *Message_SlotLookup) MarshalTo(dAtA []byte) (int, error) {
+func (m *ReplicaMessage) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ReplicaMessage) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Message_SlotLookup) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ReplicaMessage) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Message != nil {
+		{
+			size := m.Message.Size()
+			i -= size
+			if _, err := m.Message.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ReplicaMessage_Command) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplicaMessage_Command) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Command != nil {
+		{
+			size, err := m.Command.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplicaMessage_CommandReply) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplicaMessage_CommandReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.CommandReply != nil {
+		{
+			size, err := m.CommandReply.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplicaMessage_Query) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplicaMessage_Query) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Query != nil {
+		{
+			size, err := m.Query.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplicaMessage_QueryReply) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplicaMessage_QueryReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.QueryReply != nil {
+		{
+			size, err := m.QueryReply.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x22
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplicaMessage_SlotLookup) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplicaMessage_SlotLookup) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.SlotLookup != nil {
 		{
@@ -2257,12 +2696,12 @@ func (m *Message_SlotLookup) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *Message_GapCommit) MarshalTo(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_GapCommit) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Message_GapCommit) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_GapCommit) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.GapCommit != nil {
 		{
@@ -2278,12 +2717,12 @@ func (m *Message_GapCommit) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *Message_GapCommitReply) MarshalTo(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_GapCommitReply) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Message_GapCommitReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_GapCommitReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.GapCommitReply != nil {
 		{
@@ -2299,12 +2738,12 @@ func (m *Message_GapCommitReply) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	}
 	return len(dAtA) - i, nil
 }
-func (m *Message_ViewChangeRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_ViewChangeRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Message_ViewChangeRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_ViewChangeRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.ViewChangeRequest != nil {
 		{
@@ -2320,12 +2759,12 @@ func (m *Message_ViewChangeRequest) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	}
 	return len(dAtA) - i, nil
 }
-func (m *Message_ViewChange) MarshalTo(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_ViewChange) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Message_ViewChange) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_ViewChange) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.ViewChange != nil {
 		{
@@ -2341,12 +2780,12 @@ func (m *Message_ViewChange) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *Message_StartView) MarshalTo(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_StartView) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Message_StartView) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_StartView) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.StartView != nil {
 		{
@@ -2362,12 +2801,12 @@ func (m *Message_StartView) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *Message_SyncPrepare) MarshalTo(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_SyncPrepare) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Message_SyncPrepare) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_SyncPrepare) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.SyncPrepare != nil {
 		{
@@ -2383,12 +2822,12 @@ func (m *Message_SyncPrepare) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *Message_SyncReply) MarshalTo(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_SyncReply) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Message_SyncReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_SyncReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.SyncReply != nil {
 		{
@@ -2404,12 +2843,12 @@ func (m *Message_SyncReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *Message_SyncCommit) MarshalTo(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_SyncCommit) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Message_SyncCommit) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ReplicaMessage_SyncCommit) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.SyncCommit != nil {
 		{
@@ -2525,12 +2964,12 @@ func (m *CommandReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		copy(dAtA[i:], m.Value)
 		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Value)))
 		i--
-		dAtA[i] = 0x32
+		dAtA[i] = 0x2a
 	}
 	if m.SlotId != 0 {
 		i = encodeVarintProtocol(dAtA, i, uint64(m.SlotId))
 		i--
-		dAtA[i] = 0x28
+		dAtA[i] = 0x20
 	}
 	if m.ViewId != nil {
 		{
@@ -2542,22 +2981,17 @@ func (m *CommandReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i = encodeVarintProtocol(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x22
+		dAtA[i] = 0x1a
 	}
 	if len(m.SenderId) > 0 {
 		i -= len(m.SenderId)
 		copy(dAtA[i:], m.SenderId)
 		i = encodeVarintProtocol(dAtA, i, uint64(len(m.SenderId)))
 		i--
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x12
 	}
 	if m.MessageId != 0 {
 		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageId))
-		i--
-		dAtA[i] = 0x10
-	}
-	if m.SessionId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.SessionId))
 		i--
 		dAtA[i] = 0x8
 	}
@@ -2624,7 +3058,7 @@ func (m *QueryReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		copy(dAtA[i:], m.Value)
 		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Value)))
 		i--
-		dAtA[i] = 0x2a
+		dAtA[i] = 0x22
 	}
 	if m.ViewId != nil {
 		{
@@ -2636,22 +3070,17 @@ func (m *QueryReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i = encodeVarintProtocol(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x22
+		dAtA[i] = 0x1a
 	}
 	if len(m.SenderId) > 0 {
 		i -= len(m.SenderId)
 		copy(dAtA[i:], m.SenderId)
 		i = encodeVarintProtocol(dAtA, i, uint64(len(m.SenderId)))
 		i--
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x12
 	}
 	if m.MessageId != 0 {
 		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageId))
-		i--
-		dAtA[i] = 0x10
-	}
-	if m.SessionId != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.SessionId))
 		i--
 		dAtA[i] = 0x8
 	}
@@ -3134,104 +3563,142 @@ func encodeVarintProtocol(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func NewPopulatedMessage(r randyProtocol, easy bool) *Message {
-	this := &Message{}
-	oneofNumber_Message := []int32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}[r.Intn(13)]
+func NewPopulatedClientMessage(r randyProtocol, easy bool) *ClientMessage {
+	this := &ClientMessage{}
+	oneofNumber_Message := []int32{1, 2, 3, 4}[r.Intn(4)]
 	switch oneofNumber_Message {
 	case 1:
-		this.Message = NewPopulatedMessage_Command(r, easy)
+		this.Message = NewPopulatedClientMessage_Command(r, easy)
 	case 2:
-		this.Message = NewPopulatedMessage_CommandReply(r, easy)
+		this.Message = NewPopulatedClientMessage_CommandReply(r, easy)
 	case 3:
-		this.Message = NewPopulatedMessage_Query(r, easy)
+		this.Message = NewPopulatedClientMessage_Query(r, easy)
 	case 4:
-		this.Message = NewPopulatedMessage_QueryReply(r, easy)
-	case 5:
-		this.Message = NewPopulatedMessage_SlotLookup(r, easy)
-	case 6:
-		this.Message = NewPopulatedMessage_GapCommit(r, easy)
-	case 7:
-		this.Message = NewPopulatedMessage_GapCommitReply(r, easy)
-	case 8:
-		this.Message = NewPopulatedMessage_ViewChangeRequest(r, easy)
-	case 9:
-		this.Message = NewPopulatedMessage_ViewChange(r, easy)
-	case 10:
-		this.Message = NewPopulatedMessage_StartView(r, easy)
-	case 11:
-		this.Message = NewPopulatedMessage_SyncPrepare(r, easy)
-	case 12:
-		this.Message = NewPopulatedMessage_SyncReply(r, easy)
-	case 13:
-		this.Message = NewPopulatedMessage_SyncCommit(r, easy)
+		this.Message = NewPopulatedClientMessage_QueryReply(r, easy)
 	}
 	if !easy && r.Intn(10) != 0 {
 	}
 	return this
 }
 
-func NewPopulatedMessage_Command(r randyProtocol, easy bool) *Message_Command {
-	this := &Message_Command{}
+func NewPopulatedClientMessage_Command(r randyProtocol, easy bool) *ClientMessage_Command {
+	this := &ClientMessage_Command{}
 	this.Command = NewPopulatedCommandRequest(r, easy)
 	return this
 }
-func NewPopulatedMessage_CommandReply(r randyProtocol, easy bool) *Message_CommandReply {
-	this := &Message_CommandReply{}
+func NewPopulatedClientMessage_CommandReply(r randyProtocol, easy bool) *ClientMessage_CommandReply {
+	this := &ClientMessage_CommandReply{}
 	this.CommandReply = NewPopulatedCommandReply(r, easy)
 	return this
 }
-func NewPopulatedMessage_Query(r randyProtocol, easy bool) *Message_Query {
-	this := &Message_Query{}
+func NewPopulatedClientMessage_Query(r randyProtocol, easy bool) *ClientMessage_Query {
+	this := &ClientMessage_Query{}
 	this.Query = NewPopulatedQueryRequest(r, easy)
 	return this
 }
-func NewPopulatedMessage_QueryReply(r randyProtocol, easy bool) *Message_QueryReply {
-	this := &Message_QueryReply{}
+func NewPopulatedClientMessage_QueryReply(r randyProtocol, easy bool) *ClientMessage_QueryReply {
+	this := &ClientMessage_QueryReply{}
 	this.QueryReply = NewPopulatedQueryReply(r, easy)
 	return this
 }
-func NewPopulatedMessage_SlotLookup(r randyProtocol, easy bool) *Message_SlotLookup {
-	this := &Message_SlotLookup{}
+func NewPopulatedReplicaMessage(r randyProtocol, easy bool) *ReplicaMessage {
+	this := &ReplicaMessage{}
+	oneofNumber_Message := []int32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}[r.Intn(13)]
+	switch oneofNumber_Message {
+	case 1:
+		this.Message = NewPopulatedReplicaMessage_Command(r, easy)
+	case 2:
+		this.Message = NewPopulatedReplicaMessage_CommandReply(r, easy)
+	case 3:
+		this.Message = NewPopulatedReplicaMessage_Query(r, easy)
+	case 4:
+		this.Message = NewPopulatedReplicaMessage_QueryReply(r, easy)
+	case 5:
+		this.Message = NewPopulatedReplicaMessage_SlotLookup(r, easy)
+	case 6:
+		this.Message = NewPopulatedReplicaMessage_GapCommit(r, easy)
+	case 7:
+		this.Message = NewPopulatedReplicaMessage_GapCommitReply(r, easy)
+	case 8:
+		this.Message = NewPopulatedReplicaMessage_ViewChangeRequest(r, easy)
+	case 9:
+		this.Message = NewPopulatedReplicaMessage_ViewChange(r, easy)
+	case 10:
+		this.Message = NewPopulatedReplicaMessage_StartView(r, easy)
+	case 11:
+		this.Message = NewPopulatedReplicaMessage_SyncPrepare(r, easy)
+	case 12:
+		this.Message = NewPopulatedReplicaMessage_SyncReply(r, easy)
+	case 13:
+		this.Message = NewPopulatedReplicaMessage_SyncCommit(r, easy)
+	}
+	if !easy && r.Intn(10) != 0 {
+	}
+	return this
+}
+
+func NewPopulatedReplicaMessage_Command(r randyProtocol, easy bool) *ReplicaMessage_Command {
+	this := &ReplicaMessage_Command{}
+	this.Command = NewPopulatedCommandRequest(r, easy)
+	return this
+}
+func NewPopulatedReplicaMessage_CommandReply(r randyProtocol, easy bool) *ReplicaMessage_CommandReply {
+	this := &ReplicaMessage_CommandReply{}
+	this.CommandReply = NewPopulatedCommandReply(r, easy)
+	return this
+}
+func NewPopulatedReplicaMessage_Query(r randyProtocol, easy bool) *ReplicaMessage_Query {
+	this := &ReplicaMessage_Query{}
+	this.Query = NewPopulatedQueryRequest(r, easy)
+	return this
+}
+func NewPopulatedReplicaMessage_QueryReply(r randyProtocol, easy bool) *ReplicaMessage_QueryReply {
+	this := &ReplicaMessage_QueryReply{}
+	this.QueryReply = NewPopulatedQueryReply(r, easy)
+	return this
+}
+func NewPopulatedReplicaMessage_SlotLookup(r randyProtocol, easy bool) *ReplicaMessage_SlotLookup {
+	this := &ReplicaMessage_SlotLookup{}
 	this.SlotLookup = NewPopulatedSlotLookup(r, easy)
 	return this
 }
-func NewPopulatedMessage_GapCommit(r randyProtocol, easy bool) *Message_GapCommit {
-	this := &Message_GapCommit{}
+func NewPopulatedReplicaMessage_GapCommit(r randyProtocol, easy bool) *ReplicaMessage_GapCommit {
+	this := &ReplicaMessage_GapCommit{}
 	this.GapCommit = NewPopulatedGapCommitRequest(r, easy)
 	return this
 }
-func NewPopulatedMessage_GapCommitReply(r randyProtocol, easy bool) *Message_GapCommitReply {
-	this := &Message_GapCommitReply{}
+func NewPopulatedReplicaMessage_GapCommitReply(r randyProtocol, easy bool) *ReplicaMessage_GapCommitReply {
+	this := &ReplicaMessage_GapCommitReply{}
 	this.GapCommitReply = NewPopulatedGapCommitReply(r, easy)
 	return this
 }
-func NewPopulatedMessage_ViewChangeRequest(r randyProtocol, easy bool) *Message_ViewChangeRequest {
-	this := &Message_ViewChangeRequest{}
+func NewPopulatedReplicaMessage_ViewChangeRequest(r randyProtocol, easy bool) *ReplicaMessage_ViewChangeRequest {
+	this := &ReplicaMessage_ViewChangeRequest{}
 	this.ViewChangeRequest = NewPopulatedViewChangeRequest(r, easy)
 	return this
 }
-func NewPopulatedMessage_ViewChange(r randyProtocol, easy bool) *Message_ViewChange {
-	this := &Message_ViewChange{}
+func NewPopulatedReplicaMessage_ViewChange(r randyProtocol, easy bool) *ReplicaMessage_ViewChange {
+	this := &ReplicaMessage_ViewChange{}
 	this.ViewChange = NewPopulatedViewChange(r, easy)
 	return this
 }
-func NewPopulatedMessage_StartView(r randyProtocol, easy bool) *Message_StartView {
-	this := &Message_StartView{}
+func NewPopulatedReplicaMessage_StartView(r randyProtocol, easy bool) *ReplicaMessage_StartView {
+	this := &ReplicaMessage_StartView{}
 	this.StartView = NewPopulatedStartView(r, easy)
 	return this
 }
-func NewPopulatedMessage_SyncPrepare(r randyProtocol, easy bool) *Message_SyncPrepare {
-	this := &Message_SyncPrepare{}
+func NewPopulatedReplicaMessage_SyncPrepare(r randyProtocol, easy bool) *ReplicaMessage_SyncPrepare {
+	this := &ReplicaMessage_SyncPrepare{}
 	this.SyncPrepare = NewPopulatedSyncPrepare(r, easy)
 	return this
 }
-func NewPopulatedMessage_SyncReply(r randyProtocol, easy bool) *Message_SyncReply {
-	this := &Message_SyncReply{}
+func NewPopulatedReplicaMessage_SyncReply(r randyProtocol, easy bool) *ReplicaMessage_SyncReply {
+	this := &ReplicaMessage_SyncReply{}
 	this.SyncReply = NewPopulatedSyncReply(r, easy)
 	return this
 }
-func NewPopulatedMessage_SyncCommit(r randyProtocol, easy bool) *Message_SyncCommit {
-	this := &Message_SyncCommit{}
+func NewPopulatedReplicaMessage_SyncCommit(r randyProtocol, easy bool) *ReplicaMessage_SyncCommit {
+	this := &ReplicaMessage_SyncCommit{}
 	this.SyncCommit = NewPopulatedSyncCommit(r, easy)
 	return this
 }
@@ -3260,7 +3727,6 @@ func NewPopulatedCommandRequest(r randyProtocol, easy bool) *CommandRequest {
 
 func NewPopulatedCommandReply(r randyProtocol, easy bool) *CommandReply {
 	this := &CommandReply{}
-	this.SessionId = SessionID(uint64(r.Uint32()))
 	this.MessageId = MessageID(uint64(r.Uint32()))
 	this.SenderId = MemberID(randStringProtocol(r))
 	if r.Intn(5) != 0 {
@@ -3292,7 +3758,6 @@ func NewPopulatedQueryRequest(r randyProtocol, easy bool) *QueryRequest {
 
 func NewPopulatedQueryReply(r randyProtocol, easy bool) *QueryReply {
 	this := &QueryReply{}
-	this.SessionId = SessionID(uint64(r.Uint32()))
 	this.MessageId = MessageID(uint64(r.Uint32()))
 	this.SenderId = MemberID(randStringProtocol(r))
 	if r.Intn(5) != 0 {
@@ -3515,7 +3980,7 @@ func encodeVarintPopulateProtocol(dAtA []byte, v uint64) []byte {
 	dAtA = append(dAtA, uint8(v))
 	return dAtA
 }
-func (m *Message) Size() (n int) {
+func (m *ClientMessage) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3527,7 +3992,7 @@ func (m *Message) Size() (n int) {
 	return n
 }
 
-func (m *Message_Command) Size() (n int) {
+func (m *ClientMessage_Command) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3539,7 +4004,7 @@ func (m *Message_Command) Size() (n int) {
 	}
 	return n
 }
-func (m *Message_CommandReply) Size() (n int) {
+func (m *ClientMessage_CommandReply) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3551,7 +4016,7 @@ func (m *Message_CommandReply) Size() (n int) {
 	}
 	return n
 }
-func (m *Message_Query) Size() (n int) {
+func (m *ClientMessage_Query) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3563,7 +4028,7 @@ func (m *Message_Query) Size() (n int) {
 	}
 	return n
 }
-func (m *Message_QueryReply) Size() (n int) {
+func (m *ClientMessage_QueryReply) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3575,7 +4040,67 @@ func (m *Message_QueryReply) Size() (n int) {
 	}
 	return n
 }
-func (m *Message_SlotLookup) Size() (n int) {
+func (m *ReplicaMessage) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Message != nil {
+		n += m.Message.Size()
+	}
+	return n
+}
+
+func (m *ReplicaMessage_Command) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Command != nil {
+		l = m.Command.Size()
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	return n
+}
+func (m *ReplicaMessage_CommandReply) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.CommandReply != nil {
+		l = m.CommandReply.Size()
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	return n
+}
+func (m *ReplicaMessage_Query) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Query != nil {
+		l = m.Query.Size()
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	return n
+}
+func (m *ReplicaMessage_QueryReply) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.QueryReply != nil {
+		l = m.QueryReply.Size()
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	return n
+}
+func (m *ReplicaMessage_SlotLookup) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3587,7 +4112,7 @@ func (m *Message_SlotLookup) Size() (n int) {
 	}
 	return n
 }
-func (m *Message_GapCommit) Size() (n int) {
+func (m *ReplicaMessage_GapCommit) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3599,7 +4124,7 @@ func (m *Message_GapCommit) Size() (n int) {
 	}
 	return n
 }
-func (m *Message_GapCommitReply) Size() (n int) {
+func (m *ReplicaMessage_GapCommitReply) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3611,7 +4136,7 @@ func (m *Message_GapCommitReply) Size() (n int) {
 	}
 	return n
 }
-func (m *Message_ViewChangeRequest) Size() (n int) {
+func (m *ReplicaMessage_ViewChangeRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3623,7 +4148,7 @@ func (m *Message_ViewChangeRequest) Size() (n int) {
 	}
 	return n
 }
-func (m *Message_ViewChange) Size() (n int) {
+func (m *ReplicaMessage_ViewChange) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3635,7 +4160,7 @@ func (m *Message_ViewChange) Size() (n int) {
 	}
 	return n
 }
-func (m *Message_StartView) Size() (n int) {
+func (m *ReplicaMessage_StartView) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3647,7 +4172,7 @@ func (m *Message_StartView) Size() (n int) {
 	}
 	return n
 }
-func (m *Message_SyncPrepare) Size() (n int) {
+func (m *ReplicaMessage_SyncPrepare) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3659,7 +4184,7 @@ func (m *Message_SyncPrepare) Size() (n int) {
 	}
 	return n
 }
-func (m *Message_SyncReply) Size() (n int) {
+func (m *ReplicaMessage_SyncReply) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3671,7 +4196,7 @@ func (m *Message_SyncReply) Size() (n int) {
 	}
 	return n
 }
-func (m *Message_SyncCommit) Size() (n int) {
+func (m *ReplicaMessage_SyncCommit) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -3724,9 +4249,6 @@ func (m *CommandReply) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.SessionId != 0 {
-		n += 1 + sovProtocol(uint64(m.SessionId))
-	}
 	if m.MessageId != 0 {
 		n += 1 + sovProtocol(uint64(m.MessageId))
 	}
@@ -3770,9 +4292,6 @@ func (m *QueryReply) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.SessionId != 0 {
-		n += 1 + sovProtocol(uint64(m.SessionId))
-	}
 	if m.MessageId != 0 {
 		n += 1 + sovProtocol(uint64(m.MessageId))
 	}
@@ -3990,7 +4509,7 @@ func sovProtocol(x uint64) (n int) {
 func sozProtocol(x uint64) (n int) {
 	return sovProtocol(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *Message) Unmarshal(dAtA []byte) error {
+func (m *ClientMessage) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -4013,10 +4532,10 @@ func (m *Message) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: Message: wiretype end group for non-group")
+			return fmt.Errorf("proto: ClientMessage: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Message: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ClientMessage: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -4052,7 +4571,7 @@ func (m *Message) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Message = &Message_Command{v}
+			m.Message = &ClientMessage_Command{v}
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
@@ -4087,7 +4606,7 @@ func (m *Message) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Message = &Message_CommandReply{v}
+			m.Message = &ClientMessage_CommandReply{v}
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
@@ -4122,7 +4641,7 @@ func (m *Message) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Message = &Message_Query{v}
+			m.Message = &ClientMessage_Query{v}
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
@@ -4157,7 +4676,200 @@ func (m *Message) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Message = &Message_QueryReply{v}
+			m.Message = &ClientMessage_QueryReply{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipProtocol(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ReplicaMessage) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowProtocol
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ReplicaMessage: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ReplicaMessage: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Command", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &CommandRequest{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Message = &ReplicaMessage_Command{v}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CommandReply", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &CommandReply{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Message = &ReplicaMessage_CommandReply{v}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Query", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &QueryRequest{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Message = &ReplicaMessage_Query{v}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field QueryReply", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &QueryReply{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Message = &ReplicaMessage_QueryReply{v}
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
@@ -4192,7 +4904,7 @@ func (m *Message) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Message = &Message_SlotLookup{v}
+			m.Message = &ReplicaMessage_SlotLookup{v}
 			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {
@@ -4227,7 +4939,7 @@ func (m *Message) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Message = &Message_GapCommit{v}
+			m.Message = &ReplicaMessage_GapCommit{v}
 			iNdEx = postIndex
 		case 7:
 			if wireType != 2 {
@@ -4262,7 +4974,7 @@ func (m *Message) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Message = &Message_GapCommitReply{v}
+			m.Message = &ReplicaMessage_GapCommitReply{v}
 			iNdEx = postIndex
 		case 8:
 			if wireType != 2 {
@@ -4297,7 +5009,7 @@ func (m *Message) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Message = &Message_ViewChangeRequest{v}
+			m.Message = &ReplicaMessage_ViewChangeRequest{v}
 			iNdEx = postIndex
 		case 9:
 			if wireType != 2 {
@@ -4332,7 +5044,7 @@ func (m *Message) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Message = &Message_ViewChange{v}
+			m.Message = &ReplicaMessage_ViewChange{v}
 			iNdEx = postIndex
 		case 10:
 			if wireType != 2 {
@@ -4367,7 +5079,7 @@ func (m *Message) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Message = &Message_StartView{v}
+			m.Message = &ReplicaMessage_StartView{v}
 			iNdEx = postIndex
 		case 11:
 			if wireType != 2 {
@@ -4402,7 +5114,7 @@ func (m *Message) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Message = &Message_SyncPrepare{v}
+			m.Message = &ReplicaMessage_SyncPrepare{v}
 			iNdEx = postIndex
 		case 12:
 			if wireType != 2 {
@@ -4437,7 +5149,7 @@ func (m *Message) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Message = &Message_SyncReply{v}
+			m.Message = &ReplicaMessage_SyncReply{v}
 			iNdEx = postIndex
 		case 13:
 			if wireType != 2 {
@@ -4472,7 +5184,7 @@ func (m *Message) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Message = &Message_SyncCommit{v}
+			m.Message = &ReplicaMessage_SyncCommit{v}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -4758,25 +5470,6 @@ func (m *CommandReply) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SessionId", wireType)
-			}
-			m.SessionId = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowProtocol
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.SessionId |= SessionID(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 2:
-			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field MessageId", wireType)
 			}
 			m.MessageId = 0
@@ -4794,7 +5487,7 @@ func (m *CommandReply) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 3:
+		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field SenderId", wireType)
 			}
@@ -4826,7 +5519,7 @@ func (m *CommandReply) Unmarshal(dAtA []byte) error {
 			}
 			m.SenderId = MemberID(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 4:
+		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ViewId", wireType)
 			}
@@ -4862,7 +5555,7 @@ func (m *CommandReply) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 5:
+		case 4:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field SlotId", wireType)
 			}
@@ -4881,7 +5574,7 @@ func (m *CommandReply) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 6:
+		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
 			}
@@ -5076,25 +5769,6 @@ func (m *QueryReply) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SessionId", wireType)
-			}
-			m.SessionId = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowProtocol
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.SessionId |= SessionID(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 2:
-			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field MessageId", wireType)
 			}
 			m.MessageId = 0
@@ -5112,7 +5786,7 @@ func (m *QueryReply) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 3:
+		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field SenderId", wireType)
 			}
@@ -5144,7 +5818,7 @@ func (m *QueryReply) Unmarshal(dAtA []byte) error {
 			}
 			m.SenderId = MemberID(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 4:
+		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field ViewId", wireType)
 			}
@@ -5180,7 +5854,7 @@ func (m *QueryReply) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 5:
+		case 4:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
 			}

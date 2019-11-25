@@ -19,6 +19,7 @@ import (
 	"fmt"
 	node "github.com/atomix/atomix-go-node/pkg/atomix/cluster"
 	"google.golang.org/grpc"
+	"math"
 	"sync"
 )
 
@@ -30,8 +31,11 @@ type Cluster interface {
 	// Members returns a list of all members in the NOPaxos cluster
 	Members() []MemberID
 
+	// QuorumSize returns the cluster quorum size
+	QuorumSize() int
+
 	// GetStream gets a NOPaxosService_StreamClient connection for the given member
-	GetStream(memberID MemberID) (NOPaxosService_StreamClient, error)
+	GetStream(memberID MemberID) (ReplicaService_ReplicaStreamClient, error)
 }
 
 // NewCluster returns a new Cluster with the given configuration
@@ -42,12 +46,14 @@ func NewCluster(config node.Cluster) Cluster {
 		locations[MemberID(id)] = member
 		memberIDs = append(memberIDs, MemberID(id))
 	}
+	quorum := int(math.Floor(float64(len(memberIDs))/2.0)) + 1
 	return &cluster{
 		member:    MemberID(config.MemberID),
 		memberIDs: memberIDs,
 		locations: locations,
 		conns:     make(map[MemberID]*grpc.ClientConn),
-		streams:   make(map[MemberID]NOPaxosService_StreamClient),
+		streams:   make(map[MemberID]ReplicaService_ReplicaStreamClient),
+		quorum:    quorum,
 	}
 }
 
@@ -57,7 +63,8 @@ type cluster struct {
 	memberIDs []MemberID
 	locations map[MemberID]node.Member
 	conns     map[MemberID]*grpc.ClientConn
-	streams   map[MemberID]NOPaxosService_StreamClient
+	streams   map[MemberID]ReplicaService_ReplicaStreamClient
+	quorum    int
 	mu        sync.RWMutex
 }
 
@@ -67,6 +74,10 @@ func (c *cluster) Member() MemberID {
 
 func (c *cluster) Members() []MemberID {
 	return c.memberIDs
+}
+
+func (c *cluster) QuorumSize() int {
+	return c.quorum
 }
 
 func (c *cluster) getConn(member MemberID) (*grpc.ClientConn, error) {
@@ -87,7 +98,7 @@ func (c *cluster) getConn(member MemberID) (*grpc.ClientConn, error) {
 	return conn, nil
 }
 
-func (c *cluster) GetStream(member MemberID) (NOPaxosService_StreamClient, error) {
+func (c *cluster) GetStream(member MemberID) (ReplicaService_ReplicaStreamClient, error) {
 	c.mu.RLock()
 	stream, ok := c.streams[member]
 	c.mu.RUnlock()
@@ -100,8 +111,8 @@ func (c *cluster) GetStream(member MemberID) (NOPaxosService_StreamClient, error
 				c.mu.Unlock()
 				return nil, err
 			}
-			client := NewNOPaxosServiceClient(conn)
-			stream, err = client.Stream(context.Background())
+			client := NewReplicaServiceClient(conn)
+			stream, err = client.ReplicaStream(context.Background())
 			if err != nil {
 				return nil, err
 			}

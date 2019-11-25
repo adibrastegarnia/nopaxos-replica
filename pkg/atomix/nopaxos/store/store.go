@@ -21,25 +21,15 @@ import (
 
 // NewMemoryStore returns a new in-memory store
 func NewMemoryStore() Store {
-	log := log.NewMemoryLog()
 	return &store{
-		log:      log,
-		reader:   log.OpenReader(0),
-		writer:   log.Writer(),
 		snapshot: snapshot.NewMemoryStore(),
 	}
 }
 
 // Store provides storage interfaces for Raft state
 type Store interface {
-	// Log returns the Raft log
-	Log() log.Log
-
-	// Reader returns the primary Raft log reader
-	Reader() log.Reader
-
-	// Writer returns the primary Raft log writer
-	Writer() log.Writer
+	// NewLog returns a new log
+	NewLog() log.Log
 
 	// Snapshot returns the snapshot store
 	Snapshot() snapshot.Store
@@ -54,6 +44,10 @@ type store struct {
 	reader   log.Reader
 	writer   log.Writer
 	snapshot snapshot.Store
+}
+
+func (s *store) NewLog() log.Log {
+	return log.NewMemoryLog()
 }
 
 func (s *store) Log() log.Log {

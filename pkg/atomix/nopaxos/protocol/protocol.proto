@@ -25,7 +25,16 @@ option (gogoproto.testgen_all) = true;
 option (gogoproto.populate_all) = true;
 option (gogoproto.equal_all) = true;
 
-message Message {
+message ClientMessage {
+    oneof message {
+        CommandRequest command = 1;
+        CommandReply command_reply = 2;
+        QueryRequest query = 3;
+        QueryReply query_reply = 4;
+    }
+}
+
+message ReplicaMessage {
     oneof message {
         CommandRequest command = 1;
         CommandReply command_reply = 2;
@@ -55,12 +64,11 @@ message CommandRequest {
 }
 
 message CommandReply {
-    uint64 session_id = 1 [(gogoproto.casttype) = "SessionID"];
-    uint64 message_id = 2 [(gogoproto.casttype) = "MessageID"];
-    string sender_id = 3 [(gogoproto.casttype) = "MemberID"];
-    ViewId view_id = 4;
-    uint64 slot_id = 5 [(gogoproto.casttype) = "LogSlotID"];
-    bytes value = 6;
+    uint64 message_id = 1 [(gogoproto.casttype) = "MessageID"];
+    string sender_id = 2 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 3;
+    uint64 slot_id = 4 [(gogoproto.casttype) = "LogSlotID"];
+    bytes value = 5;
 }
 
 message QueryRequest {
@@ -69,11 +77,10 @@ message QueryRequest {
 }
 
 message QueryReply {
-    uint64 session_id = 1 [(gogoproto.casttype) = "SessionID"];
-    uint64 message_id = 2 [(gogoproto.casttype) = "MessageID"];
-    string sender_id = 3 [(gogoproto.casttype) = "MemberID"];
-    ViewId view_id = 4;
-    bytes value = 5;
+    uint64 message_id = 1 [(gogoproto.casttype) = "MessageID"];
+    string sender_id = 2 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 3;
+    bytes value = 4;
 }
 
 message SlotLookup {
@@ -131,6 +138,10 @@ message SyncCommit {
     repeated LogEntry log = 4;
 }
 
-service NOPaxosService {
-    rpc Stream(stream Message) returns (stream Message);
+service ClientService {
+    rpc ClientStream(stream ClientMessage) returns (stream ClientMessage);
+}
+
+service ReplicaService {
+    rpc ReplicaStream(stream ReplicaMessage) returns (stream ReplicaMessage);
 }

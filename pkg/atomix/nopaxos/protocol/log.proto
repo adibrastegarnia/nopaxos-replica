@@ -42,7 +42,8 @@ message NoOpEntry {
 }
 
 message CommandEntry {
-    bytes value = 1;
+    uint64 message_id = 1 [(gogoproto.casttype) = "MessageID"];
+    bytes value = 2;
 }
 
 message QueryEntry {
