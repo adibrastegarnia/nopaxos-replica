@@ -560,16 +560,14 @@ func (s *NOPaxos) viewChangeRequest(request *ViewChangeRequest) {
 
 	// Send a view change request to all replicas other than the leader
 	for _, member := range s.cluster.Members() {
-		if member != s.getLeader(newViewID) {
-			if stream, err := s.cluster.GetStream(member); err == nil {
-				_ = stream.Send(&ReplicaMessage{
-					Message: &ReplicaMessage_ViewChangeRequest{
-						ViewChangeRequest: &ViewChangeRequest{
-							ViewID: newViewID,
-						},
+		if stream, err := s.cluster.GetStream(member); err == nil {
+			_ = stream.Send(&ReplicaMessage{
+				Message: &ReplicaMessage_ViewChangeRequest{
+					ViewChangeRequest: &ViewChangeRequest{
+						ViewID: newViewID,
 					},
-				})
-			}
+				},
+			})
 		}
 	}
 }
@@ -599,31 +597,42 @@ func (s *NOPaxos) viewChange(request *ViewChange) {
 	s.stateMu.Unlock()
 
 	// Aggregate the view changes for the current view
+	localViewChanged := false
 	viewChanges := make([]*ViewChange, 0, len(s.viewChanges))
 	for _, viewChange := range s.viewChanges {
 		if viewChange.ViewID.SessionNum == s.viewID.SessionNum && viewChange.ViewID.LeaderNum == s.viewID.LeaderNum {
 			viewChanges = append(viewChanges, viewChange)
+			if viewChange.Sender == s.cluster.Member() {
+				localViewChanged = true
+			}
 		}
 	}
 
 	// If the view changes have reached a quorum, start the new view
-	if len(viewChanges) >= s.cluster.QuorumSize() {
+	if localViewChanged && len(viewChanges) >= s.cluster.QuorumSize() {
 		// Create the state for the new view
-		var lastNormal *ViewChange
-		for _, viewChange := range viewChanges {
-			if viewChange.ViewID.SessionNum <= s.viewID.SessionNum && viewChange.ViewID.LeaderNum <= s.viewID.LeaderNum {
-				lastNormal = viewChange
+		var lastNormal *ViewId
+		for _, viewChange1 := range viewChanges {
+			normal := true
+			for _, viewChange2 := range viewChanges {
+				if viewChange2.LastNormal.SessionNum > viewChange1.LastNormal.SessionNum || viewChange2.LastNormal.LeaderNum > viewChange1.LastNormal.LeaderNum {
+					normal = false
+					break
+				}
+			}
+			if normal {
+				lastNormal = viewChange1.LastNormal
 			}
 		}
 
 		var newMessageID MessageID
 		goodLogs := make([][]*LogEntry, 0, len(viewChanges))
 		for _, viewChange := range viewChanges {
-			if viewChange.LastNormal.SessionNum == lastNormal.ViewID.SessionNum && viewChange.LastNormal.LeaderNum == lastNormal.ViewID.LeaderNum {
+			if viewChange.LastNormal.SessionNum == lastNormal.SessionNum && viewChange.LastNormal.LeaderNum == lastNormal.LeaderNum {
 				goodLogs = append(goodLogs, viewChange.Log)
 
 				// If the session has changed, take the maximum message ID
-				if lastNormal.ViewID.SessionNum == s.viewID.SessionNum && viewChange.MessageNum > newMessageID {
+				if lastNormal.SessionNum == s.viewID.SessionNum && viewChange.MessageNum > newMessageID {
 					newMessageID = viewChange.MessageNum
 				}
 			}
