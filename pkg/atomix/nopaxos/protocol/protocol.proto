@@ -50,6 +50,7 @@ message ReplicaMessage {
         SyncPrepare sync_prepare = 11;
         SyncReply sync_reply = 12;
         SyncCommit sync_commit = 13;
+        Ping ping = 14;
     }
 }
 
@@ -140,6 +141,11 @@ message SyncCommit {
     ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
     uint64 message_num = 3 [(gogoproto.casttype) = "MessageID"];
     repeated LogEntry log = 4;
+}
+
+message Ping {
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
 }
 
 service ClientService {

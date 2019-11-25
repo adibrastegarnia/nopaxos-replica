@@ -26,7 +26,7 @@ import (
 
 // NewNOPaxos returns a new NOPaxos protocol state struct
 func NewNOPaxos(cluster Cluster, registry *node.Registry, config *config.ProtocolConfig) *NOPaxos {
-	return &NOPaxos{
+	nopaxos := &NOPaxos{
 		config:  config,
 		cluster: cluster,
 		state:   newStateMachine(string(cluster.Member()), registry),
@@ -45,6 +45,8 @@ func NewNOPaxos(cluster Cluster, registry *node.Registry, config *config.Protoco
 		gapCommitReps:     make(map[MemberID]*GapCommitReply),
 		syncReps:          make(map[MemberID]*SyncReply),
 	}
+	nopaxos.start()
+	return nopaxos
 }
 
 // MemberID is the ID of a NOPaxos cluster member
@@ -93,8 +95,45 @@ type NOPaxos struct {
 	tentativeSync     LogSlotID
 	syncPoint         LogSlotID
 	syncReps          map[MemberID]*SyncReply
+	pingTicker        *time.Ticker
+	timeoutTimer      *time.Timer
 	stateMu           sync.RWMutex
 	logMu             sync.RWMutex
+}
+
+func (s *NOPaxos) start() {
+	s.stateMu.Lock()
+	s.resetTimeout()
+	s.setPingTicker()
+	s.stateMu.Unlock()
+}
+
+func (s *NOPaxos) resetTimeout() {
+	s.timeoutTimer = time.NewTimer(s.config.GetLeaderTimeoutOrDefault())
+	go func() {
+		select {
+		case _, ok := <-s.timeoutTimer.C:
+			if !ok {
+				return
+			}
+			s.timeout()
+		}
+	}()
+}
+
+func (s *NOPaxos) setPingTicker() {
+	s.pingTicker = time.NewTicker(s.config.GetPingIntervalOrDefault())
+	go func() {
+		for {
+			select {
+			case _, ok := <-s.pingTicker.C:
+				if !ok {
+					return
+				}
+				s.sendPing()
+			}
+		}
+	}()
 }
 
 func (s *NOPaxos) ClientStream(stream ClientService_ClientStreamServer) error {
@@ -157,6 +196,8 @@ func (s *NOPaxos) handleReplica(message *ReplicaMessage, stream ReplicaService_R
 		s.syncReply(m.SyncReply)
 	case *ReplicaMessage_SyncCommit:
 		s.syncCommit(m.SyncCommit)
+	case *ReplicaMessage_Ping:
+		s.ping(m.Ping)
 	}
 }
 
@@ -688,6 +729,8 @@ func (s *NOPaxos) startView(request *StartView) {
 			}
 		}
 	}
+
+	s.resetTimeout()
 }
 
 func (s *NOPaxos) startSync() {
@@ -817,7 +860,7 @@ func (s *NOPaxos) syncReply(reply *SyncReply) {
 	defer s.stateMu.RUnlock()
 
 	// If the view IDs do not match, ignore the request
-	if s.viewID == nil || s.viewID.LeaderNum != reply.ViewID.LeaderNum || s.viewID.SessionNum != reply.ViewID.SessionNum {
+	if s.viewID.LeaderNum != reply.ViewID.LeaderNum || s.viewID.SessionNum != reply.ViewID.SessionNum {
 		return
 	}
 
@@ -907,6 +950,44 @@ func (s *NOPaxos) syncCommit(request *SyncCommit) {
 	s.log = newLog
 	s.firstSlotNum = firstSlotID
 	s.lastSlotNum = lastSlotID
+}
+
+func (s *NOPaxos) sendPing() {
+	for _, member := range s.cluster.Members() {
+		if member != s.cluster.Member() {
+			if stream, err := s.cluster.GetStream(member); err == nil {
+				_ = stream.Send(&ReplicaMessage{
+					Message: &ReplicaMessage_Ping{
+						Ping: &Ping{
+							Sender: s.cluster.Member(),
+							ViewID: s.viewID,
+						},
+					},
+				})
+			}
+		}
+	}
+}
+
+func (s *NOPaxos) ping(request *Ping) {
+	s.stateMu.Lock()
+	defer s.stateMu.Unlock()
+
+	// If the view IDs do not match, ignore the request
+	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
+		return
+	}
+
+	// If the replica's status is not Normal, ignore the request
+	if s.status != StatusNormal {
+		return
+	}
+
+	s.timeoutTimer.Reset(s.config.GetLeaderTimeoutOrDefault())
+}
+
+func (s *NOPaxos) timeout() {
+	s.startLeaderChange()
 }
 
 func newStateMachine(node string, registry *node.Registry) *stateMachine {
