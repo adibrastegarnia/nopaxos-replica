@@ -44,14 +44,19 @@ func (s *NOPaxos) handleRecover(request *Recover) {
 		return
 	}
 
-	// If this node is the leader for its view, send the log
+	// If this node is the leader for its view, send the snapshot and log
 	var log []*LogEntry
+	var checkpoint LogSlotID
+	var snapshotData []byte
 	if s.getLeader(s.viewID) == s.cluster.Member() {
 		log := make([]*LogEntry, 0, s.log.LastSlot()-s.log.FirstSlot()+1)
 		for slotNum := s.log.FirstSlot(); slotNum <= s.log.LastSlot(); slotNum++ {
 			if entry := s.log.Get(slotNum); entry != nil {
 				log = append(log, entry)
 			}
+		}
+		if s.currentSnapshot != nil {
+			snapshotData = s.currentSnapshot.Data
 		}
 	}
 
@@ -62,6 +67,8 @@ func (s *NOPaxos) handleRecover(request *Recover) {
 			RecoveryID: request.RecoveryID,
 			ViewID:     s.viewID,
 			MessageNum: s.sessionMessageNum,
+			Checkpoint: checkpoint,
+			Snapshot:   snapshotData,
 			Log:        log,
 		}
 		s.logger.SendTo("RecoverReply", reply, request.Sender)
@@ -113,6 +120,12 @@ func (s *NOPaxos) handleRecoverReply(reply *RecoverReply) {
 			for _, entry := range leaderReply.Log {
 				newLog.Set(entry)
 			}
+			s.log = newLog
+		}
+
+		if leaderReply.Checkpoint > 0 {
+			s.currentSnapshot = newSnapshot(leaderReply.Checkpoint)
+			s.currentSnapshot.Data = leaderReply.Snapshot
 		}
 		s.sessionMessageNum = leaderReply.MessageNum
 		s.status = StatusNormal

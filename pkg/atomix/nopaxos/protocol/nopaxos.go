@@ -66,9 +66,6 @@ type SessionID uint64
 // MessageID is a sequencer message ID
 type MessageID uint64
 
-// LogSlotID is a log slot number
-type LogSlotID uint64
-
 // Status is the protocol status
 type Status int
 
@@ -95,6 +92,7 @@ type NOPaxos struct {
 	status               Status                              // The status of the replica TODO: Ensure statuses are correctly filtered
 	recoveryID           string                              // A nonce indicating the recovery attempt
 	recoverReps          map[MemberID]*RecoverReply          // The set of recover replies received
+	currentSnapshot      *Snapshot                           // The current snapshot (if any)
 	sessionMessageNum    MessageID                           // The latest message num for the sequencer session
 	viewID               *ViewId                             // The current view ID
 	lastNormView         *ViewId                             // The last normal view ID TODO: Ensure this is used correctly

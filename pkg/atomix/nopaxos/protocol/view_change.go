@@ -197,6 +197,7 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 
 		var newMessageID MessageID
 		var minSlotNum, maxSlotNum LogSlotID
+		var maxCheckpoint LogSlotID
 
 		noOpFilters := make(map[MemberID]*bloom.BloomFilter)
 		for _, viewChange := range viewChanges {
@@ -215,6 +216,12 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 				}
 				if maxSlotNum == 0 || viewChange.LastLogSlotNum > maxSlotNum {
 					maxSlotNum = viewChange.LastLogSlotNum
+				}
+
+				// If the replica has no snapshot or its snapshot is older than the view change's log
+				// we need to request the snapshot from a replica.
+				if (s.currentSnapshot == nil || s.currentSnapshot.SlotNum < viewChange.FirstLogSlotNum) && viewChange.FirstLogSlotNum-1 > maxCheckpoint {
+					maxCheckpoint = viewChange.FirstLogSlotNum - 1
 				}
 
 				// If the session has changed, take the maximum message ID
@@ -254,7 +261,7 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 
 		// If there are any missing slots in the log, store the new log and send LogRepair requests to peers to
 		// determine whether a no-op entry should be written to the log. Otherwise, send a StartView.
-		if len(noOpSlots) > 0 {
+		if len(noOpSlots) > 0 || maxCheckpoint > 0 {
 			s.viewChangeRepairs = make(map[MemberID]*ViewChangeRepair)
 			for member, slots := range noOpSlots {
 				if stream, err := s.cluster.GetStream(member); err == nil {
@@ -262,6 +269,7 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 						Sender:     s.cluster.Member(),
 						ViewID:     s.viewID,
 						MessageNum: newMessageID,
+						Checkpoint: maxCheckpoint,
 						SlotNums:   slots,
 					}
 					message := &ReplicaMessage{
@@ -336,12 +344,22 @@ func (s *NOPaxos) handleViewChangeRepair(request *ViewChangeRepair) {
 		}
 	}
 
+	// If this replica's checkpoint was requested, send the snapshot
+	var checkpoint LogSlotID
+	var snapshot []byte
+	if request.Checkpoint > 0 && s.currentSnapshot != nil && request.Checkpoint <= s.currentSnapshot.SlotNum {
+		checkpoint = s.currentSnapshot.SlotNum
+		snapshot = s.currentSnapshot.Data
+	}
+
 	// Send non-nil entries back to the sender
 	if stream, err := s.cluster.GetStream(request.Sender); err == nil {
 		viewChangeReply := &ViewChangeRepairReply{
 			Sender:     s.cluster.Member(),
 			ViewID:     s.viewID,
 			MessageNum: request.MessageNum,
+			Checkpoint: checkpoint,
+			Snapshot:   snapshot,
 			SlotNums:   slots,
 		}
 		message := &ReplicaMessage{
@@ -365,6 +383,14 @@ func (s *NOPaxos) handleViewChangeRepairReply(reply *ViewChangeRepairReply) {
 
 	// Add the reply to the SlotRepair replies list
 	s.viewChangeRepairReps[reply.Sender] = reply
+
+	// If a snapshot has been returned and the snapshot is newer than the local snapshot, update it
+	// This is safe to do without waiting for replies from all replicas since snapshots can only be
+	// taken of a consistent log.
+	if reply.Checkpoint > 0 && (s.currentSnapshot == nil || reply.Checkpoint > s.currentSnapshot.SlotNum) {
+		s.currentSnapshot = newSnapshot(reply.Checkpoint)
+		s.currentSnapshot.Data = reply.Snapshot
+	}
 
 	// If all view repairs have been responded to, remove entries where any slot is empty
 	// and populate slots where all entries have been returned

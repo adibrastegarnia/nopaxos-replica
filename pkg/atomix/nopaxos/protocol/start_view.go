@@ -61,7 +61,13 @@ func (s *NOPaxos) handleStartView(request *StartView) {
 		}
 	}
 
-	// If any entries need to be requested from the leader, request them. Otherwise, send a SyncReply
+	// If the view's checkpoint is newer than the local checkpoint, request a snapshot
+	var checkpoint LogSlotID
+	if request.FirstLogSlotNum > 1 && (s.currentSnapshot == nil || request.FirstLogSlotNum > s.currentSnapshot.SlotNum+1) {
+		checkpoint = request.FirstLogSlotNum - 1
+	}
+
+	// If any entries need to be requested from the leader, request them
 	if len(entrySlots) > 0 {
 		leader := s.getLeader(s.viewID)
 		if stream, err := s.cluster.GetStream(leader); err == nil {
@@ -69,6 +75,7 @@ func (s *NOPaxos) handleStartView(request *StartView) {
 				Sender:     s.cluster.Member(),
 				ViewID:     s.viewID,
 				MessageNum: request.MessageNum,
+				Checkpoint: checkpoint,
 				SlotNums:   entrySlots,
 			}
 			message := &ReplicaMessage{
@@ -128,12 +135,22 @@ func (s *NOPaxos) handleViewRepair(request *ViewRepair) {
 		}
 	}
 
+	// If a snapshot was requested, return the snapshot
+	var checkpoint LogSlotID
+	var snapshot []byte
+	if request.Checkpoint > 0 && s.currentSnapshot != nil && request.Checkpoint <= s.currentSnapshot.SlotNum {
+		checkpoint = s.currentSnapshot.SlotNum
+		snapshot = s.currentSnapshot.Data
+	}
+
 	// Send non-nil entries back to the sender
 	if stream, err := s.cluster.GetStream(request.Sender); err == nil {
 		viewRepairReply := &ViewRepairReply{
-			Sender:  s.cluster.Member(),
-			ViewID:  s.viewID,
-			Entries: entries,
+			Sender:     s.cluster.Member(),
+			ViewID:     s.viewID,
+			Checkpoint: checkpoint,
+			Snapshot:   snapshot,
+			Entries:    entries,
 		}
 		message := &ReplicaMessage{
 			Message: &ReplicaMessage_ViewRepairReply{
@@ -153,8 +170,14 @@ func (s *NOPaxos) handleViewRepairReply(reply *ViewRepairReply) {
 
 	// If no view repair request is stored, ignore the reply
 	request := s.viewRepair
-	if request == nil || s.syncLog == nil {
+	if request == nil || s.viewLog == nil {
 		return
+	}
+
+	// If a snapshot was returned and the snapshot is newer than the local snapshot, store the snapshot
+	if reply.Checkpoint > 0 && (s.currentSnapshot == nil || reply.Checkpoint > s.currentSnapshot.SlotNum) {
+		s.currentSnapshot = newSnapshot(reply.Checkpoint)
+		s.currentSnapshot.Data = reply.Snapshot
 	}
 
 	// Create a map of log entries

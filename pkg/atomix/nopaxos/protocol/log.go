@@ -14,6 +14,9 @@
 
 package protocol
 
+// LogSlotID is a log slot number
+type LogSlotID uint64
+
 // newLog returns a new NOPaxos log
 func newLog(firstSlot LogSlotID) *Log {
 	return &Log{
