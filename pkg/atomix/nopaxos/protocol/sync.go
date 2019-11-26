@@ -381,6 +381,12 @@ func (s *NOPaxos) handleSyncCommit(request *SyncCommit) {
 		return
 	}
 
+	// If a checkpoint exists and is less than the sync point, restore the checkpoint
+	if s.currentCheckpoint != nil && s.currentCheckpoint.SlotNum <= request.SyncPoint && s.currentCheckpoint.SlotNum > s.applied {
+		s.state.restore(s.currentCheckpoint)
+		s.applied = s.currentCheckpoint.SlotNum
+	}
+
 	for slotNum := s.applied + 1; slotNum <= request.SyncPoint; slotNum++ {
 		entry := s.log.Get(slotNum)
 		if entry != nil {
