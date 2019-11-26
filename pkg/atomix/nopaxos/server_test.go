@@ -33,7 +33,7 @@ import (
 func TestRaftProtocol(t *testing.T) {
 	logrus.SetLevel(logrus.TraceLevel)
 
-	leaderTimeout := 10 * time.Second
+	leaderTimeout := 5 * time.Second
 	config := &config.ProtocolConfig{LeaderTimeout: &leaderTimeout}
 
 	clusterFoo := atomix.Cluster{
@@ -106,7 +106,7 @@ func TestRaftProtocol(t *testing.T) {
 	go serverBar.Start()
 	go serverBaz.Start()
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	connFoo, err := grpc.Dial("localhost:5678", grpc.WithInsecure())
 	assert.NoError(t, err)

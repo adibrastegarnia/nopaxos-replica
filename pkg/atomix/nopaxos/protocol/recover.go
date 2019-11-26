@@ -36,10 +36,28 @@ func (s *NOPaxos) startRecovery() {
 }
 
 func (s *NOPaxos) handleRecover(request *Recover) {
+	s.logger.ReceiveFrom("Recover", request, request.Sender)
+
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	// If this node is not in the Normal state, ignore the request
+	// If this node is recovering, return an empty view
+	if s.status == StatusRecovering {
+		if stream, err := s.cluster.GetStream(request.Sender); err == nil {
+			reply := &RecoverReply{
+				Sender:     s.cluster.Member(),
+				RecoveryID: request.RecoveryID,
+			}
+			s.logger.SendTo("RecoverReply", reply, request.Sender)
+			_ = stream.Send(&ReplicaMessage{
+				Message: &ReplicaMessage_RecoverReply{
+					RecoverReply: reply,
+				},
+			})
+		}
+	}
+
+	// If this node is not in the normal state, ignore the recovery
 	if s.status != StatusNormal {
 		return
 	}
@@ -81,6 +99,8 @@ func (s *NOPaxos) handleRecover(request *Recover) {
 }
 
 func (s *NOPaxos) handleRecoverReply(reply *RecoverReply) {
+	s.logger.ReceiveFrom("RecoverReply", reply, reply.Sender)
+
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -89,12 +109,20 @@ func (s *NOPaxos) handleRecoverReply(reply *RecoverReply) {
 		return
 	}
 
+	// If the recovery ID does not match, ignore the reply
+	if reply.RecoveryID != s.recoveryID {
+		return
+	}
+
 	// Add the reply to the set of replies
 	s.recoverReps[reply.Sender] = reply
 
-	// Determine the most recent view in the replies
+	// Determine the most recent view in the replies and count the number of recovering nodes
+	recovering := 0
 	for _, recoverReply := range s.recoverReps {
-		if recoverReply.ViewID.SessionNum > s.viewID.SessionNum || (recoverReply.ViewID.SessionNum == s.viewID.SessionNum && recoverReply.ViewID.LeaderNum > s.viewID.LeaderNum) {
+		if recoverReply.ViewID == nil {
+			recovering++
+		} else if recoverReply.ViewID.SessionNum > s.viewID.SessionNum || (recoverReply.ViewID.SessionNum == s.viewID.SessionNum && recoverReply.ViewID.LeaderNum > s.viewID.LeaderNum) {
 			s.viewID = recoverReply.ViewID
 		}
 	}
@@ -108,13 +136,16 @@ func (s *NOPaxos) handleRecoverReply(reply *RecoverReply) {
 	// Aggregate the replies changes for the most recent view
 	viewReplies := make([]*RecoverReply, 0, len(s.recoverReps))
 	for _, recoverReply := range s.recoverReps {
-		if recoverReply.ViewID.SessionNum == s.viewID.SessionNum && recoverReply.ViewID.LeaderNum == s.viewID.LeaderNum {
+		if recoverReply.ViewID != nil && recoverReply.ViewID.SessionNum == s.viewID.SessionNum && recoverReply.ViewID.LeaderNum == s.viewID.LeaderNum {
 			viewReplies = append(viewReplies, recoverReply)
 		}
 	}
 
-	// If the recover replies have reached a quorum, start the new view
-	if len(viewReplies) >= s.cluster.QuorumSize() {
+	// If a quorum of nodes are recovering, start in the initial state
+	// Otherwise, if a quorum of views has been received, initialize the state from the leader
+	if recovering >= s.cluster.QuorumSize() {
+		s.status = StatusNormal
+	} else if len(viewReplies) >= s.cluster.QuorumSize() {
 		if len(leaderReply.Log) > 0 {
 			newLog := newLog(leaderReply.Log[0].SlotNum)
 			for _, entry := range leaderReply.Log {

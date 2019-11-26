@@ -66,6 +66,7 @@ func (s *NOPaxos) handlePing(request *Ping) {
 func (s *NOPaxos) Timeout() {
 	s.mu.RLock()
 	if s.status == StatusRecovering {
+		s.mu.RUnlock()
 		s.startRecovery()
 	} else if s.getLeader(s.viewID) != s.cluster.Member() {
 		s.mu.RUnlock()
