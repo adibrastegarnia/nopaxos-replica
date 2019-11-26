@@ -16,10 +16,13 @@ package nopaxos
 
 import (
 	"context"
+	"github.com/atomix/atomix-api/proto/atomix/counter"
 	atomix "github.com/atomix/atomix-go-node/pkg/atomix/cluster"
 	"github.com/atomix/atomix-go-node/pkg/atomix/registry"
+	"github.com/atomix/atomix-go-node/pkg/atomix/service"
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/config"
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/protocol"
+	"github.com/gogo/protobuf/proto"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
@@ -123,33 +126,52 @@ func TestRaftProtocol(t *testing.T) {
 	streamBaz, err := clientBaz.ClientStream(context.Background())
 	assert.NoError(t, err)
 
-	streamFoo.Send(&protocol.ClientMessage{
+	bytes, _ := proto.Marshal(&counter.SetRequest{
+		Value: 1,
+	})
+	bytes, _ = proto.Marshal(&service.CommandRequest{
+		Context: &service.RequestContext{},
+		Name:    "set",
+		Command: bytes,
+	})
+	bytes, _ = proto.Marshal(&service.ServiceRequest{
+		Id: &service.ServiceId{
+			Type:      "test",
+			Name:      "test",
+			Namespace: "test",
+		},
+		Request: &service.ServiceRequest_Command{
+			Command: bytes,
+		},
+	})
+
+	_ = streamFoo.Send(&protocol.ClientMessage{
 		Message: &protocol.ClientMessage_Command{
 			Command: &protocol.CommandRequest{
 				SessionNum: 1,
 				MessageNum: 1,
 				Timestamp:  time.Now(),
-				Value:      []byte{},
+				Value:      bytes,
 			},
 		},
 	})
-	streamBar.Send(&protocol.ClientMessage{
+	_ = streamBar.Send(&protocol.ClientMessage{
 		Message: &protocol.ClientMessage_Command{
 			Command: &protocol.CommandRequest{
 				SessionNum: 1,
 				MessageNum: 1,
 				Timestamp:  time.Now(),
-				Value:      []byte{},
+				Value:      bytes,
 			},
 		},
 	})
-	streamBaz.Send(&protocol.ClientMessage{
+	_ = streamBaz.Send(&protocol.ClientMessage{
 		Message: &protocol.ClientMessage_Command{
 			Command: &protocol.CommandRequest{
 				SessionNum: 1,
 				MessageNum: 1,
 				Timestamp:  time.Now(),
-				Value:      []byte{},
+				Value:      bytes,
 			},
 		},
 	})
