@@ -66,6 +66,11 @@ func (s *Server) Start() error {
 	return s.server.Serve(lis)
 }
 
+// timeout times out the server to start a view change
+func (s *Server) timeout() {
+	s.nopaxos.Timeout()
+}
+
 // Stop shuts down the NOPaxos server
 func (s *Server) Stop() error {
 	s.mu.Lock()

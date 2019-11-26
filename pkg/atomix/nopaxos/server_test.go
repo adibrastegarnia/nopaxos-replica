@@ -188,5 +188,53 @@ func TestRaftProtocol(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, messageBaz)
 
+	time.Sleep(10 * time.Second)
+
+	// Timeout bar to force a view change
+	serverBar.timeout()
+
 	time.Sleep(5 * time.Second)
+
+	_ = streamFoo.Send(&protocol.ClientMessage{
+		Message: &protocol.ClientMessage_Command{
+			Command: &protocol.CommandRequest{
+				SessionNum: 1,
+				MessageNum: 1,
+				Timestamp:  time.Now(),
+				Value:      bytes,
+			},
+		},
+	})
+	_ = streamBar.Send(&protocol.ClientMessage{
+		Message: &protocol.ClientMessage_Command{
+			Command: &protocol.CommandRequest{
+				SessionNum: 1,
+				MessageNum: 1,
+				Timestamp:  time.Now(),
+				Value:      bytes,
+			},
+		},
+	})
+	_ = streamBaz.Send(&protocol.ClientMessage{
+		Message: &protocol.ClientMessage_Command{
+			Command: &protocol.CommandRequest{
+				SessionNum: 1,
+				MessageNum: 1,
+				Timestamp:  time.Now(),
+				Value:      bytes,
+			},
+		},
+	})
+
+	messageFoo, err = streamFoo.Recv()
+	assert.NoError(t, err)
+	assert.NotNil(t, messageFoo)
+
+	messageBar, err = streamBar.Recv()
+	assert.NoError(t, err)
+	assert.NotNil(t, messageBar)
+
+	messageBaz, err = streamBaz.Recv()
+	assert.NoError(t, err)
+	assert.NotNil(t, messageBaz)
 }

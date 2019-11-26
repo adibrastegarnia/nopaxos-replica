@@ -20,6 +20,7 @@ import (
 	node "github.com/atomix/atomix-go-node/pkg/atomix/cluster"
 	"google.golang.org/grpc"
 	"math"
+	"sort"
 	"sync"
 )
 
@@ -46,6 +47,9 @@ func NewCluster(config node.Cluster) Cluster {
 		locations[MemberID(id)] = member
 		memberIDs = append(memberIDs, MemberID(id))
 	}
+	sort.Slice(memberIDs, func(i, j int) bool {
+		return memberIDs[i] < memberIDs[j]
+	})
 	quorum := int(math.Floor(float64(len(memberIDs))/2.0)) + 1
 	return &cluster{
 		member:    MemberID(config.MemberID),

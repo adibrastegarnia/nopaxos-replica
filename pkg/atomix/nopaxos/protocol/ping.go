@@ -62,7 +62,7 @@ func (s *NOPaxos) handlePing(request *Ping) {
 	s.timeoutTimer.Reset(s.config.GetLeaderTimeoutOrDefault())
 }
 
-func (s *NOPaxos) timeout() {
+func (s *NOPaxos) Timeout() {
 	s.stateMu.RLock()
 	if s.getLeader(s.viewID) != s.cluster.Member() {
 		s.stateMu.RUnlock()

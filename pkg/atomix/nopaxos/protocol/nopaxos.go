@@ -125,7 +125,7 @@ func (s *NOPaxos) resetTimeout() {
 			if !ok {
 				return
 			}
-			s.timeout()
+			s.Timeout()
 		}
 	}()
 }
