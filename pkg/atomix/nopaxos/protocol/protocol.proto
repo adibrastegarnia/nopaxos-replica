@@ -106,8 +106,8 @@ message RecoverReply {
     string recovery_id = 2 [(gogoproto.customname) = "RecoveryID"];
     ViewId view_id = 3 [(gogoproto.customname) = "ViewID"];
     uint64 message_num = 4 [(gogoproto.casttype) = "MessageID"];
-    uint64 checkpoint = 5 [(gogoproto.casttype) = "LogSlotID"];
-    bytes snapshot = 6;
+    uint64 checkpoint_slot_num = 5 [(gogoproto.casttype) = "LogSlotID"];
+    bytes checkpoint = 6;
     repeated LogEntry log = 7;
 }
 
@@ -156,8 +156,8 @@ message ViewChangeRepairReply {
     string sender = 1 [(gogoproto.casttype) = "MemberID"];
     ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
     uint64 message_num = 3 [(gogoproto.casttype) = "MessageID"];
-    uint64 checkpoint = 4 [(gogoproto.casttype) = "LogSlotID"];
-    bytes snapshot = 5;
+    uint64 checkpoint_slot_num = 4 [(gogoproto.casttype) = "LogSlotID"];
+    bytes checkpoint = 5;
     repeated uint64 slot_nums = 6 [(gogoproto.casttype) = "LogSlotID"];
 }
 
@@ -181,8 +181,8 @@ message ViewRepair {
 message ViewRepairReply {
     string sender = 1 [(gogoproto.casttype) = "MemberID"];
     ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
-    uint64 checkpoint = 3 [(gogoproto.casttype) = "LogSlotID"];
-    bytes snapshot = 4;
+    uint64 checkpoint_slot_num = 3 [(gogoproto.casttype) = "LogSlotID"];
+    bytes checkpoint = 4;
     repeated LogEntry entries = 5;
 }
 
@@ -205,8 +205,8 @@ message SyncRepair {
 message SyncRepairReply {
     string sender = 1 [(gogoproto.casttype) = "MemberID"];
     ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
-    uint64 checkpoint = 3 [(gogoproto.casttype) = "LogSlotID"];
-    bytes snapshot = 4;
+    uint64 checkpoint_slot_num = 3 [(gogoproto.casttype) = "LogSlotID"];
+    bytes checkpoint = 4;
     repeated LogEntry entries = 5;
 }
 

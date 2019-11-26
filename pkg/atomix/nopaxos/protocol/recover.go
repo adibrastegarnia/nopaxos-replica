@@ -44,10 +44,10 @@ func (s *NOPaxos) handleRecover(request *Recover) {
 		return
 	}
 
-	// If this node is the leader for its view, send the snapshot and log
+	// If this node is the leader for its view, send the checkpoint and log
 	var log []*LogEntry
-	var checkpoint LogSlotID
-	var snapshotData []byte
+	var checkpointSlotNum LogSlotID
+	var checkpointData []byte
 	if s.getLeader(s.viewID) == s.cluster.Member() {
 		log := make([]*LogEntry, 0, s.log.LastSlot()-s.log.FirstSlot()+1)
 		for slotNum := s.log.FirstSlot(); slotNum <= s.log.LastSlot(); slotNum++ {
@@ -55,21 +55,21 @@ func (s *NOPaxos) handleRecover(request *Recover) {
 				log = append(log, entry)
 			}
 		}
-		if s.currentSnapshot != nil {
-			snapshotData = s.currentSnapshot.Data
+		if s.currentCheckpoint != nil {
+			checkpointData = s.currentCheckpoint.Data
 		}
 	}
 
 	// Send a RecoverReply back to the recovering node
 	if stream, err := s.cluster.GetStream(request.Sender); err == nil {
 		reply := &RecoverReply{
-			Sender:     s.cluster.Member(),
-			RecoveryID: request.RecoveryID,
-			ViewID:     s.viewID,
-			MessageNum: s.sessionMessageNum,
-			Checkpoint: checkpoint,
-			Snapshot:   snapshotData,
-			Log:        log,
+			Sender:            s.cluster.Member(),
+			RecoveryID:        request.RecoveryID,
+			ViewID:            s.viewID,
+			MessageNum:        s.sessionMessageNum,
+			CheckpointSlotNum: checkpointSlotNum,
+			Checkpoint:        checkpointData,
+			Log:               log,
 		}
 		s.logger.SendTo("RecoverReply", reply, request.Sender)
 		_ = stream.Send(&ReplicaMessage{
@@ -123,9 +123,9 @@ func (s *NOPaxos) handleRecoverReply(reply *RecoverReply) {
 			s.log = newLog
 		}
 
-		if leaderReply.Checkpoint > 0 {
-			s.currentSnapshot = newSnapshot(leaderReply.Checkpoint)
-			s.currentSnapshot.Data = leaderReply.Snapshot
+		if leaderReply.CheckpointSlotNum > 0 {
+			s.currentCheckpoint = newCheckpoint(leaderReply.CheckpointSlotNum)
+			s.currentCheckpoint.Data = leaderReply.Checkpoint
 		}
 		s.sessionMessageNum = leaderReply.MessageNum
 		s.status = StatusNormal

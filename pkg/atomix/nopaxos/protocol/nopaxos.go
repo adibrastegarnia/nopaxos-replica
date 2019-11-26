@@ -87,16 +87,16 @@ type NOPaxos struct {
 	cluster              Cluster                             // The cluster state
 	state                *stateMachine                       // The replica's state machine
 	applied              LogSlotID                           // The highest slot applied to the state machine
-	sequencer            ClientService_ClientStreamServer    // The stream to the sequencer
-	log                  *Log                                // The primary log
-	status               Status                              // The status of the replica TODO: Ensure statuses are correctly filtered
-	recoveryID           string                              // A nonce indicating the recovery attempt
-	recoverReps          map[MemberID]*RecoverReply          // The set of recover replies received
-	currentSnapshot      *Snapshot                           // The current snapshot (if any)
-	sessionMessageNum    MessageID                           // The latest message num for the sequencer session
-	viewID               *ViewId                             // The current view ID
-	lastNormView         *ViewId                             // The last normal view ID TODO: Ensure this is used correctly
-	viewChanges          map[MemberID]*ViewChange            // The set of view changes received TODO: Ensure this is cleared
+	sequencer         ClientService_ClientStreamServer       // The stream to the sequencer
+	log               *Log                                   // The primary log
+	status            Status                                 // The status of the replica TODO: Ensure statuses are correctly filtered
+	recoveryID        string                                 // A nonce indicating the recovery attempt
+	recoverReps       map[MemberID]*RecoverReply             // The set of recover replies received
+	currentCheckpoint *Checkpoint                            // The current checkpoint (if any)
+	sessionMessageNum MessageID                              // The latest message num for the sequencer session
+	viewID            *ViewId                                // The current view ID
+	lastNormView      *ViewId                                // The last normal view ID TODO: Ensure this is used correctly
+	viewChanges       map[MemberID]*ViewChange               // The set of view changes received TODO: Ensure this is cleared
 	viewChangeRepairs    map[MemberID]*ViewChangeRepair      // The set of view change repairs received TODO: Ensure this is cleared
 	viewChangeRepairReps map[MemberID]*ViewChangeRepairReply // The set of view change repair replies received TODO: Ensure this is cleared
 	viewRepair           *ViewRepair                         // The last view repair requested TODO: Ensure this is cleared

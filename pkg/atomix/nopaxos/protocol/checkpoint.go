@@ -20,52 +20,52 @@ import (
 	"io"
 )
 
-// newSnapshot creates a new snapshot
-func newSnapshot(slotNum LogSlotID) *Snapshot {
-	return &Snapshot{
+// newCheckpoint creates a new checkpoint
+func newCheckpoint(slotNum LogSlotID) *Checkpoint {
+	return &Checkpoint{
 		SlotNum: slotNum,
 		Data:    make([]byte, 0),
 	}
 }
 
-// Snapshot is a snapshot of the state machine
-type Snapshot struct {
+// Checkpoint is a checkpoint of the state machine
+type Checkpoint struct {
 	SlotNum  LogSlotID
 	Data     []byte
 	Checksum []byte
 }
 
-func (s *Snapshot) Writer() io.WriteCloser {
-	return &snapshotWriteCloser{snapshot: s}
+func (s *Checkpoint) Writer() io.WriteCloser {
+	return &checkpointWriteCloser{checkpoint: s}
 }
 
-func (s *Snapshot) Reader() io.ReadCloser {
-	return &snapshotReadCloser{reader: bytes.NewBuffer(s.Data)}
+func (s *Checkpoint) Reader() io.ReadCloser {
+	return &checkpointReadCloser{reader: bytes.NewBuffer(s.Data)}
 }
 
-type snapshotWriteCloser struct {
-	snapshot *Snapshot
+type checkpointWriteCloser struct {
+	checkpoint *Checkpoint
 }
 
-func (w *snapshotWriteCloser) Write(p []byte) (n int, err error) {
-	w.snapshot.Data = append(w.snapshot.Data, p...)
+func (w *checkpointWriteCloser) Write(p []byte) (n int, err error) {
+	w.checkpoint.Data = append(w.checkpoint.Data, p...)
 	return len(p), nil
 }
 
-func (w *snapshotWriteCloser) Close() error {
-	checksum := sha256.Sum256([]byte(w.snapshot.Data))
-	w.snapshot.Checksum = checksum[:]
+func (w *checkpointWriteCloser) Close() error {
+	checksum := sha256.Sum256([]byte(w.checkpoint.Data))
+	w.checkpoint.Checksum = checksum[:]
 	return nil
 }
 
-type snapshotReadCloser struct {
+type checkpointReadCloser struct {
 	reader io.Reader
 }
 
-func (r *snapshotReadCloser) Read(p []byte) (n int, err error) {
+func (r *checkpointReadCloser) Read(p []byte) (n int, err error) {
 	return r.reader.Read(p)
 }
 
-func (r *snapshotReadCloser) Close() error {
+func (r *checkpointReadCloser) Close() error {
 	return nil
 }
