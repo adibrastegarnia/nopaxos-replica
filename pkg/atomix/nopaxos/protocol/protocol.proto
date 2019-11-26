@@ -46,11 +46,17 @@ message ReplicaMessage {
         GapCommitReply gap_commit_reply = 7;
         ViewChangeRequest view_change_request = 8;
         ViewChange view_change = 9;
-        StartView start_view = 10;
-        SyncPrepare sync_prepare = 11;
-        SyncReply sync_reply = 12;
-        SyncCommit sync_commit = 13;
-        Ping ping = 14;
+        ViewChangeRepair view_change_repair = 10;
+        ViewChangeRepairReply view_change_repair_reply = 11;
+        StartView start_view = 12;
+        ViewRepair view_repair = 13;
+        ViewRepairReply view_repair_reply = 14;
+        SyncPrepare sync_prepare = 15;
+        SyncRepair sync_repair = 16;
+        SyncRepairReply sync_repair_reply = 17;
+        SyncReply sync_reply = 18;
+        SyncCommit sync_commit = 19;
+        Ping ping = 20;
     }
 }
 
@@ -116,21 +122,66 @@ message ViewChange {
     ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
     ViewId last_normal = 3;
     uint64 message_num = 4 [(gogoproto.casttype) = "MessageID"];
-    repeated LogEntry log = 5;
+    bytes no_op_filter = 5;
+    uint64 first_log_slot_num = 6 [(gogoproto.casttype) = "LogSlotID"];
+    uint64 last_log_slot_num = 7 [(gogoproto.casttype) = "LogSlotID"];
+}
+
+message ViewChangeRepair {
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
+    uint64 message_num = 3 [(gogoproto.casttype) = "MessageID"];
+    repeated uint64 slot_nums = 4 [(gogoproto.casttype) = "LogSlotID"];
+}
+
+message ViewChangeRepairReply {
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
+    uint64 message_num = 3 [(gogoproto.casttype) = "MessageID"];
+    repeated uint64 slot_nums = 4 [(gogoproto.casttype) = "LogSlotID"];
 }
 
 message StartView {
     string sender = 1 [(gogoproto.casttype) = "MemberID"];
     ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
     uint64 message_num = 3 [(gogoproto.casttype) = "MessageID"];
-    repeated LogEntry log = 4;
+    bytes no_op_filter = 4;
+    uint64 first_log_slot_num = 5 [(gogoproto.casttype) = "LogSlotID"];
+    uint64 last_log_slot_num = 6 [(gogoproto.casttype) = "LogSlotID"];
+}
+
+message ViewRepair {
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
+    uint64 message_num = 3 [(gogoproto.casttype) = "MessageID"];
+    repeated uint64 slot_nums = 4 [(gogoproto.casttype) = "LogSlotID"];
+}
+
+message ViewRepairReply {
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
+    repeated LogEntry entries = 3;
 }
 
 message SyncPrepare {
     string sender = 1 [(gogoproto.casttype) = "MemberID"];
     ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
     uint64 message_num = 3 [(gogoproto.casttype) = "MessageID"];
-    repeated LogEntry log = 4;
+    bytes no_op_filter = 4;
+    uint64 first_log_slot_num = 5 [(gogoproto.casttype) = "LogSlotID"];
+    uint64 last_log_slot_num = 6 [(gogoproto.casttype) = "LogSlotID"];
+}
+
+message SyncRepair {
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
+    repeated uint64 slot_nums = 3 [(gogoproto.casttype) = "LogSlotID"];
+}
+
+message SyncRepairReply {
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
+    repeated LogEntry entries = 3;
 }
 
 message SyncReply {
@@ -143,7 +194,7 @@ message SyncCommit {
     string sender = 1 [(gogoproto.casttype) = "MemberID"];
     ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
     uint64 message_num = 3 [(gogoproto.casttype) = "MessageID"];
-    repeated LogEntry log = 4;
+    uint64 sync_point = 4 [(gogoproto.casttype) = "LogSlotID"];
 }
 
 message Ping {

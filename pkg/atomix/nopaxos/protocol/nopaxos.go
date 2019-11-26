@@ -20,10 +20,11 @@ import (
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/config"
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/util"
 	"io"
-	"math"
 	"sync"
 	"time"
 )
+
+const bloomFilterHashFunctions = 5
 
 // NewNOPaxos returns a new NOPaxos protocol state struct
 func NewNOPaxos(cluster Cluster, registry *node.Registry, config *config.ProtocolConfig) *NOPaxos {
@@ -41,8 +42,7 @@ func NewNOPaxos(cluster Cluster, registry *node.Registry, config *config.Protoco
 			LeaderNum:  1,
 		},
 		sessionMessageNum: 1,
-		log:               make(map[LogSlotID]*LogEntry),
-		firstSlotNum:      1,
+		log:               newLog(1),
 		viewChanges:       make(map[MemberID]*ViewChange),
 		gapCommitReps:     make(map[MemberID]*GapCommitReply),
 		syncReps:          make(map[MemberID]*SyncReply),
@@ -80,28 +80,33 @@ const (
 
 // NOPaxos is an interface for managing the state of the NOPaxos consensus protocol
 type NOPaxos struct {
-	logger            util.Logger
-	config            *config.ProtocolConfig
-	cluster           Cluster
-	state             *stateMachine
-	sequencer         ClientService_ClientStreamServer
-	log               map[LogSlotID]*LogEntry
-	firstSlotNum      LogSlotID
-	lastSlotNum       LogSlotID
-	status            Status
-	sessionMessageNum MessageID
-	viewID            *ViewId
-	lastNormView      *ViewId
-	viewChanges       map[MemberID]*ViewChange
-	currentGapSlot    LogSlotID
-	gapCommitReps     map[MemberID]*GapCommitReply
-	tentativeSync     LogSlotID
-	syncPoint         LogSlotID
-	syncReps          map[MemberID]*SyncReply
-	pingTicker        *time.Ticker
-	timeoutTimer      *time.Timer
-	stateMu           sync.RWMutex
-	logMu             sync.RWMutex
+	logger               util.Logger
+	config               *config.ProtocolConfig
+	cluster              Cluster
+	state                *stateMachine
+	applied              LogSlotID
+	sequencer            ClientService_ClientStreamServer
+	log                  *Log
+	viewChangeLog        *Log
+	viewLog              *Log
+	status               Status
+	sessionMessageNum    MessageID
+	viewID               *ViewId
+	lastNormView         *ViewId
+	viewChanges          map[MemberID]*ViewChange
+	viewChangeRepairs    map[MemberID]*ViewChangeRepair
+	viewChangeRepairReps map[MemberID]*ViewChangeRepairReply
+	viewRepair           *ViewRepair
+	currentGapSlot       LogSlotID
+	gapCommitReps        map[MemberID]*GapCommitReply
+	tentativeSync        LogSlotID
+	syncPoint            LogSlotID
+	syncRepair           *SyncRepair
+	syncReps             map[MemberID]*SyncReply
+	syncLog              *Log
+	pingTicker           *time.Ticker
+	timeoutTimer         *time.Timer
+	stateMu              sync.RWMutex
 }
 
 func (s *NOPaxos) start() {
@@ -175,914 +180,52 @@ func (s *NOPaxos) ReplicaStream(stream ReplicaService_ReplicaStreamServer) error
 		if err != nil {
 			return err
 		}
-		go s.handleReplica(message, stream)
+		go s.handleReplica(message)
 	}
 }
 
-func (s *NOPaxos) handleReplica(message *ReplicaMessage, stream ReplicaService_ReplicaStreamServer) {
+func (s *NOPaxos) handleReplica(message *ReplicaMessage) {
 	switch m := message.Message.(type) {
 	case *ReplicaMessage_Command:
-		s.slot(m.Command)
+		s.handleSlot(m.Command)
 	case *ReplicaMessage_SlotLookup:
-		s.slotLookup(m.SlotLookup, stream)
+		s.handleSlotLookup(m.SlotLookup)
 	case *ReplicaMessage_GapCommit:
-		s.gapCommit(m.GapCommit, stream)
+		s.handleGapCommit(m.GapCommit)
 	case *ReplicaMessage_GapCommitReply:
-		s.gapCommitReply(m.GapCommitReply)
+		s.handleGapCommitReply(m.GapCommitReply)
 	case *ReplicaMessage_ViewChangeRequest:
-		s.viewChangeRequest(m.ViewChangeRequest)
+		s.handleViewChangeRequest(m.ViewChangeRequest)
 	case *ReplicaMessage_ViewChange:
-		s.viewChange(m.ViewChange)
+		s.handleViewChange(m.ViewChange)
+	case *ReplicaMessage_ViewChangeRepair:
+		s.handleViewChangeRepair(m.ViewChangeRepair)
+	case *ReplicaMessage_ViewChangeRepairReply:
+		s.handleViewChangeRepairReply(m.ViewChangeRepairReply)
 	case *ReplicaMessage_StartView:
-		s.startView(m.StartView)
+		s.handleStartView(m.StartView)
+	case *ReplicaMessage_ViewRepair:
+		s.handleViewRepair(m.ViewRepair)
+	case *ReplicaMessage_ViewRepairReply:
+		s.handleViewRepairReply(m.ViewRepairReply)
 	case *ReplicaMessage_SyncPrepare:
-		s.syncPrepare(m.SyncPrepare, stream)
+		s.handleSyncPrepare(m.SyncPrepare)
+	case *ReplicaMessage_SyncRepair:
+		s.handleSyncRepair(m.SyncRepair)
+	case *ReplicaMessage_SyncRepairReply:
+		s.handleSyncRepairReply(m.SyncRepairReply)
 	case *ReplicaMessage_SyncReply:
-		s.syncReply(m.SyncReply)
+		s.handleSyncReply(m.SyncReply)
 	case *ReplicaMessage_SyncCommit:
-		s.syncCommit(m.SyncCommit)
+		s.handleSyncCommit(m.SyncCommit)
 	case *ReplicaMessage_Ping:
-		s.ping(m.Ping)
+		s.handlePing(m.Ping)
 	}
 }
 
 func (s *NOPaxos) getLeader(viewID *ViewId) MemberID {
 	members := s.cluster.Members()
 	return members[int(uint64(viewID.LeaderNum)%uint64(len(members)))]
-}
-
-func (s *NOPaxos) slot(request *CommandRequest) {
-	s.command(request, nil)
-}
-
-func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientStreamServer) {
-	s.logger.Receive("CommandRequest", request)
-
-	s.stateMu.RLock()
-	defer s.stateMu.RUnlock()
-
-	// If the replica's status is not Normal, skip the commit
-	if s.status != StatusNormal {
-		return
-	}
-
-	if request.SessionNum == s.viewID.SessionNum && request.MessageNum == s.sessionMessageNum {
-		// Command received in the normal case
-		s.logMu.Lock()
-		slotNum := s.lastSlotNum + 1
-		entry := &LogEntry{
-			SlotNum:    slotNum,
-			Timestamp:  request.Timestamp,
-			MessageNum: request.MessageNum,
-			Value:      request.Value,
-		}
-		s.log[slotNum] = entry
-		s.lastSlotNum = slotNum
-		s.logMu.Unlock()
-
-		// Apply the command to the state machine before responding if leader
-		if stream != nil {
-			if s.getLeader(s.viewID) == s.cluster.Member() {
-				ch := make(chan node.Output)
-				viewID := s.viewID
-				go func() {
-					for result := range ch {
-						message := &ClientMessage{
-							Message: &ClientMessage_CommandReply{
-								CommandReply: &CommandReply{
-									MessageNum: request.MessageNum,
-									Sender:     s.cluster.Member(),
-									ViewID:     viewID,
-									SlotNum:    slotNum,
-									Value:      result.Value,
-								},
-							},
-						}
-						// TODO: Send state machine errors
-						s.logger.Send("CommandReply", message)
-						_ = stream.Send(message)
-					}
-				}()
-				s.state.applyCommand(entry, ch)
-			} else {
-				message := &ClientMessage{
-					Message: &ClientMessage_CommandReply{
-						CommandReply: &CommandReply{
-							MessageNum: request.MessageNum,
-							Sender:     s.cluster.Member(),
-							ViewID:     s.viewID,
-							SlotNum:    slotNum,
-						},
-					},
-				}
-				s.logger.Send("CommandReply", message)
-				_ = stream.Send(message)
-			}
-		}
-	} else if request.SessionNum > s.viewID.SessionNum {
-		// Command received in the session terminated case
-		newViewID := &ViewId{
-			SessionNum: request.SessionNum,
-			LeaderNum:  s.viewID.LeaderNum,
-		}
-		for _, member := range s.cluster.Members() {
-			if stream, err := s.cluster.GetStream(member); err == nil {
-				_ = stream.Send(&ReplicaMessage{
-					Message: &ReplicaMessage_ViewChangeRequest{
-						ViewChangeRequest: &ViewChangeRequest{
-							ViewID: newViewID,
-						},
-					},
-				})
-			}
-		}
-	} else if request.SessionNum == s.viewID.SessionNum && request.MessageNum > s.sessionMessageNum {
-		// Drop notification. If leader commit a gap, otherwise ask the leader for the slot
-		if s.getLeader(s.viewID) == s.cluster.Member() {
-			s.sendGapCommit()
-		} else {
-			stream, err := s.cluster.GetStream(s.getLeader(s.viewID))
-			if err != nil {
-				return
-			}
-			_ = stream.Send(&ReplicaMessage{
-				Message: &ReplicaMessage_SlotLookup{
-					SlotLookup: &SlotLookup{
-						Sender:     s.cluster.Member(),
-						ViewID:     s.viewID,
-						MessageNum: request.MessageNum,
-					},
-				},
-			})
-		}
-	}
-}
-
-func (s *NOPaxos) query(request *QueryRequest, stream ClientService_ClientStreamServer) {
-	s.logger.Receive("QueryRequest", request)
-
-	s.stateMu.RLock()
-	defer s.stateMu.RUnlock()
-
-	// If the replica's status is not Normal, skip the commit
-	if s.status != StatusNormal {
-		return
-	}
-
-	if request.SessionNum == s.viewID.SessionNum {
-		if stream != nil && s.getLeader(s.viewID) == s.cluster.Member() {
-			ch := make(chan node.Output)
-			s.state.applyQuery(request, ch)
-			go func() {
-				for result := range ch {
-					// TODO: Send state machine errors
-					_ = stream.Send(&ClientMessage{
-						Message: &ClientMessage_QueryReply{
-							QueryReply: &QueryReply{
-								MessageNum: request.MessageNum,
-								Sender:     s.cluster.Member(),
-								ViewID:     s.viewID,
-								Value:      result.Value,
-							},
-						},
-					})
-				}
-			}()
-		}
-	}
-}
-
-func (s *NOPaxos) slotLookup(request *SlotLookup, stream ReplicaService_ReplicaStreamServer) {
-	s.logger.ReceiveFrom("SlotLookup", request, request.Sender)
-
-	s.stateMu.RLock()
-
-	// If the view ID does not match the sender's view ID, skip the message
-	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
-		s.stateMu.RUnlock()
-		return
-	}
-
-	// If this replica is not the leader, skip the message
-	if s.getLeader(s.viewID) != s.cluster.Member() {
-		s.stateMu.RUnlock()
-		return
-	}
-
-	// If the replica's status is not Normal, skip the message
-	if s.status != StatusNormal {
-		s.stateMu.RUnlock()
-		return
-	}
-
-	slotID := s.lastSlotNum + 1 - LogSlotID(s.sessionMessageNum-request.MessageNum)
-
-	if slotID <= s.lastSlotNum {
-		for i := slotID; i <= s.lastSlotNum; i++ {
-			entry := s.log[i]
-			if entry != nil {
-				_ = stream.Send(&ReplicaMessage{
-					Message: &ReplicaMessage_Command{
-						Command: &CommandRequest{
-							SessionNum: s.viewID.SessionNum,
-							MessageNum: entry.MessageNum,
-							Value:      entry.Value,
-						},
-					},
-				})
-			}
-		}
-		s.stateMu.RUnlock()
-	} else if slotID == s.lastSlotNum+1 {
-		s.stateMu.RUnlock()
-		s.sendGapCommit()
-	}
-}
-
-func (s *NOPaxos) sendGapCommit() {
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
-
-	// If this replica is not the leader, skip the commit
-	if s.getLeader(s.viewID) != s.cluster.Member() {
-		return
-	}
-
-	// If the replica's status is not Normal, skip the commit
-	if s.status != StatusNormal {
-		return
-	}
-
-	slotID := s.lastSlotNum + 1
-
-	// Set the replica's status to GapCommit
-	s.status = StatusGapCommit
-
-	// Set the current gap slot
-	s.currentGapSlot = slotID
-
-	message := &ReplicaMessage{
-		Message: &ReplicaMessage_GapCommit{
-			GapCommit: &GapCommitRequest{
-				Sender:  s.cluster.Member(),
-				ViewID:  s.viewID,
-				SlotNum: slotID,
-			},
-		},
-	}
-
-	// Send a GapCommit to each replica
-	for _, member := range s.cluster.Members() {
-		if stream, err := s.cluster.GetStream(member); err == nil {
-			s.logger.SendTo("GapCommit", message, member)
-			_ = stream.Send(message)
-		}
-	}
-}
-
-func (s *NOPaxos) gapCommit(request *GapCommitRequest, stream ReplicaService_ReplicaStreamServer) {
-	s.logger.ReceiveFrom("GapCommitRequest", request, request.Sender)
-
-	s.stateMu.RLock()
-
-	// If the view ID does not match the sender's view ID, skip the message
-	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
-		s.stateMu.RUnlock()
-		return
-	}
-
-	// If the replica's status is not Normal or GapCommit, skip the message
-	if s.status != StatusNormal && s.status != StatusGapCommit {
-		s.stateMu.RUnlock()
-		return
-	}
-
-	s.stateMu.RUnlock()
-
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
-
-	// If the request slot ID is not the next slot in the replica's log, skip the message
-	lastSlotID := s.lastSlotNum
-	if request.SlotNum > lastSlotID+1 {
-		return
-	}
-
-	// A no-op entry is represented as a missing entry
-	delete(s.log, request.SlotNum)
-
-	// Increment the session message ID if necessary
-	if request.SlotNum > s.lastSlotNum {
-		s.sessionMessageNum++
-	}
-
-	_ = stream.SendMsg(&GapCommitReply{
-		Sender:  s.cluster.Member(),
-		ViewID:  s.viewID,
-		SlotNum: request.SlotNum,
-	})
-}
-
-func (s *NOPaxos) gapCommitReply(reply *GapCommitReply) {
-	s.logger.ReceiveFrom("GapCommitReply", reply, reply.Sender)
-
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
-
-	// If the view ID does not match the sender's view ID, skip the message
-	if s.viewID.LeaderNum != reply.ViewID.LeaderNum || s.viewID.SessionNum != reply.ViewID.SessionNum {
-		return
-	}
-
-	// If this replica is not the leader, skip the message
-	if s.getLeader(s.viewID) != s.cluster.Member() {
-		return
-	}
-
-	// If the replica's status is not Normal or GapCommit, skip the message
-	if s.status != StatusGapCommit {
-		return
-	}
-
-	// If the gap commit slot does not match the current gap slot, skip the message
-	if reply.SlotNum != s.currentGapSlot {
-		return
-	}
-
-	s.gapCommitReps[reply.Sender] = reply
-
-	// Get the set of gap commit replies for the current slot
-	gapCommits := make([]*GapCommitReply, 0, len(s.gapCommitReps))
-	for _, gapCommit := range s.gapCommitReps {
-		if gapCommit.ViewID.SessionNum == s.viewID.SessionNum && gapCommit.ViewID.LeaderNum == s.viewID.LeaderNum && gapCommit.SlotNum == s.currentGapSlot {
-			gapCommits = append(gapCommits, gapCommit)
-		}
-	}
-
-	// If a quorum of gap commits has been received for the slot, return the status to normal
-	if len(gapCommits) >= s.cluster.QuorumSize() {
-		s.status = StatusNormal
-	}
-}
-
-func (s *NOPaxos) startLeaderChange() {
-	s.stateMu.RLock()
-	newViewID := &ViewId{
-		SessionNum: s.viewID.SessionNum,
-		LeaderNum:  s.viewID.LeaderNum + 1,
-	}
-	s.stateMu.RUnlock()
-
-	message := &ReplicaMessage{
-		Message: &ReplicaMessage_ViewChangeRequest{
-			ViewChangeRequest: &ViewChangeRequest{
-				ViewID: newViewID,
-			},
-		},
-	}
-
-	for _, member := range s.cluster.Members() {
-		if member != s.getLeader(newViewID) {
-			if stream, err := s.cluster.GetStream(member); err == nil {
-				s.logger.SendTo("ViewChangeRequest", message, member)
-				_ = stream.Send(message)
-			}
-		}
-	}
-}
-
-func (s *NOPaxos) viewChangeRequest(request *ViewChangeRequest) {
-	s.logger.ReceiveFrom("ViewChangeRequest", request, request.Sender)
-
-	s.stateMu.RLock()
-	newLeaderID := LeaderID(math.Max(float64(s.viewID.LeaderNum), float64(request.ViewID.LeaderNum)))
-	newSessionID := SessionID(math.Max(float64(s.viewID.SessionNum), float64(request.ViewID.SessionNum)))
-	newViewID := &ViewId{
-		LeaderNum:  newLeaderID,
-		SessionNum: newSessionID,
-	}
-	s.stateMu.RUnlock()
-
-	// If the view IDs match, ignore the request
-	if s.viewID.LeaderNum == newViewID.LeaderNum && s.viewID.SessionNum == newViewID.SessionNum {
-		return
-	}
-
-	// Set the replica's status to ViewChange
-	s.status = StatusViewChange
-
-	// Set the replica's view ID to the new view ID
-	s.viewID = newViewID
-
-	// Reset the view changes
-	s.viewChanges = make(map[MemberID]*ViewChange)
-
-	// Send a ViewChange to the new leader
-	leader := s.getLeader(newViewID)
-	stream, err := s.cluster.GetStream(leader)
-	if err != nil {
-		return
-	}
-
-	// TODO: We probably can't send the entire log in a single message here
-	log := make([]*LogEntry, 0, len(s.log))
-	for _, entry := range s.log {
-		log = append(log, entry)
-	}
-
-	message := &ReplicaMessage{
-		Message: &ReplicaMessage_ViewChange{
-			ViewChange: &ViewChange{
-				Sender:     s.cluster.Member(),
-				ViewID:     newViewID,
-				LastNormal: s.lastNormView,
-				MessageNum: s.sessionMessageNum,
-				Log:        log,
-			},
-		},
-	}
-	s.logger.SendTo("ViewChange", message, leader)
-	_ = stream.Send(message)
-
-	message = &ReplicaMessage{
-		Message: &ReplicaMessage_ViewChangeRequest{
-			ViewChangeRequest: &ViewChangeRequest{
-				Sender: s.cluster.Member(),
-				ViewID: newViewID,
-			},
-		},
-	}
-
-	// Send a view change request to all replicas other than the leader
-	for _, member := range s.cluster.Members() {
-		if stream, err := s.cluster.GetStream(member); err == nil {
-			s.logger.SendTo("ViewChangeRequest", message, member)
-			_ = stream.Send(message)
-		}
-	}
-}
-
-func (s *NOPaxos) viewChange(request *ViewChange) {
-	s.logger.ReceiveFrom("ViewChange", request, request.Sender)
-
-	s.stateMu.RLock()
-
-	// If the view IDs do not match, ignore the request
-	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
-		s.stateMu.RUnlock()
-		return
-	}
-
-	// If the replica's status is not ViewChange, ignore the request
-	if s.status != StatusViewChange {
-		s.stateMu.RUnlock()
-		return
-	}
-
-	// If this replica is not the leader of the view, ignore the request
-	if s.getLeader(request.ViewID) != s.cluster.Member() {
-		s.stateMu.RUnlock()
-		return
-	}
-	s.stateMu.RUnlock()
-
-	// Add the view change to the set of view changes
-	s.stateMu.Lock()
-	s.viewChanges[request.Sender] = request
-	s.stateMu.Unlock()
-	s.stateMu.RLock()
-
-	// Aggregate the view changes for the current view
-	localViewChanged := false
-	viewChanges := make([]*ViewChange, 0, len(s.viewChanges))
-	for _, viewChange := range s.viewChanges {
-		if viewChange.ViewID.SessionNum == s.viewID.SessionNum && viewChange.ViewID.LeaderNum == s.viewID.LeaderNum {
-			viewChanges = append(viewChanges, viewChange)
-			if viewChange.Sender == s.cluster.Member() {
-				localViewChanged = true
-			}
-		}
-	}
-
-	// If the view changes have reached a quorum, start the new view
-	if localViewChanged && len(viewChanges) >= s.cluster.QuorumSize() {
-		// Create the state for the new view
-		var lastNormal *ViewId
-		for _, viewChange1 := range viewChanges {
-			normal := true
-			for _, viewChange2 := range viewChanges {
-				if viewChange2.LastNormal.SessionNum > viewChange1.LastNormal.SessionNum || viewChange2.LastNormal.LeaderNum > viewChange1.LastNormal.LeaderNum {
-					normal = false
-					break
-				}
-			}
-			if normal {
-				lastNormal = viewChange1.LastNormal
-			}
-		}
-
-		var newMessageID MessageID
-		goodLogs := make([][]*LogEntry, 0, len(viewChanges))
-		for _, viewChange := range viewChanges {
-			if viewChange.LastNormal.SessionNum == lastNormal.SessionNum && viewChange.LastNormal.LeaderNum == lastNormal.LeaderNum {
-				goodLogs = append(goodLogs, viewChange.Log)
-
-				// If the session has changed, take the maximum message ID
-				if lastNormal.SessionNum == s.viewID.SessionNum && viewChange.MessageNum > newMessageID {
-					newMessageID = viewChange.MessageNum
-				}
-			}
-		}
-
-		var firstSlotID, lastSlotID LogSlotID
-		newLog := make(map[LogSlotID]*LogEntry)
-		for _, goodLog := range goodLogs {
-			for _, entry := range goodLog {
-				newEntry := newLog[entry.SlotNum]
-				if newEntry == nil {
-					newLog[entry.SlotNum] = entry
-					if firstSlotID == 0 || entry.SlotNum < firstSlotID {
-						firstSlotID = entry.SlotNum
-					}
-					if lastSlotID == 0 || entry.SlotNum > lastSlotID {
-						lastSlotID = entry.SlotNum
-					}
-				}
-			}
-		}
-
-		log := make([]*LogEntry, 0, len(newLog))
-		for slotID := firstSlotID; slotID <= lastSlotID; slotID++ {
-			entry := newLog[slotID]
-			if entry != nil {
-				log = append(log, entry)
-			}
-		}
-
-		message := &ReplicaMessage{
-			Message: &ReplicaMessage_StartView{
-				StartView: &StartView{
-					Sender:     s.cluster.Member(),
-					ViewID:     s.viewID,
-					MessageNum: newMessageID,
-					Log:        log,
-				},
-			},
-		}
-
-		// Send a StartView to each replica
-		for _, member := range s.cluster.Members() {
-			if stream, err := s.cluster.GetStream(member); err == nil {
-				s.logger.SendTo("StartView", message, member)
-				_ = stream.Send(message)
-			}
-		}
-	}
-}
-
-func (s *NOPaxos) startView(request *StartView) {
-	s.logger.ReceiveFrom("StartView", request, request.Sender)
-
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
-
-	// If the local view is newer than the request view, skip the view
-	if s.viewID.SessionNum >= request.ViewID.SessionNum && s.viewID.LeaderNum >= request.ViewID.LeaderNum {
-		return
-	}
-
-	// If the views match and the replica is not in the ViewChange state, skip the view
-	if s.viewID.SessionNum == request.ViewID.SessionNum && s.viewID.LeaderNum == request.ViewID.LeaderNum && s.status != StatusViewChange {
-		return
-	}
-
-	newLog := make(map[LogSlotID]*LogEntry)
-	var firstSlotNum LogSlotID
-	if len(request.Log) > 0 {
-		firstSlotNum = request.Log[0].SlotNum
-	}
-
-	var lastSlotNum = firstSlotNum
-	for _, entry := range request.Log {
-		newLog[entry.SlotNum] = entry
-		if entry.SlotNum > lastSlotNum {
-			lastSlotNum = entry.SlotNum
-		}
-	}
-
-	s.log = newLog
-	s.firstSlotNum = firstSlotNum
-	s.lastSlotNum = lastSlotNum
-	s.sessionMessageNum = request.MessageNum
-	s.status = StatusNormal
-	s.viewID = request.ViewID
-	s.lastNormView = request.ViewID
-
-	// Send a reply for all commands in the log
-	sequencer := s.sequencer
-	if sequencer != nil {
-		s.logMu.Lock()
-		defer s.logMu.Unlock()
-
-		for slotNum := s.firstSlotNum; slotNum <= s.lastSlotNum; slotNum++ {
-			entry := s.log[slotNum]
-			if entry != nil {
-				_ = sequencer.Send(&ClientMessage{
-					Message: &ClientMessage_CommandReply{
-						CommandReply: &CommandReply{
-							MessageNum: entry.MessageNum,
-							Sender:     s.cluster.Member(),
-							ViewID:     s.viewID,
-							SlotNum:    slotNum,
-						},
-					},
-				})
-			}
-		}
-	}
-
-	s.resetTimeout()
-}
-
-func (s *NOPaxos) startSync() {
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
-
-	// If this replica is not the leader of the view, ignore the request
-	if s.getLeader(s.viewID) != s.cluster.Member() {
-		return
-	}
-
-	// If the replica's status is not Normal, do not attempt the sync
-	if s.status != StatusNormal {
-		return
-	}
-
-	s.syncReps = make(map[MemberID]*SyncReply)
-	s.tentativeSync = s.lastSlotNum
-
-	log := make([]*LogEntry, 0, len(s.log))
-	for _, entry := range s.log {
-		log = append(log, entry)
-	}
-
-	message := &ReplicaMessage{
-		Message: &ReplicaMessage_SyncPrepare{
-			SyncPrepare: &SyncPrepare{
-				Sender:     s.cluster.Member(),
-				ViewID:     s.viewID,
-				MessageNum: s.sessionMessageNum,
-				Log:        log,
-			},
-		},
-	}
-
-	for _, member := range s.cluster.Members() {
-		if member != s.cluster.Member() {
-			if stream, err := s.cluster.GetStream(member); err == nil {
-				s.logger.SendTo("SyncPrepare", message, member)
-				_ = stream.Send(message)
-			}
-		}
-	}
-}
-
-func (s *NOPaxos) syncPrepare(request *SyncPrepare, stream ReplicaService_ReplicaStreamServer) {
-	s.logger.ReceiveFrom("SyncPrepare", request, request.Sender)
-
-	s.stateMu.RLock()
-	defer s.stateMu.RUnlock()
-
-	// If the replica's status is not Normal, ignore the request
-	if s.status != StatusNormal {
-		return
-	}
-
-	// If the view IDs do not match, ignore the request
-	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
-		return
-	}
-
-	// If the sender is not the leader for the current view, ignore the request
-	if request.Sender != s.getLeader(request.ViewID) {
-		return
-	}
-
-	newLog := make(map[LogSlotID]*LogEntry)
-	var firstSlotID LogSlotID
-	if len(request.Log) > 0 {
-		firstSlotID = request.Log[0].SlotNum
-	}
-
-	var lastSlotID = firstSlotID
-	for _, entry := range request.Log {
-		newLog[entry.SlotNum] = entry
-		if entry.SlotNum > lastSlotID {
-			lastSlotID = entry.SlotNum
-		}
-	}
-
-	s.logMu.Lock()
-	for i := lastSlotID; i < s.lastSlotNum; i++ {
-		entry := s.log[i]
-		if entry != nil {
-			newLog[entry.SlotNum] = entry
-		}
-	}
-	s.sessionMessageNum = s.sessionMessageNum + MessageID(lastSlotID-s.lastSlotNum)
-	s.log = newLog
-	s.firstSlotNum = firstSlotID
-	s.lastSlotNum = lastSlotID
-	s.logMu.Unlock()
-
-	// Send a SyncReply back to the leader
-	_ = stream.Send(&ReplicaMessage{
-		Message: &ReplicaMessage_SyncReply{
-			SyncReply: &SyncReply{
-				Sender:  s.cluster.Member(),
-				ViewID:  s.viewID,
-				SlotNum: lastSlotID,
-			},
-		},
-	})
-
-	// Send a RequestReply for all entries in the new log
-	sequencer := s.sequencer
-
-	if sequencer != nil {
-		s.logMu.Lock()
-		defer s.logMu.Unlock()
-
-		for slotNum := s.firstSlotNum; slotNum <= s.lastSlotNum; slotNum++ {
-			entry := s.log[slotNum]
-			if entry != nil {
-				_ = sequencer.Send(&ClientMessage{
-					Message: &ClientMessage_CommandReply{
-						CommandReply: &CommandReply{
-							MessageNum: entry.MessageNum,
-							Sender:     s.cluster.Member(),
-							ViewID:     s.viewID,
-							SlotNum:    slotNum,
-						},
-					},
-				})
-			}
-		}
-	}
-}
-
-func (s *NOPaxos) syncReply(reply *SyncReply) {
-	s.logger.ReceiveFrom("SyncReply", reply, reply.Sender)
-
-	s.stateMu.RLock()
-	defer s.stateMu.RUnlock()
-
-	// If the view IDs do not match, ignore the request
-	if s.viewID.LeaderNum != reply.ViewID.LeaderNum || s.viewID.SessionNum != reply.ViewID.SessionNum {
-		return
-	}
-
-	// If the replica's status is not Normal, ignore the request
-	if s.status != StatusNormal {
-		return
-	}
-
-	// Add the reply to the set of sync replies
-	s.syncReps[reply.Sender] = reply
-
-	syncReps := make([]*SyncReply, 0, len(s.syncReps))
-	for _, syncRep := range s.syncReps {
-		if syncRep.ViewID.LeaderNum == s.viewID.LeaderNum && syncRep.ViewID.SessionNum == s.viewID.SessionNum && syncRep.SlotNum == s.tentativeSync {
-			syncReps = append(syncReps, syncRep)
-		}
-	}
-
-	if len(syncReps) >= s.cluster.QuorumSize() {
-		log := make([]*LogEntry, 0, len(s.log))
-		for _, entry := range s.log {
-			log = append(log, entry)
-		}
-
-		for _, member := range s.cluster.Members() {
-			if member != s.cluster.Member() {
-				if stream, err := s.cluster.GetStream(member); err == nil {
-					_ = stream.Send(&ReplicaMessage{
-						Message: &ReplicaMessage_SyncCommit{
-							SyncCommit: &SyncCommit{
-								Sender:     s.cluster.Member(),
-								ViewID:     s.viewID,
-								MessageNum: s.sessionMessageNum,
-								Log:        log,
-							},
-						},
-					})
-				}
-			}
-		}
-	}
-}
-
-func (s *NOPaxos) syncCommit(request *SyncCommit) {
-	s.logger.ReceiveFrom("SyncCommit", request, request.Sender)
-
-	s.stateMu.RLock()
-	defer s.stateMu.RUnlock()
-
-	// If the replica's status is not Normal, ignore the request
-	if s.status != StatusNormal {
-		return
-	}
-
-	// If the view IDs do not match, ignore the request
-	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
-		return
-	}
-
-	// If the sender is not the leader for the current view, ignore the request
-	if request.Sender != s.getLeader(request.ViewID) {
-		return
-	}
-
-	newLog := make(map[LogSlotID]*LogEntry)
-	var firstSlotID LogSlotID
-	if len(request.Log) > 0 {
-		firstSlotID = request.Log[0].SlotNum
-	}
-
-	var lastSlotID = firstSlotID
-	for _, entry := range request.Log {
-		newLog[entry.SlotNum] = entry
-		if entry.SlotNum > lastSlotID {
-			lastSlotID = entry.SlotNum
-		}
-	}
-
-	s.logMu.Lock()
-	defer s.logMu.Unlock()
-
-	for i := lastSlotID; i < s.lastSlotNum; i++ {
-		entry := s.log[i]
-		if entry != nil {
-			newLog[entry.SlotNum] = entry
-		}
-	}
-	s.sessionMessageNum = s.sessionMessageNum + MessageID(lastSlotID-s.lastSlotNum)
-	s.log = newLog
-	s.firstSlotNum = firstSlotID
-	s.lastSlotNum = lastSlotID
-}
-
-func (s *NOPaxos) sendPing() {
-	s.stateMu.RLock()
-
-	// If this replica is not the leader of the view, do not send the ping
-	if s.getLeader(s.viewID) != s.cluster.Member() {
-		s.stateMu.RUnlock()
-		return
-	}
-
-	message := &ReplicaMessage{
-		Message: &ReplicaMessage_Ping{
-			Ping: &Ping{
-				Sender: s.cluster.Member(),
-				ViewID: s.viewID,
-			},
-		},
-	}
-	s.stateMu.RUnlock()
-
-	for _, member := range s.cluster.Members() {
-		if member != s.cluster.Member() {
-			if stream, err := s.cluster.GetStream(member); err == nil {
-				s.logger.SendTo("Ping", message, member)
-				_ = stream.Send(message)
-			}
-		}
-	}
-}
-
-func (s *NOPaxos) ping(request *Ping) {
-	s.logger.ReceiveFrom("Ping", request, request.Sender)
-
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
-
-	// If the view IDs do not match, ignore the request
-	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
-		return
-	}
-
-	// If the replica's status is not Normal, ignore the request
-	if s.status != StatusNormal {
-		return
-	}
-
-	s.timeoutTimer.Reset(s.config.GetLeaderTimeoutOrDefault())
-}
-
-func (s *NOPaxos) timeout() {
-	s.logger.Debug("Leader ping timed out")
-	s.startLeaderChange()
 }
 
 func newStateMachine(node string, registry *node.Registry) *stateMachine {

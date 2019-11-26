@@ -155,8 +155,14 @@ type ReplicaMessage struct {
 	//	*ReplicaMessage_GapCommitReply
 	//	*ReplicaMessage_ViewChangeRequest
 	//	*ReplicaMessage_ViewChange
+	//	*ReplicaMessage_ViewChangeRepair
+	//	*ReplicaMessage_ViewChangeRepairReply
 	//	*ReplicaMessage_StartView
+	//	*ReplicaMessage_ViewRepair
+	//	*ReplicaMessage_ViewRepairReply
 	//	*ReplicaMessage_SyncPrepare
+	//	*ReplicaMessage_SyncRepair
+	//	*ReplicaMessage_SyncRepairReply
 	//	*ReplicaMessage_SyncReply
 	//	*ReplicaMessage_SyncCommit
 	//	*ReplicaMessage_Ping
@@ -230,36 +236,60 @@ type ReplicaMessage_ViewChangeRequest struct {
 type ReplicaMessage_ViewChange struct {
 	ViewChange *ViewChange `protobuf:"bytes,9,opt,name=view_change,json=viewChange,proto3,oneof" json:"view_change,omitempty"`
 }
+type ReplicaMessage_ViewChangeRepair struct {
+	ViewChangeRepair *ViewChangeRepair `protobuf:"bytes,10,opt,name=view_change_repair,json=viewChangeRepair,proto3,oneof" json:"view_change_repair,omitempty"`
+}
+type ReplicaMessage_ViewChangeRepairReply struct {
+	ViewChangeRepairReply *ViewChangeRepairReply `protobuf:"bytes,11,opt,name=view_change_repair_reply,json=viewChangeRepairReply,proto3,oneof" json:"view_change_repair_reply,omitempty"`
+}
 type ReplicaMessage_StartView struct {
-	StartView *StartView `protobuf:"bytes,10,opt,name=start_view,json=startView,proto3,oneof" json:"start_view,omitempty"`
+	StartView *StartView `protobuf:"bytes,12,opt,name=start_view,json=startView,proto3,oneof" json:"start_view,omitempty"`
+}
+type ReplicaMessage_ViewRepair struct {
+	ViewRepair *ViewRepair `protobuf:"bytes,13,opt,name=view_repair,json=viewRepair,proto3,oneof" json:"view_repair,omitempty"`
+}
+type ReplicaMessage_ViewRepairReply struct {
+	ViewRepairReply *ViewRepairReply `protobuf:"bytes,14,opt,name=view_repair_reply,json=viewRepairReply,proto3,oneof" json:"view_repair_reply,omitempty"`
 }
 type ReplicaMessage_SyncPrepare struct {
-	SyncPrepare *SyncPrepare `protobuf:"bytes,11,opt,name=sync_prepare,json=syncPrepare,proto3,oneof" json:"sync_prepare,omitempty"`
+	SyncPrepare *SyncPrepare `protobuf:"bytes,15,opt,name=sync_prepare,json=syncPrepare,proto3,oneof" json:"sync_prepare,omitempty"`
+}
+type ReplicaMessage_SyncRepair struct {
+	SyncRepair *SyncRepair `protobuf:"bytes,16,opt,name=sync_repair,json=syncRepair,proto3,oneof" json:"sync_repair,omitempty"`
+}
+type ReplicaMessage_SyncRepairReply struct {
+	SyncRepairReply *SyncRepairReply `protobuf:"bytes,17,opt,name=sync_repair_reply,json=syncRepairReply,proto3,oneof" json:"sync_repair_reply,omitempty"`
 }
 type ReplicaMessage_SyncReply struct {
-	SyncReply *SyncReply `protobuf:"bytes,12,opt,name=sync_reply,json=syncReply,proto3,oneof" json:"sync_reply,omitempty"`
+	SyncReply *SyncReply `protobuf:"bytes,18,opt,name=sync_reply,json=syncReply,proto3,oneof" json:"sync_reply,omitempty"`
 }
 type ReplicaMessage_SyncCommit struct {
-	SyncCommit *SyncCommit `protobuf:"bytes,13,opt,name=sync_commit,json=syncCommit,proto3,oneof" json:"sync_commit,omitempty"`
+	SyncCommit *SyncCommit `protobuf:"bytes,19,opt,name=sync_commit,json=syncCommit,proto3,oneof" json:"sync_commit,omitempty"`
 }
 type ReplicaMessage_Ping struct {
-	Ping *Ping `protobuf:"bytes,14,opt,name=ping,proto3,oneof" json:"ping,omitempty"`
+	Ping *Ping `protobuf:"bytes,20,opt,name=ping,proto3,oneof" json:"ping,omitempty"`
 }
 
-func (*ReplicaMessage_Command) isReplicaMessage_Message()           {}
-func (*ReplicaMessage_CommandReply) isReplicaMessage_Message()      {}
-func (*ReplicaMessage_Query) isReplicaMessage_Message()             {}
-func (*ReplicaMessage_QueryReply) isReplicaMessage_Message()        {}
-func (*ReplicaMessage_SlotLookup) isReplicaMessage_Message()        {}
-func (*ReplicaMessage_GapCommit) isReplicaMessage_Message()         {}
-func (*ReplicaMessage_GapCommitReply) isReplicaMessage_Message()    {}
-func (*ReplicaMessage_ViewChangeRequest) isReplicaMessage_Message() {}
-func (*ReplicaMessage_ViewChange) isReplicaMessage_Message()        {}
-func (*ReplicaMessage_StartView) isReplicaMessage_Message()         {}
-func (*ReplicaMessage_SyncPrepare) isReplicaMessage_Message()       {}
-func (*ReplicaMessage_SyncReply) isReplicaMessage_Message()         {}
-func (*ReplicaMessage_SyncCommit) isReplicaMessage_Message()        {}
-func (*ReplicaMessage_Ping) isReplicaMessage_Message()              {}
+func (*ReplicaMessage_Command) isReplicaMessage_Message()               {}
+func (*ReplicaMessage_CommandReply) isReplicaMessage_Message()          {}
+func (*ReplicaMessage_Query) isReplicaMessage_Message()                 {}
+func (*ReplicaMessage_QueryReply) isReplicaMessage_Message()            {}
+func (*ReplicaMessage_SlotLookup) isReplicaMessage_Message()            {}
+func (*ReplicaMessage_GapCommit) isReplicaMessage_Message()             {}
+func (*ReplicaMessage_GapCommitReply) isReplicaMessage_Message()        {}
+func (*ReplicaMessage_ViewChangeRequest) isReplicaMessage_Message()     {}
+func (*ReplicaMessage_ViewChange) isReplicaMessage_Message()            {}
+func (*ReplicaMessage_ViewChangeRepair) isReplicaMessage_Message()      {}
+func (*ReplicaMessage_ViewChangeRepairReply) isReplicaMessage_Message() {}
+func (*ReplicaMessage_StartView) isReplicaMessage_Message()             {}
+func (*ReplicaMessage_ViewRepair) isReplicaMessage_Message()            {}
+func (*ReplicaMessage_ViewRepairReply) isReplicaMessage_Message()       {}
+func (*ReplicaMessage_SyncPrepare) isReplicaMessage_Message()           {}
+func (*ReplicaMessage_SyncRepair) isReplicaMessage_Message()            {}
+func (*ReplicaMessage_SyncRepairReply) isReplicaMessage_Message()       {}
+func (*ReplicaMessage_SyncReply) isReplicaMessage_Message()             {}
+func (*ReplicaMessage_SyncCommit) isReplicaMessage_Message()            {}
+func (*ReplicaMessage_Ping) isReplicaMessage_Message()                  {}
 
 func (m *ReplicaMessage) GetMessage() isReplicaMessage_Message {
 	if m != nil {
@@ -331,6 +361,20 @@ func (m *ReplicaMessage) GetViewChange() *ViewChange {
 	return nil
 }
 
+func (m *ReplicaMessage) GetViewChangeRepair() *ViewChangeRepair {
+	if x, ok := m.GetMessage().(*ReplicaMessage_ViewChangeRepair); ok {
+		return x.ViewChangeRepair
+	}
+	return nil
+}
+
+func (m *ReplicaMessage) GetViewChangeRepairReply() *ViewChangeRepairReply {
+	if x, ok := m.GetMessage().(*ReplicaMessage_ViewChangeRepairReply); ok {
+		return x.ViewChangeRepairReply
+	}
+	return nil
+}
+
 func (m *ReplicaMessage) GetStartView() *StartView {
 	if x, ok := m.GetMessage().(*ReplicaMessage_StartView); ok {
 		return x.StartView
@@ -338,9 +382,37 @@ func (m *ReplicaMessage) GetStartView() *StartView {
 	return nil
 }
 
+func (m *ReplicaMessage) GetViewRepair() *ViewRepair {
+	if x, ok := m.GetMessage().(*ReplicaMessage_ViewRepair); ok {
+		return x.ViewRepair
+	}
+	return nil
+}
+
+func (m *ReplicaMessage) GetViewRepairReply() *ViewRepairReply {
+	if x, ok := m.GetMessage().(*ReplicaMessage_ViewRepairReply); ok {
+		return x.ViewRepairReply
+	}
+	return nil
+}
+
 func (m *ReplicaMessage) GetSyncPrepare() *SyncPrepare {
 	if x, ok := m.GetMessage().(*ReplicaMessage_SyncPrepare); ok {
 		return x.SyncPrepare
+	}
+	return nil
+}
+
+func (m *ReplicaMessage) GetSyncRepair() *SyncRepair {
+	if x, ok := m.GetMessage().(*ReplicaMessage_SyncRepair); ok {
+		return x.SyncRepair
+	}
+	return nil
+}
+
+func (m *ReplicaMessage) GetSyncRepairReply() *SyncRepairReply {
+	if x, ok := m.GetMessage().(*ReplicaMessage_SyncRepairReply); ok {
+		return x.SyncRepairReply
 	}
 	return nil
 }
@@ -378,8 +450,14 @@ func (*ReplicaMessage) XXX_OneofWrappers() []interface{} {
 		(*ReplicaMessage_GapCommitReply)(nil),
 		(*ReplicaMessage_ViewChangeRequest)(nil),
 		(*ReplicaMessage_ViewChange)(nil),
+		(*ReplicaMessage_ViewChangeRepair)(nil),
+		(*ReplicaMessage_ViewChangeRepairReply)(nil),
 		(*ReplicaMessage_StartView)(nil),
+		(*ReplicaMessage_ViewRepair)(nil),
+		(*ReplicaMessage_ViewRepairReply)(nil),
 		(*ReplicaMessage_SyncPrepare)(nil),
+		(*ReplicaMessage_SyncRepair)(nil),
+		(*ReplicaMessage_SyncRepairReply)(nil),
 		(*ReplicaMessage_SyncReply)(nil),
 		(*ReplicaMessage_SyncCommit)(nil),
 		(*ReplicaMessage_Ping)(nil),
@@ -951,11 +1029,13 @@ func (m *ViewChangeRequest) GetViewID() *ViewId {
 }
 
 type ViewChange struct {
-	Sender     MemberID    `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
-	ViewID     *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	LastNormal *ViewId     `protobuf:"bytes,3,opt,name=last_normal,json=lastNormal,proto3" json:"last_normal,omitempty"`
-	MessageNum MessageID   `protobuf:"varint,4,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
-	Log        []*LogEntry `protobuf:"bytes,5,rep,name=log,proto3" json:"log,omitempty"`
+	Sender          MemberID  `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID          *ViewId   `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	LastNormal      *ViewId   `protobuf:"bytes,3,opt,name=last_normal,json=lastNormal,proto3" json:"last_normal,omitempty"`
+	MessageNum      MessageID `protobuf:"varint,4,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
+	NoOpFilter      []byte    `protobuf:"bytes,5,opt,name=no_op_filter,json=noOpFilter,proto3" json:"no_op_filter,omitempty"`
+	FirstLogSlotNum LogSlotID `protobuf:"varint,6,opt,name=first_log_slot_num,json=firstLogSlotNum,proto3,casttype=LogSlotID" json:"first_log_slot_num,omitempty"`
+	LastLogSlotNum  LogSlotID `protobuf:"varint,7,opt,name=last_log_slot_num,json=lastLogSlotNum,proto3,casttype=LogSlotID" json:"last_log_slot_num,omitempty"`
 }
 
 func (m *ViewChange) Reset()         { *m = ViewChange{} }
@@ -1019,25 +1099,177 @@ func (m *ViewChange) GetMessageNum() MessageID {
 	return 0
 }
 
-func (m *ViewChange) GetLog() []*LogEntry {
+func (m *ViewChange) GetNoOpFilter() []byte {
 	if m != nil {
-		return m.Log
+		return m.NoOpFilter
+	}
+	return nil
+}
+
+func (m *ViewChange) GetFirstLogSlotNum() LogSlotID {
+	if m != nil {
+		return m.FirstLogSlotNum
+	}
+	return 0
+}
+
+func (m *ViewChange) GetLastLogSlotNum() LogSlotID {
+	if m != nil {
+		return m.LastLogSlotNum
+	}
+	return 0
+}
+
+type ViewChangeRepair struct {
+	Sender     MemberID    `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID     *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	MessageNum MessageID   `protobuf:"varint,3,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
+	SlotNums   []LogSlotID `protobuf:"varint,4,rep,packed,name=slot_nums,json=slotNums,proto3,casttype=LogSlotID" json:"slot_nums,omitempty"`
+}
+
+func (m *ViewChangeRepair) Reset()         { *m = ViewChangeRepair{} }
+func (m *ViewChangeRepair) String() string { return proto.CompactTextString(m) }
+func (*ViewChangeRepair) ProtoMessage()    {}
+func (*ViewChangeRepair) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5bf22afbce485451, []int{12}
+}
+func (m *ViewChangeRepair) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ViewChangeRepair) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ViewChangeRepair.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ViewChangeRepair) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ViewChangeRepair.Merge(m, src)
+}
+func (m *ViewChangeRepair) XXX_Size() int {
+	return m.Size()
+}
+func (m *ViewChangeRepair) XXX_DiscardUnknown() {
+	xxx_messageInfo_ViewChangeRepair.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ViewChangeRepair proto.InternalMessageInfo
+
+func (m *ViewChangeRepair) GetSender() MemberID {
+	if m != nil {
+		return m.Sender
+	}
+	return ""
+}
+
+func (m *ViewChangeRepair) GetViewID() *ViewId {
+	if m != nil {
+		return m.ViewID
+	}
+	return nil
+}
+
+func (m *ViewChangeRepair) GetMessageNum() MessageID {
+	if m != nil {
+		return m.MessageNum
+	}
+	return 0
+}
+
+func (m *ViewChangeRepair) GetSlotNums() []LogSlotID {
+	if m != nil {
+		return m.SlotNums
+	}
+	return nil
+}
+
+type ViewChangeRepairReply struct {
+	Sender     MemberID    `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID     *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	MessageNum MessageID   `protobuf:"varint,3,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
+	SlotNums   []LogSlotID `protobuf:"varint,4,rep,packed,name=slot_nums,json=slotNums,proto3,casttype=LogSlotID" json:"slot_nums,omitempty"`
+}
+
+func (m *ViewChangeRepairReply) Reset()         { *m = ViewChangeRepairReply{} }
+func (m *ViewChangeRepairReply) String() string { return proto.CompactTextString(m) }
+func (*ViewChangeRepairReply) ProtoMessage()    {}
+func (*ViewChangeRepairReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5bf22afbce485451, []int{13}
+}
+func (m *ViewChangeRepairReply) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ViewChangeRepairReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ViewChangeRepairReply.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ViewChangeRepairReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ViewChangeRepairReply.Merge(m, src)
+}
+func (m *ViewChangeRepairReply) XXX_Size() int {
+	return m.Size()
+}
+func (m *ViewChangeRepairReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_ViewChangeRepairReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ViewChangeRepairReply proto.InternalMessageInfo
+
+func (m *ViewChangeRepairReply) GetSender() MemberID {
+	if m != nil {
+		return m.Sender
+	}
+	return ""
+}
+
+func (m *ViewChangeRepairReply) GetViewID() *ViewId {
+	if m != nil {
+		return m.ViewID
+	}
+	return nil
+}
+
+func (m *ViewChangeRepairReply) GetMessageNum() MessageID {
+	if m != nil {
+		return m.MessageNum
+	}
+	return 0
+}
+
+func (m *ViewChangeRepairReply) GetSlotNums() []LogSlotID {
+	if m != nil {
+		return m.SlotNums
 	}
 	return nil
 }
 
 type StartView struct {
-	Sender     MemberID    `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
-	ViewID     *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	MessageNum MessageID   `protobuf:"varint,3,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
-	Log        []*LogEntry `protobuf:"bytes,4,rep,name=log,proto3" json:"log,omitempty"`
+	Sender          MemberID  `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID          *ViewId   `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	MessageNum      MessageID `protobuf:"varint,3,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
+	NoOpFilter      []byte    `protobuf:"bytes,4,opt,name=no_op_filter,json=noOpFilter,proto3" json:"no_op_filter,omitempty"`
+	FirstLogSlotNum LogSlotID `protobuf:"varint,5,opt,name=first_log_slot_num,json=firstLogSlotNum,proto3,casttype=LogSlotID" json:"first_log_slot_num,omitempty"`
+	LastLogSlotNum  LogSlotID `protobuf:"varint,6,opt,name=last_log_slot_num,json=lastLogSlotNum,proto3,casttype=LogSlotID" json:"last_log_slot_num,omitempty"`
 }
 
 func (m *StartView) Reset()         { *m = StartView{} }
 func (m *StartView) String() string { return proto.CompactTextString(m) }
 func (*StartView) ProtoMessage()    {}
 func (*StartView) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{12}
+	return fileDescriptor_5bf22afbce485451, []int{14}
 }
 func (m *StartView) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1087,25 +1319,169 @@ func (m *StartView) GetMessageNum() MessageID {
 	return 0
 }
 
-func (m *StartView) GetLog() []*LogEntry {
+func (m *StartView) GetNoOpFilter() []byte {
 	if m != nil {
-		return m.Log
+		return m.NoOpFilter
+	}
+	return nil
+}
+
+func (m *StartView) GetFirstLogSlotNum() LogSlotID {
+	if m != nil {
+		return m.FirstLogSlotNum
+	}
+	return 0
+}
+
+func (m *StartView) GetLastLogSlotNum() LogSlotID {
+	if m != nil {
+		return m.LastLogSlotNum
+	}
+	return 0
+}
+
+type ViewRepair struct {
+	Sender     MemberID    `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID     *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	MessageNum MessageID   `protobuf:"varint,3,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
+	SlotNums   []LogSlotID `protobuf:"varint,4,rep,packed,name=slot_nums,json=slotNums,proto3,casttype=LogSlotID" json:"slot_nums,omitempty"`
+}
+
+func (m *ViewRepair) Reset()         { *m = ViewRepair{} }
+func (m *ViewRepair) String() string { return proto.CompactTextString(m) }
+func (*ViewRepair) ProtoMessage()    {}
+func (*ViewRepair) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5bf22afbce485451, []int{15}
+}
+func (m *ViewRepair) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ViewRepair) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ViewRepair.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ViewRepair) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ViewRepair.Merge(m, src)
+}
+func (m *ViewRepair) XXX_Size() int {
+	return m.Size()
+}
+func (m *ViewRepair) XXX_DiscardUnknown() {
+	xxx_messageInfo_ViewRepair.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ViewRepair proto.InternalMessageInfo
+
+func (m *ViewRepair) GetSender() MemberID {
+	if m != nil {
+		return m.Sender
+	}
+	return ""
+}
+
+func (m *ViewRepair) GetViewID() *ViewId {
+	if m != nil {
+		return m.ViewID
+	}
+	return nil
+}
+
+func (m *ViewRepair) GetMessageNum() MessageID {
+	if m != nil {
+		return m.MessageNum
+	}
+	return 0
+}
+
+func (m *ViewRepair) GetSlotNums() []LogSlotID {
+	if m != nil {
+		return m.SlotNums
+	}
+	return nil
+}
+
+type ViewRepairReply struct {
+	Sender  MemberID    `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID  *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	Entries []*LogEntry `protobuf:"bytes,3,rep,name=entries,proto3" json:"entries,omitempty"`
+}
+
+func (m *ViewRepairReply) Reset()         { *m = ViewRepairReply{} }
+func (m *ViewRepairReply) String() string { return proto.CompactTextString(m) }
+func (*ViewRepairReply) ProtoMessage()    {}
+func (*ViewRepairReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5bf22afbce485451, []int{16}
+}
+func (m *ViewRepairReply) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ViewRepairReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ViewRepairReply.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ViewRepairReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ViewRepairReply.Merge(m, src)
+}
+func (m *ViewRepairReply) XXX_Size() int {
+	return m.Size()
+}
+func (m *ViewRepairReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_ViewRepairReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ViewRepairReply proto.InternalMessageInfo
+
+func (m *ViewRepairReply) GetSender() MemberID {
+	if m != nil {
+		return m.Sender
+	}
+	return ""
+}
+
+func (m *ViewRepairReply) GetViewID() *ViewId {
+	if m != nil {
+		return m.ViewID
+	}
+	return nil
+}
+
+func (m *ViewRepairReply) GetEntries() []*LogEntry {
+	if m != nil {
+		return m.Entries
 	}
 	return nil
 }
 
 type SyncPrepare struct {
-	Sender     MemberID    `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
-	ViewID     *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	MessageNum MessageID   `protobuf:"varint,3,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
-	Log        []*LogEntry `protobuf:"bytes,4,rep,name=log,proto3" json:"log,omitempty"`
+	Sender          MemberID  `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID          *ViewId   `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	MessageNum      MessageID `protobuf:"varint,3,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
+	NoOpFilter      []byte    `protobuf:"bytes,4,opt,name=no_op_filter,json=noOpFilter,proto3" json:"no_op_filter,omitempty"`
+	FirstLogSlotNum LogSlotID `protobuf:"varint,5,opt,name=first_log_slot_num,json=firstLogSlotNum,proto3,casttype=LogSlotID" json:"first_log_slot_num,omitempty"`
+	LastLogSlotNum  LogSlotID `protobuf:"varint,6,opt,name=last_log_slot_num,json=lastLogSlotNum,proto3,casttype=LogSlotID" json:"last_log_slot_num,omitempty"`
 }
 
 func (m *SyncPrepare) Reset()         { *m = SyncPrepare{} }
 func (m *SyncPrepare) String() string { return proto.CompactTextString(m) }
 func (*SyncPrepare) ProtoMessage()    {}
 func (*SyncPrepare) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{13}
+	return fileDescriptor_5bf22afbce485451, []int{17}
 }
 func (m *SyncPrepare) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1155,9 +1531,143 @@ func (m *SyncPrepare) GetMessageNum() MessageID {
 	return 0
 }
 
-func (m *SyncPrepare) GetLog() []*LogEntry {
+func (m *SyncPrepare) GetNoOpFilter() []byte {
 	if m != nil {
-		return m.Log
+		return m.NoOpFilter
+	}
+	return nil
+}
+
+func (m *SyncPrepare) GetFirstLogSlotNum() LogSlotID {
+	if m != nil {
+		return m.FirstLogSlotNum
+	}
+	return 0
+}
+
+func (m *SyncPrepare) GetLastLogSlotNum() LogSlotID {
+	if m != nil {
+		return m.LastLogSlotNum
+	}
+	return 0
+}
+
+type SyncRepair struct {
+	Sender   MemberID    `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID   *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	SlotNums []LogSlotID `protobuf:"varint,3,rep,packed,name=slot_nums,json=slotNums,proto3,casttype=LogSlotID" json:"slot_nums,omitempty"`
+}
+
+func (m *SyncRepair) Reset()         { *m = SyncRepair{} }
+func (m *SyncRepair) String() string { return proto.CompactTextString(m) }
+func (*SyncRepair) ProtoMessage()    {}
+func (*SyncRepair) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5bf22afbce485451, []int{18}
+}
+func (m *SyncRepair) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *SyncRepair) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_SyncRepair.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *SyncRepair) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SyncRepair.Merge(m, src)
+}
+func (m *SyncRepair) XXX_Size() int {
+	return m.Size()
+}
+func (m *SyncRepair) XXX_DiscardUnknown() {
+	xxx_messageInfo_SyncRepair.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SyncRepair proto.InternalMessageInfo
+
+func (m *SyncRepair) GetSender() MemberID {
+	if m != nil {
+		return m.Sender
+	}
+	return ""
+}
+
+func (m *SyncRepair) GetViewID() *ViewId {
+	if m != nil {
+		return m.ViewID
+	}
+	return nil
+}
+
+func (m *SyncRepair) GetSlotNums() []LogSlotID {
+	if m != nil {
+		return m.SlotNums
+	}
+	return nil
+}
+
+type SyncRepairReply struct {
+	Sender  MemberID    `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID  *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	Entries []*LogEntry `protobuf:"bytes,3,rep,name=entries,proto3" json:"entries,omitempty"`
+}
+
+func (m *SyncRepairReply) Reset()         { *m = SyncRepairReply{} }
+func (m *SyncRepairReply) String() string { return proto.CompactTextString(m) }
+func (*SyncRepairReply) ProtoMessage()    {}
+func (*SyncRepairReply) Descriptor() ([]byte, []int) {
+	return fileDescriptor_5bf22afbce485451, []int{19}
+}
+func (m *SyncRepairReply) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *SyncRepairReply) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_SyncRepairReply.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *SyncRepairReply) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SyncRepairReply.Merge(m, src)
+}
+func (m *SyncRepairReply) XXX_Size() int {
+	return m.Size()
+}
+func (m *SyncRepairReply) XXX_DiscardUnknown() {
+	xxx_messageInfo_SyncRepairReply.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SyncRepairReply proto.InternalMessageInfo
+
+func (m *SyncRepairReply) GetSender() MemberID {
+	if m != nil {
+		return m.Sender
+	}
+	return ""
+}
+
+func (m *SyncRepairReply) GetViewID() *ViewId {
+	if m != nil {
+		return m.ViewID
+	}
+	return nil
+}
+
+func (m *SyncRepairReply) GetEntries() []*LogEntry {
+	if m != nil {
+		return m.Entries
 	}
 	return nil
 }
@@ -1172,7 +1682,7 @@ func (m *SyncReply) Reset()         { *m = SyncReply{} }
 func (m *SyncReply) String() string { return proto.CompactTextString(m) }
 func (*SyncReply) ProtoMessage()    {}
 func (*SyncReply) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{14}
+	return fileDescriptor_5bf22afbce485451, []int{20}
 }
 func (m *SyncReply) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1223,17 +1733,17 @@ func (m *SyncReply) GetSlotNum() LogSlotID {
 }
 
 type SyncCommit struct {
-	Sender     MemberID    `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
-	ViewID     *ViewId     `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
-	MessageNum MessageID   `protobuf:"varint,3,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
-	Log        []*LogEntry `protobuf:"bytes,4,rep,name=log,proto3" json:"log,omitempty"`
+	Sender     MemberID  `protobuf:"bytes,1,opt,name=sender,proto3,casttype=MemberID" json:"sender,omitempty"`
+	ViewID     *ViewId   `protobuf:"bytes,2,opt,name=view_id,json=viewId,proto3" json:"view_id,omitempty"`
+	MessageNum MessageID `protobuf:"varint,3,opt,name=message_num,json=messageNum,proto3,casttype=MessageID" json:"message_num,omitempty"`
+	SyncPoint  LogSlotID `protobuf:"varint,4,opt,name=sync_point,json=syncPoint,proto3,casttype=LogSlotID" json:"sync_point,omitempty"`
 }
 
 func (m *SyncCommit) Reset()         { *m = SyncCommit{} }
 func (m *SyncCommit) String() string { return proto.CompactTextString(m) }
 func (*SyncCommit) ProtoMessage()    {}
 func (*SyncCommit) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{15}
+	return fileDescriptor_5bf22afbce485451, []int{21}
 }
 func (m *SyncCommit) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1283,11 +1793,11 @@ func (m *SyncCommit) GetMessageNum() MessageID {
 	return 0
 }
 
-func (m *SyncCommit) GetLog() []*LogEntry {
+func (m *SyncCommit) GetSyncPoint() LogSlotID {
 	if m != nil {
-		return m.Log
+		return m.SyncPoint
 	}
-	return nil
+	return 0
 }
 
 type Ping struct {
@@ -1299,7 +1809,7 @@ func (m *Ping) Reset()         { *m = Ping{} }
 func (m *Ping) String() string { return proto.CompactTextString(m) }
 func (*Ping) ProtoMessage()    {}
 func (*Ping) Descriptor() ([]byte, []int) {
-	return fileDescriptor_5bf22afbce485451, []int{16}
+	return fileDescriptor_5bf22afbce485451, []int{22}
 }
 func (m *Ping) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1355,8 +1865,14 @@ func init() {
 	proto.RegisterType((*GapCommitReply)(nil), "atomix.nopaxos.protocol.GapCommitReply")
 	proto.RegisterType((*ViewChangeRequest)(nil), "atomix.nopaxos.protocol.ViewChangeRequest")
 	proto.RegisterType((*ViewChange)(nil), "atomix.nopaxos.protocol.ViewChange")
+	proto.RegisterType((*ViewChangeRepair)(nil), "atomix.nopaxos.protocol.ViewChangeRepair")
+	proto.RegisterType((*ViewChangeRepairReply)(nil), "atomix.nopaxos.protocol.ViewChangeRepairReply")
 	proto.RegisterType((*StartView)(nil), "atomix.nopaxos.protocol.StartView")
+	proto.RegisterType((*ViewRepair)(nil), "atomix.nopaxos.protocol.ViewRepair")
+	proto.RegisterType((*ViewRepairReply)(nil), "atomix.nopaxos.protocol.ViewRepairReply")
 	proto.RegisterType((*SyncPrepare)(nil), "atomix.nopaxos.protocol.SyncPrepare")
+	proto.RegisterType((*SyncRepair)(nil), "atomix.nopaxos.protocol.SyncRepair")
+	proto.RegisterType((*SyncRepairReply)(nil), "atomix.nopaxos.protocol.SyncRepairReply")
 	proto.RegisterType((*SyncReply)(nil), "atomix.nopaxos.protocol.SyncReply")
 	proto.RegisterType((*SyncCommit)(nil), "atomix.nopaxos.protocol.SyncCommit")
 	proto.RegisterType((*Ping)(nil), "atomix.nopaxos.protocol.Ping")
@@ -1367,71 +1883,88 @@ func init() {
 }
 
 var fileDescriptor_5bf22afbce485451 = []byte{
-	// 1017 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x58, 0xcf, 0x6f, 0xe3, 0xc4,
-	0x17, 0xcf, 0xe4, 0x77, 0x5e, 0x7e, 0x68, 0xd7, 0xdf, 0x95, 0xbe, 0x56, 0x24, 0x9c, 0xdd, 0x50,
-	0x96, 0x02, 0x92, 0x8b, 0xda, 0x33, 0x12, 0x4a, 0x02, 0x34, 0x28, 0x5b, 0x2d, 0x2e, 0xe2, 0x84,
-	0x64, 0xb9, 0xce, 0x60, 0x2c, 0x6c, 0x8f, 0xeb, 0x71, 0xd2, 0xcd, 0x89, 0x7f, 0x61, 0x4f, 0x5c,
-	0x11, 0x17, 0xb4, 0x7f, 0x00, 0x07, 0x4e, 0x9c, 0x2b, 0x4e, 0x7b, 0xe4, 0x00, 0x01, 0xd2, 0x1b,
-	0x7f, 0x01, 0xda, 0x13, 0x9a, 0x19, 0xff, 0x6a, 0xc0, 0xeb, 0xc2, 0xa1, 0x2a, 0x2b, 0x6e, 0x33,
-	0xcf, 0x9f, 0xf9, 0xcc, 0xe7, 0xbd, 0x37, 0xf3, 0x66, 0xc6, 0x70, 0xdf, 0x08, 0x89, 0x6b, 0x3f,
-	0xda, 0xf3, 0x88, 0x6f, 0x3c, 0x22, 0x74, 0xcf, 0x0f, 0x48, 0x48, 0x4c, 0xe2, 0x24, 0x0d, 0x95,
-	0x37, 0xa4, 0xff, 0x0b, 0x9c, 0x1a, 0xe1, 0xd4, 0xf8, 0x73, 0xff, 0x5e, 0x1e, 0x81, 0x43, 0x2c,
-	0x81, 0xea, 0xdf, 0xb1, 0x88, 0x45, 0x78, 0x73, 0x8f, 0xb5, 0x22, 0xeb, 0xc0, 0x22, 0xc4, 0x72,
-	0xb0, 0x18, 0x70, 0xb2, 0xf8, 0x64, 0x2f, 0xb4, 0x5d, 0x4c, 0x43, 0xc3, 0xf5, 0x05, 0x60, 0xf8,
-	0x4d, 0x19, 0xba, 0x63, 0xc7, 0xc6, 0x5e, 0xf8, 0x00, 0x53, 0x6a, 0x58, 0x58, 0x1a, 0x43, 0xc3,
-	0x24, 0xae, 0x6b, 0x78, 0x73, 0x19, 0xdd, 0x45, 0xbb, 0xed, 0xfd, 0x57, 0xd5, 0x1c, 0x59, 0xea,
-	0x58, 0xe0, 0x34, 0x7c, 0xba, 0xc0, 0x34, 0x3c, 0x2c, 0x69, 0xf1, 0x48, 0x69, 0x06, 0xdd, 0xa8,
-	0xa9, 0x07, 0xd8, 0x77, 0x56, 0x72, 0x99, 0x53, 0xbd, 0x52, 0x4c, 0xe5, 0x3b, 0xab, 0xc3, 0x92,
-	0xd6, 0x31, 0x33, 0x7d, 0xe9, 0x2d, 0xa8, 0x9d, 0x2e, 0x70, 0xb0, 0x92, 0x2b, 0x05, 0x2c, 0x1f,
-	0x30, 0x54, 0x2a, 0x47, 0x8c, 0x92, 0xde, 0x85, 0x36, 0x6f, 0x44, 0x52, 0xaa, 0x9c, 0xe4, 0xe5,
-	0x22, 0x12, 0x21, 0x04, 0x4e, 0x93, 0xde, 0xa8, 0x05, 0x0d, 0x57, 0x04, 0x69, 0xf8, 0x45, 0x13,
-	0x7a, 0xcc, 0x68, 0x9b, 0xc6, 0x7f, 0x71, 0x2b, 0x88, 0x1b, 0xe3, 0xa1, 0x0e, 0x09, 0x75, 0x87,
-	0x90, 0xcf, 0x16, 0xbe, 0x5c, 0x2b, 0xe0, 0x39, 0x76, 0x48, 0x38, 0xe3, 0x50, 0xc6, 0x43, 0x93,
-	0x9e, 0xf4, 0x3e, 0x80, 0x65, 0xf8, 0x3a, 0x73, 0xd1, 0x0e, 0xe5, 0x3a, 0xa7, 0x79, 0x2d, 0x97,
-	0xe6, 0x3d, 0xc3, 0x1f, 0x73, 0x64, 0xea, 0x57, 0xcb, 0x8a, 0x6d, 0xd2, 0x31, 0xdc, 0x4a, 0xb9,
-	0x22, 0x07, 0x1b, 0x05, 0x69, 0xcb, 0x30, 0x0a, 0x27, 0x7b, 0xd6, 0x25, 0x8b, 0xf4, 0x31, 0xfc,
-	0x6f, 0x69, 0xe3, 0x33, 0xdd, 0xfc, 0xd4, 0xf0, 0x2c, 0xac, 0x07, 0x62, 0x62, 0xb9, 0xc9, 0x79,
-	0x5f, 0xcf, 0xe5, 0xfd, 0xc8, 0xc6, 0x67, 0x63, 0x3e, 0x24, 0x95, 0x7a, 0x7b, 0xb9, 0x6d, 0x64,
-	0x61, 0xcc, 0xb0, 0xcb, 0xad, 0x82, 0x30, 0xa6, 0xac, 0x2c, 0x8c, 0x29, 0x9d, 0x34, 0x06, 0xa0,
-	0xa1, 0x11, 0x84, 0x3a, 0xb3, 0xc9, 0xc0, 0x69, 0x86, 0xf9, 0xd9, 0x60, 0x50, 0xc6, 0xc5, 0xe2,
-	0x47, 0xe3, 0x8e, 0x34, 0x85, 0x0e, 0x5d, 0x79, 0xa6, 0xee, 0x07, 0xd8, 0x37, 0x02, 0x2c, 0xb7,
-	0x39, 0xcd, 0x4e, 0x3e, 0xcd, 0xca, 0x33, 0x1f, 0x0a, 0xec, 0x61, 0x49, 0x6b, 0xd3, 0xb4, 0xcb,
-	0xf5, 0x30, 0x2a, 0x91, 0x84, 0x4e, 0x91, 0x9e, 0x95, 0x67, 0xc6, 0xf1, 0x6f, 0xd1, 0xb8, 0xc3,
-	0xd7, 0x18, 0x23, 0x89, 0x16, 0x47, 0xb7, 0x68, 0x8d, 0xad, 0x3c, 0x53, 0x64, 0x8e, 0xaf, 0xb1,
-	0xa4, 0x27, 0x1d, 0x40, 0xd5, 0xb7, 0x3d, 0x4b, 0xee, 0x71, 0x82, 0x97, 0x72, 0x09, 0x1e, 0xda,
-	0x9e, 0x75, 0x58, 0xd2, 0x38, 0x38, 0x5b, 0x18, 0x30, 0xd4, 0x59, 0x7c, 0xa6, 0x73, 0xe9, 0x0d,
-	0x00, 0x07, 0x1b, 0x73, 0x1c, 0xe8, 0xde, 0xc2, 0xe5, 0x25, 0xa1, 0x3a, 0xea, 0x3c, 0x5b, 0x0f,
-	0x9a, 0x33, 0x6e, 0x9d, 0x4e, 0xb4, 0x96, 0xf8, 0x7e, 0xb4, 0x70, 0x25, 0x15, 0xda, 0x14, 0x53,
-	0x6a, 0x13, 0x8f, 0xa3, 0xcb, 0x1c, 0xdd, 0x7d, 0xb6, 0x1e, 0xb4, 0x8e, 0x85, 0x79, 0x3a, 0xd1,
-	0x20, 0x42, 0x1c, 0x2d, 0xdc, 0xe1, 0xf7, 0x08, 0x7a, 0x97, 0xab, 0xc8, 0x36, 0x05, 0x2a, 0xa0,
-	0x60, 0xf8, 0x48, 0xf4, 0xf6, 0x94, 0x51, 0x45, 0x63, 0xf8, 0x08, 0xc1, 0xf0, 0x23, 0x68, 0x25,
-	0x87, 0x47, 0x54, 0x50, 0xfa, 0xaa, 0x38, 0x5e, 0xd4, 0xf8, 0x78, 0x51, 0x3f, 0x8c, 0x11, 0xa3,
-	0xe6, 0xf9, 0x7a, 0x50, 0x7a, 0xfc, 0xf3, 0x00, 0x69, 0xe9, 0x30, 0xe9, 0x0e, 0xd4, 0x96, 0x86,
-	0xb3, 0xc0, 0xbc, 0x96, 0x74, 0x34, 0xd1, 0x19, 0xfe, 0x86, 0xa0, 0x93, 0xad, 0x63, 0xdb, 0xd2,
-	0x50, 0x91, 0xb4, 0x1d, 0xa8, 0x53, 0xec, 0xcd, 0x71, 0xc0, 0xbd, 0x68, 0x89, 0x30, 0x3f, 0xc0,
-	0xee, 0x09, 0x0f, 0x73, 0xf4, 0x4d, 0x9a, 0x40, 0x83, 0xef, 0x1f, 0x7b, 0x1e, 0xc9, 0x1f, 0x3c,
-	0x77, 0xef, 0x4c, 0xe7, 0x23, 0xd8, 0xac, 0x07, 0x22, 0x9d, 0x13, 0xad, 0xbe, 0x14, 0x69, 0xdd,
-	0x85, 0x26, 0x2f, 0x66, 0x4c, 0x58, 0x35, 0x15, 0x36, 0x23, 0x16, 0xab, 0x5b, 0xd3, 0x89, 0xd6,
-	0x60, 0x9f, 0x99, 0xaa, 0xc4, 0xd9, 0x5a, 0xd6, 0xd9, 0x73, 0x04, 0x9d, 0x6c, 0xb9, 0xfd, 0x17,
-	0xe7, 0xed, 0x3b, 0x04, 0x90, 0x16, 0xfd, 0x1b, 0x9d, 0xb5, 0xbf, 0x76, 0xe0, 0x09, 0x02, 0x48,
-	0x4f, 0x9b, 0x8c, 0x20, 0x74, 0x35, 0x41, 0xe5, 0x7f, 0x2e, 0x68, 0x2b, 0x58, 0x95, 0x82, 0x60,
-	0x31, 0xa9, 0xb7, 0xb6, 0x4f, 0xb4, 0x6b, 0x15, 0x9c, 0x5d, 0xf7, 0x95, 0xe7, 0xad, 0xfb, 0xe1,
-	0xd7, 0x08, 0x7a, 0x97, 0x8f, 0xca, 0x1b, 0x2a, 0xf4, 0x73, 0xb8, 0xfd, 0xa7, 0xa3, 0xf7, 0x3a,
-	0xa5, 0x0e, 0xbf, 0x2c, 0x03, 0xa4, 0x0a, 0xae, 0x35, 0x4a, 0x6f, 0x43, 0xdb, 0x31, 0x68, 0xa8,
-	0x7b, 0x24, 0x70, 0x0d, 0xe7, 0x8a, 0x5b, 0x4b, 0x03, 0x36, 0xe6, 0x88, 0x0f, 0xd9, 0x5e, 0xc1,
-	0xd5, 0xa2, 0xed, 0x7e, 0x00, 0x15, 0x87, 0x58, 0x72, 0xed, 0x6e, 0x65, 0xb7, 0xbd, 0x7f, 0x2f,
-	0x77, 0xa6, 0x19, 0xb1, 0xde, 0xf1, 0xc2, 0x60, 0xa5, 0x31, 0xf4, 0xf0, 0x47, 0x04, 0xad, 0xe4,
-	0x06, 0x72, 0x93, 0x37, 0x68, 0xec, 0x5e, 0xf5, 0x6f, 0xb9, 0xb7, 0x46, 0xd0, 0xce, 0xdc, 0x8c,
-	0x5e, 0x3c, 0x07, 0xbf, 0x62, 0xf9, 0x4b, 0x2e, 0x69, 0x37, 0xb3, 0x0c, 0xfc, 0xc4, 0x4e, 0x81,
-	0xf4, 0x06, 0xf8, 0xc2, 0xe5, 0x20, 0x80, 0x2a, 0xbb, 0xad, 0x5e, 0xa7, 0x63, 0xfb, 0x34, 0xfe,
-	0xab, 0x70, 0x8c, 0x83, 0xa5, 0x6d, 0x62, 0xe9, 0x04, 0x3a, 0x91, 0x21, 0x0c, 0xb0, 0xe1, 0x4a,
-	0xf7, 0xf3, 0x5f, 0xb4, 0xd9, 0xbf, 0x11, 0xfd, 0x2b, 0xe2, 0x76, 0xd1, 0x9b, 0x68, 0xff, 0x2c,
-	0x79, 0x93, 0xc7, 0xb3, 0x62, 0xe8, 0xc6, 0x16, 0x31, 0x6d, 0xfe, 0xe3, 0xee, 0xf2, 0x6b, 0xbe,
-	0x7f, 0x55, 0x20, 0x9b, 0x78, 0xb4, 0xf3, 0xfb, 0xaf, 0x0a, 0x7a, 0xb2, 0x51, 0xd0, 0xb7, 0x1b,
-	0x05, 0x9d, 0x6f, 0x14, 0xf4, 0x74, 0xa3, 0xa0, 0x5f, 0x36, 0x0a, 0x7a, 0x7c, 0xa1, 0x94, 0x9e,
-	0x5e, 0x28, 0xa5, 0x1f, 0x2e, 0x94, 0xd2, 0x49, 0x9d, 0x53, 0x1c, 0xfc, 0x11, 0x00, 0x00, 0xff,
-	0xff, 0xcf, 0x2a, 0xb9, 0xce, 0x0e, 0x12, 0x00, 0x00,
+	// 1295 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xec, 0x59, 0x4f, 0x6f, 0x1b, 0x45,
+	0x14, 0xf7, 0xd8, 0x8e, 0x1d, 0x3f, 0x3b, 0x4e, 0xb2, 0x6d, 0xc5, 0x2a, 0x12, 0x76, 0x6a, 0x4a,
+	0x09, 0x05, 0x39, 0x28, 0xbd, 0x20, 0x10, 0x12, 0xb2, 0x43, 0x89, 0x51, 0x5a, 0xc2, 0x06, 0x55,
+	0x42, 0x42, 0x5a, 0x6d, 0xec, 0xe9, 0xb2, 0x62, 0x77, 0x67, 0xbb, 0xb3, 0x76, 0xeb, 0x13, 0x12,
+	0x9f, 0xa0, 0x1f, 0x80, 0x0b, 0x12, 0x42, 0xfd, 0x00, 0x1c, 0x10, 0x07, 0x10, 0xb7, 0x88, 0x53,
+	0x0f, 0x08, 0x21, 0x0e, 0x29, 0x38, 0x37, 0x3e, 0x01, 0xea, 0x09, 0xcd, 0xec, 0xec, 0x1f, 0x6f,
+	0xec, 0xae, 0x95, 0x83, 0xe5, 0x56, 0xbd, 0xed, 0xbc, 0x79, 0xef, 0x37, 0xef, 0xf7, 0xe6, 0xbd,
+	0x9d, 0x37, 0xbb, 0x70, 0x55, 0xf3, 0x88, 0x65, 0xdc, 0xdf, 0xb6, 0x89, 0xa3, 0xdd, 0x27, 0x74,
+	0xdb, 0x71, 0x89, 0x47, 0xba, 0xc4, 0x0c, 0x1f, 0x9a, 0xfc, 0x41, 0x7a, 0xc9, 0xd7, 0x6b, 0x0a,
+	0xbd, 0x66, 0x30, 0xbd, 0x71, 0x79, 0x1a, 0x80, 0x49, 0x74, 0x5f, 0x6b, 0xe3, 0xa2, 0x4e, 0x74,
+	0xc2, 0x1f, 0xb7, 0xd9, 0x93, 0x90, 0xd6, 0x75, 0x42, 0x74, 0x13, 0xfb, 0x06, 0x47, 0xfd, 0x3b,
+	0xdb, 0x9e, 0x61, 0x61, 0xea, 0x69, 0x96, 0xe3, 0x2b, 0x34, 0x7e, 0xc8, 0xc2, 0x4a, 0xdb, 0x34,
+	0xb0, 0xed, 0xdd, 0xc4, 0x94, 0x6a, 0x3a, 0x96, 0xda, 0x50, 0xec, 0x12, 0xcb, 0xd2, 0xec, 0x9e,
+	0x8c, 0x36, 0xd1, 0x56, 0x79, 0xe7, 0xb5, 0xe6, 0x14, 0xb7, 0x9a, 0x6d, 0x5f, 0x4f, 0xc1, 0x77,
+	0xfb, 0x98, 0x7a, 0x7b, 0x19, 0x25, 0xb0, 0x94, 0xf6, 0x61, 0x45, 0x3c, 0xaa, 0x2e, 0x76, 0xcc,
+	0xa1, 0x9c, 0xe5, 0x50, 0xaf, 0xa6, 0x43, 0x39, 0xe6, 0x70, 0x2f, 0xa3, 0x54, 0xba, 0xb1, 0xb1,
+	0xf4, 0x1e, 0x2c, 0xdd, 0xed, 0x63, 0x77, 0x28, 0xe7, 0x52, 0x50, 0x3e, 0x61, 0x5a, 0x91, 0x3b,
+	0xbe, 0x95, 0x74, 0x03, 0xca, 0xfc, 0x41, 0xb8, 0x92, 0xe7, 0x20, 0xaf, 0xa4, 0x81, 0xf8, 0x8e,
+	0xc0, 0xdd, 0x70, 0xd4, 0x2a, 0x41, 0xd1, 0xf2, 0x83, 0xd4, 0xf8, 0xa6, 0x02, 0x55, 0x26, 0x34,
+	0xba, 0xda, 0x8b, 0xb8, 0xa5, 0xc4, 0x8d, 0xe1, 0x50, 0x93, 0x78, 0xaa, 0x49, 0xc8, 0x97, 0x7d,
+	0x47, 0x5e, 0x4a, 0xc1, 0x39, 0x34, 0x89, 0xb7, 0xcf, 0x55, 0x19, 0x0e, 0x0d, 0x47, 0xd2, 0x47,
+	0x00, 0xba, 0xe6, 0xa8, 0x8c, 0xa2, 0xe1, 0xc9, 0x05, 0x0e, 0xf3, 0xfa, 0x54, 0x98, 0x0f, 0x35,
+	0xa7, 0xcd, 0x35, 0x23, 0x5e, 0x25, 0x3d, 0x90, 0x49, 0x87, 0xb0, 0x16, 0x61, 0x09, 0x82, 0xc5,
+	0x94, 0x6d, 0x8b, 0x21, 0xfa, 0x24, 0xab, 0xfa, 0x98, 0x44, 0xfa, 0x1c, 0x2e, 0x0c, 0x0c, 0x7c,
+	0x4f, 0xed, 0x7e, 0xa1, 0xd9, 0x3a, 0x56, 0x5d, 0x7f, 0x61, 0x79, 0x99, 0xe3, 0x5e, 0x9b, 0x8a,
+	0x7b, 0xdb, 0xc0, 0xf7, 0xda, 0xdc, 0x24, 0x72, 0x75, 0x7d, 0x90, 0x14, 0xb2, 0x30, 0xc6, 0xd0,
+	0xe5, 0x52, 0x4a, 0x18, 0x23, 0x54, 0x16, 0xc6, 0x08, 0x4e, 0xfa, 0x0c, 0xa4, 0x71, 0x2f, 0x1d,
+	0xcd, 0x70, 0x65, 0x48, 0x09, 0x67, 0xdc, 0x49, 0x66, 0xb0, 0x97, 0x51, 0xd6, 0x06, 0x09, 0x99,
+	0x64, 0x80, 0x7c, 0x16, 0x5a, 0x44, 0xb7, 0xcc, 0x17, 0x68, 0xce, 0xbc, 0x40, 0x10, 0xe4, 0x4b,
+	0x83, 0x49, 0x13, 0x52, 0x1b, 0x80, 0x7a, 0x9a, 0xeb, 0xa9, 0x6c, 0x5a, 0xae, 0x70, 0xf0, 0xc6,
+	0xf4, 0x9c, 0x62, 0xaa, 0x6c, 0x05, 0x96, 0x05, 0x34, 0x18, 0x84, 0x21, 0x15, 0x31, 0x58, 0x99,
+	0x21, 0xa4, 0x21, 0x7b, 0x1e, 0x52, 0xc1, 0xfb, 0x36, 0xac, 0xc7, 0x70, 0x04, 0xe1, 0x2a, 0x47,
+	0xdb, 0x9a, 0x01, 0x2d, 0xa0, 0xba, 0x3a, 0x18, 0x17, 0x49, 0x1d, 0xa8, 0xd0, 0xa1, 0xdd, 0x55,
+	0x1d, 0x06, 0xec, 0x62, 0x79, 0x95, 0x43, 0x5e, 0x99, 0x4e, 0x73, 0x68, 0x77, 0x0f, 0x7c, 0xdd,
+	0xbd, 0x8c, 0x52, 0xa6, 0xd1, 0x90, 0x17, 0x21, 0x83, 0x12, 0x54, 0xd7, 0xd2, 0x8a, 0x70, 0x68,
+	0x77, 0x23, 0xaa, 0x34, 0x1c, 0x31, 0xaa, 0x31, 0x1c, 0x41, 0x75, 0x3d, 0x85, 0x6a, 0x84, 0x16,
+	0x52, 0xa5, 0xe3, 0x22, 0xbe, 0x9f, 0x02, 0xd7, 0x1c, 0xca, 0x52, 0xda, 0x7e, 0xfa, 0xd6, 0x1c,
+	0xaa, 0x44, 0x83, 0x41, 0x48, 0x52, 0xbc, 0x22, 0x2e, 0xcc, 0x40, 0xd2, 0xaf, 0xdf, 0x80, 0xa4,
+	0x78, 0x3b, 0x5c, 0x87, 0xbc, 0x63, 0xd8, 0xba, 0x7c, 0x91, 0x03, 0xbc, 0x3c, 0x15, 0xe0, 0xc0,
+	0xb0, 0xf5, 0xbd, 0x8c, 0xc2, 0x95, 0xe3, 0xc7, 0x03, 0x86, 0x02, 0xdb, 0xdd, 0x4e, 0x4f, 0x7a,
+	0x03, 0xc0, 0xc4, 0x5a, 0x0f, 0xbb, 0xaa, 0xdd, 0xb7, 0xf8, 0xc1, 0x90, 0x6f, 0x55, 0x9e, 0x9c,
+	0xd4, 0x97, 0xf7, 0xb9, 0xb4, 0xb3, 0xab, 0x94, 0xfc, 0xf9, 0x5b, 0x7d, 0x4b, 0x6a, 0x42, 0x99,
+	0x62, 0x4a, 0x0d, 0x62, 0x73, 0xed, 0x2c, 0xd7, 0x5e, 0x79, 0x72, 0x52, 0x2f, 0x1d, 0xfa, 0xe2,
+	0xce, 0xae, 0x02, 0x42, 0xe3, 0x56, 0xdf, 0x6a, 0xfc, 0x86, 0xa0, 0x3a, 0x7e, 0x96, 0x24, 0x21,
+	0x50, 0x0a, 0x04, 0xd3, 0x17, 0x4e, 0x27, 0x97, 0x14, 0xe7, 0x1a, 0xd3, 0x17, 0x1a, 0x4c, 0xbf,
+	0x05, 0xa5, 0xb0, 0x85, 0x10, 0xc7, 0xca, 0x46, 0xd3, 0x6f, 0x32, 0x9a, 0x41, 0x93, 0xd1, 0xfc,
+	0x34, 0xd0, 0x68, 0x2d, 0x1f, 0x9f, 0xd4, 0x33, 0x0f, 0x1e, 0xd7, 0x91, 0x12, 0x99, 0x49, 0x17,
+	0x61, 0x69, 0xa0, 0x99, 0x7d, 0xcc, 0x4f, 0x94, 0x8a, 0xe2, 0x0f, 0x1a, 0xff, 0x22, 0xa8, 0xc4,
+	0x4f, 0xb3, 0xa4, 0x6b, 0x28, 0xcd, 0xb5, 0x2b, 0x50, 0xa0, 0xd8, 0xee, 0x61, 0x97, 0xb3, 0x28,
+	0xf9, 0x61, 0xbe, 0x89, 0xad, 0x23, 0x1e, 0x66, 0x31, 0x27, 0xed, 0x42, 0x91, 0x97, 0xaa, 0xd1,
+	0x13, 0xee, 0xd7, 0x9f, 0x5a, 0xa0, 0x9d, 0x5e, 0x0b, 0x46, 0x27, 0x75, 0x7f, 0x3b, 0x77, 0x95,
+	0xc2, 0xc0, 0xdf, 0xd6, 0x2d, 0x58, 0xe6, 0x47, 0x1a, 0x73, 0x2c, 0x1f, 0x39, 0xb6, 0x4f, 0x74,
+	0x76, 0x7a, 0x75, 0x76, 0x95, 0x22, 0x9b, 0x66, 0x5e, 0x85, 0x64, 0x97, 0xe2, 0x64, 0x8f, 0x11,
+	0x54, 0xe2, 0x87, 0xee, 0x33, 0xbc, 0x6f, 0x3f, 0x23, 0x80, 0xe8, 0xe8, 0x5f, 0xe8, 0x5d, 0x9b,
+	0x4c, 0xe0, 0x21, 0x02, 0x88, 0x7a, 0x8e, 0x98, 0x43, 0x68, 0x36, 0x87, 0xb2, 0xe7, 0x77, 0x28,
+	0x11, 0xac, 0x5c, 0x4a, 0xb0, 0x98, 0xab, 0x6b, 0xc9, 0xbe, 0x66, 0xae, 0x0e, 0xc7, 0xf3, 0x3e,
+	0xf7, 0xb4, 0xbc, 0x6f, 0x7c, 0x8f, 0xa0, 0x3a, 0xde, 0x30, 0x2d, 0xa8, 0xa3, 0x5f, 0xc1, 0xfa,
+	0x99, 0x06, 0x6c, 0x9e, 0xae, 0x36, 0xbe, 0xce, 0x01, 0x44, 0x1e, 0xcc, 0x35, 0x4a, 0xef, 0x43,
+	0xd9, 0xd4, 0xa8, 0xa7, 0xda, 0xc4, 0xb5, 0x34, 0x73, 0xc6, 0xd2, 0x52, 0x80, 0xd9, 0xdc, 0xe2,
+	0x26, 0xc9, 0x0c, 0xce, 0xa7, 0x95, 0xfb, 0x26, 0x54, 0x6c, 0xa2, 0x12, 0x47, 0xbd, 0x63, 0x98,
+	0x1e, 0x76, 0xc5, 0x5b, 0x11, 0x6c, 0xf2, 0xb1, 0x73, 0x83, 0x4b, 0xa4, 0x77, 0x40, 0xba, 0x63,
+	0xb8, 0x94, 0x5d, 0x17, 0x74, 0x35, 0xdc, 0xc3, 0xc2, 0xa4, 0x3d, 0x5c, 0xe5, 0x8a, 0x62, 0xcc,
+	0xd0, 0xdf, 0x86, 0x75, 0xce, 0x67, 0xcc, 0xb4, 0x38, 0xc9, 0xb4, 0xca, 0xf4, 0x22, 0xcb, 0xc6,
+	0x5f, 0x08, 0xd6, 0x92, 0x1d, 0xe8, 0x22, 0xbf, 0x0a, 0xa4, 0x6b, 0x50, 0x0a, 0x18, 0x52, 0x39,
+	0xbf, 0x99, 0x3b, 0x4b, 0x71, 0x59, 0x64, 0x38, 0x6d, 0x3c, 0x46, 0x70, 0x69, 0x62, 0x7b, 0xfd,
+	0xdc, 0x30, 0xfc, 0x25, 0x0b, 0xa5, 0xb0, 0xc7, 0x5f, 0x68, 0x56, 0xc9, 0x02, 0xc8, 0xcf, 0x58,
+	0x00, 0x4b, 0xe7, 0x2f, 0x80, 0xc2, 0x2c, 0x05, 0xf0, 0x3b, 0xf2, 0xdf, 0x42, 0xcf, 0x59, 0xea,
+	0xff, 0x84, 0x60, 0x35, 0x71, 0xd1, 0x9a, 0x2b, 0xb7, 0x77, 0xa1, 0x88, 0x6d, 0xcf, 0x35, 0x30,
+	0x95, 0x73, 0x9b, 0xb9, 0xad, 0xf2, 0xce, 0xe5, 0xa9, 0x28, 0xfb, 0x44, 0xff, 0xc0, 0xf6, 0xdc,
+	0xa1, 0x12, 0x58, 0x34, 0x7e, 0xcd, 0x42, 0x39, 0x76, 0xa5, 0x7b, 0x91, 0xd7, 0xe7, 0xc8, 0xeb,
+	0xef, 0x58, 0x77, 0x17, 0x5d, 0x5f, 0xe7, 0x19, 0xc2, 0xb1, 0x3c, 0xcd, 0xa5, 0xe7, 0x69, 0xe2,
+	0x96, 0xfc, 0xec, 0xe4, 0xe9, 0xb7, 0x08, 0x4a, 0xe1, 0x8d, 0x7c, 0x41, 0xdb, 0xbc, 0x3f, 0x44,
+	0x1e, 0x88, 0x1b, 0xfe, 0x22, 0x97, 0xd2, 0x9b, 0xe2, 0x53, 0x88, 0x43, 0x0c, 0xdb, 0x9b, 0x7c,
+	0xbd, 0xe4, 0xdf, 0x3c, 0x0e, 0xd8, 0x7c, 0xc3, 0x85, 0xfc, 0x81, 0x61, 0xeb, 0xf3, 0x64, 0xb4,
+	0x43, 0x83, 0x9f, 0x06, 0x87, 0xd8, 0x1d, 0x18, 0x5d, 0x2c, 0x1d, 0x41, 0x45, 0x08, 0x3c, 0x17,
+	0x6b, 0x96, 0x74, 0x75, 0xfa, 0x07, 0xeb, 0xf8, 0xcf, 0x86, 0x8d, 0x19, 0xf5, 0xb6, 0xd0, 0x5b,
+	0x68, 0xe7, 0x5e, 0xf8, 0xc9, 0x3d, 0x58, 0x15, 0xc3, 0x4a, 0x20, 0xf1, 0x97, 0x9d, 0xfe, 0xed,
+	0x76, 0xfc, 0x63, 0xfd, 0xc6, 0xac, 0x8a, 0x6c, 0xe1, 0xd6, 0x95, 0xff, 0xfe, 0xa9, 0xa1, 0x87,
+	0xa3, 0x1a, 0xfa, 0x71, 0x54, 0x43, 0xc7, 0xa3, 0x1a, 0x7a, 0x34, 0xaa, 0xa1, 0xbf, 0x47, 0x35,
+	0xf4, 0xe0, 0xb4, 0x96, 0x79, 0x74, 0x5a, 0xcb, 0xfc, 0x79, 0x5a, 0xcb, 0x1c, 0x15, 0x38, 0xc4,
+	0xf5, 0xff, 0x03, 0x00, 0x00, 0xff, 0xff, 0x85, 0x36, 0xbe, 0x3c, 0xed, 0x19, 0x00, 0x00,
 }
 
 func (this *ClientMessage) Equal(that interface{}) bool {
@@ -1806,6 +2339,54 @@ func (this *ReplicaMessage_ViewChange) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *ReplicaMessage_ViewChangeRepair) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplicaMessage_ViewChangeRepair)
+	if !ok {
+		that2, ok := that.(ReplicaMessage_ViewChangeRepair)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ViewChangeRepair.Equal(that1.ViewChangeRepair) {
+		return false
+	}
+	return true
+}
+func (this *ReplicaMessage_ViewChangeRepairReply) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplicaMessage_ViewChangeRepairReply)
+	if !ok {
+		that2, ok := that.(ReplicaMessage_ViewChangeRepairReply)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ViewChangeRepairReply.Equal(that1.ViewChangeRepairReply) {
+		return false
+	}
+	return true
+}
 func (this *ReplicaMessage_StartView) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -1830,6 +2411,54 @@ func (this *ReplicaMessage_StartView) Equal(that interface{}) bool {
 	}
 	return true
 }
+func (this *ReplicaMessage_ViewRepair) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplicaMessage_ViewRepair)
+	if !ok {
+		that2, ok := that.(ReplicaMessage_ViewRepair)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ViewRepair.Equal(that1.ViewRepair) {
+		return false
+	}
+	return true
+}
+func (this *ReplicaMessage_ViewRepairReply) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplicaMessage_ViewRepairReply)
+	if !ok {
+		that2, ok := that.(ReplicaMessage_ViewRepairReply)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.ViewRepairReply.Equal(that1.ViewRepairReply) {
+		return false
+	}
+	return true
+}
 func (this *ReplicaMessage_SyncPrepare) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
@@ -1850,6 +2479,54 @@ func (this *ReplicaMessage_SyncPrepare) Equal(that interface{}) bool {
 		return false
 	}
 	if !this.SyncPrepare.Equal(that1.SyncPrepare) {
+		return false
+	}
+	return true
+}
+func (this *ReplicaMessage_SyncRepair) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplicaMessage_SyncRepair)
+	if !ok {
+		that2, ok := that.(ReplicaMessage_SyncRepair)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.SyncRepair.Equal(that1.SyncRepair) {
+		return false
+	}
+	return true
+}
+func (this *ReplicaMessage_SyncRepairReply) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ReplicaMessage_SyncRepairReply)
+	if !ok {
+		that2, ok := that.(ReplicaMessage_SyncRepairReply)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.SyncRepairReply.Equal(that1.SyncRepairReply) {
 		return false
 	}
 	return true
@@ -2236,11 +2913,88 @@ func (this *ViewChange) Equal(that interface{}) bool {
 	if this.MessageNum != that1.MessageNum {
 		return false
 	}
-	if len(this.Log) != len(that1.Log) {
+	if !bytes.Equal(this.NoOpFilter, that1.NoOpFilter) {
 		return false
 	}
-	for i := range this.Log {
-		if !this.Log[i].Equal(that1.Log[i]) {
+	if this.FirstLogSlotNum != that1.FirstLogSlotNum {
+		return false
+	}
+	if this.LastLogSlotNum != that1.LastLogSlotNum {
+		return false
+	}
+	return true
+}
+func (this *ViewChangeRepair) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ViewChangeRepair)
+	if !ok {
+		that2, ok := that.(ViewChangeRepair)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Sender != that1.Sender {
+		return false
+	}
+	if !this.ViewID.Equal(that1.ViewID) {
+		return false
+	}
+	if this.MessageNum != that1.MessageNum {
+		return false
+	}
+	if len(this.SlotNums) != len(that1.SlotNums) {
+		return false
+	}
+	for i := range this.SlotNums {
+		if this.SlotNums[i] != that1.SlotNums[i] {
+			return false
+		}
+	}
+	return true
+}
+func (this *ViewChangeRepairReply) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ViewChangeRepairReply)
+	if !ok {
+		that2, ok := that.(ViewChangeRepairReply)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Sender != that1.Sender {
+		return false
+	}
+	if !this.ViewID.Equal(that1.ViewID) {
+		return false
+	}
+	if this.MessageNum != that1.MessageNum {
+		return false
+	}
+	if len(this.SlotNums) != len(that1.SlotNums) {
+		return false
+	}
+	for i := range this.SlotNums {
+		if this.SlotNums[i] != that1.SlotNums[i] {
 			return false
 		}
 	}
@@ -2274,11 +3028,85 @@ func (this *StartView) Equal(that interface{}) bool {
 	if this.MessageNum != that1.MessageNum {
 		return false
 	}
-	if len(this.Log) != len(that1.Log) {
+	if !bytes.Equal(this.NoOpFilter, that1.NoOpFilter) {
 		return false
 	}
-	for i := range this.Log {
-		if !this.Log[i].Equal(that1.Log[i]) {
+	if this.FirstLogSlotNum != that1.FirstLogSlotNum {
+		return false
+	}
+	if this.LastLogSlotNum != that1.LastLogSlotNum {
+		return false
+	}
+	return true
+}
+func (this *ViewRepair) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ViewRepair)
+	if !ok {
+		that2, ok := that.(ViewRepair)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Sender != that1.Sender {
+		return false
+	}
+	if !this.ViewID.Equal(that1.ViewID) {
+		return false
+	}
+	if this.MessageNum != that1.MessageNum {
+		return false
+	}
+	if len(this.SlotNums) != len(that1.SlotNums) {
+		return false
+	}
+	for i := range this.SlotNums {
+		if this.SlotNums[i] != that1.SlotNums[i] {
+			return false
+		}
+	}
+	return true
+}
+func (this *ViewRepairReply) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ViewRepairReply)
+	if !ok {
+		that2, ok := that.(ViewRepairReply)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Sender != that1.Sender {
+		return false
+	}
+	if !this.ViewID.Equal(that1.ViewID) {
+		return false
+	}
+	if len(this.Entries) != len(that1.Entries) {
+		return false
+	}
+	for i := range this.Entries {
+		if !this.Entries[i].Equal(that1.Entries[i]) {
 			return false
 		}
 	}
@@ -2312,11 +3140,82 @@ func (this *SyncPrepare) Equal(that interface{}) bool {
 	if this.MessageNum != that1.MessageNum {
 		return false
 	}
-	if len(this.Log) != len(that1.Log) {
+	if !bytes.Equal(this.NoOpFilter, that1.NoOpFilter) {
 		return false
 	}
-	for i := range this.Log {
-		if !this.Log[i].Equal(that1.Log[i]) {
+	if this.FirstLogSlotNum != that1.FirstLogSlotNum {
+		return false
+	}
+	if this.LastLogSlotNum != that1.LastLogSlotNum {
+		return false
+	}
+	return true
+}
+func (this *SyncRepair) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*SyncRepair)
+	if !ok {
+		that2, ok := that.(SyncRepair)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Sender != that1.Sender {
+		return false
+	}
+	if !this.ViewID.Equal(that1.ViewID) {
+		return false
+	}
+	if len(this.SlotNums) != len(that1.SlotNums) {
+		return false
+	}
+	for i := range this.SlotNums {
+		if this.SlotNums[i] != that1.SlotNums[i] {
+			return false
+		}
+	}
+	return true
+}
+func (this *SyncRepairReply) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*SyncRepairReply)
+	if !ok {
+		that2, ok := that.(SyncRepairReply)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Sender != that1.Sender {
+		return false
+	}
+	if !this.ViewID.Equal(that1.ViewID) {
+		return false
+	}
+	if len(this.Entries) != len(that1.Entries) {
+		return false
+	}
+	for i := range this.Entries {
+		if !this.Entries[i].Equal(that1.Entries[i]) {
 			return false
 		}
 	}
@@ -2380,13 +3279,8 @@ func (this *SyncCommit) Equal(that interface{}) bool {
 	if this.MessageNum != that1.MessageNum {
 		return false
 	}
-	if len(this.Log) != len(that1.Log) {
+	if this.SyncPoint != that1.SyncPoint {
 		return false
-	}
-	for i := range this.Log {
-		if !this.Log[i].Equal(that1.Log[i]) {
-			return false
-		}
 	}
 	return true
 }
@@ -2971,6 +3865,48 @@ func (m *ReplicaMessage_ViewChange) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	}
 	return len(dAtA) - i, nil
 }
+func (m *ReplicaMessage_ViewChangeRepair) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplicaMessage_ViewChangeRepair) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.ViewChangeRepair != nil {
+		{
+			size, err := m.ViewChangeRepair.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x52
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplicaMessage_ViewChangeRepairReply) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplicaMessage_ViewChangeRepairReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.ViewChangeRepairReply != nil {
+		{
+			size, err := m.ViewChangeRepairReply.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x5a
+	}
+	return len(dAtA) - i, nil
+}
 func (m *ReplicaMessage_StartView) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
@@ -2988,7 +3924,49 @@ func (m *ReplicaMessage_StartView) MarshalToSizedBuffer(dAtA []byte) (int, error
 			i = encodeVarintProtocol(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x52
+		dAtA[i] = 0x62
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplicaMessage_ViewRepair) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplicaMessage_ViewRepair) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.ViewRepair != nil {
+		{
+			size, err := m.ViewRepair.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x6a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplicaMessage_ViewRepairReply) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplicaMessage_ViewRepairReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.ViewRepairReply != nil {
+		{
+			size, err := m.ViewRepairReply.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x72
 	}
 	return len(dAtA) - i, nil
 }
@@ -3009,7 +3987,53 @@ func (m *ReplicaMessage_SyncPrepare) MarshalToSizedBuffer(dAtA []byte) (int, err
 			i = encodeVarintProtocol(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x5a
+		dAtA[i] = 0x7a
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplicaMessage_SyncRepair) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplicaMessage_SyncRepair) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.SyncRepair != nil {
+		{
+			size, err := m.SyncRepair.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x82
+	}
+	return len(dAtA) - i, nil
+}
+func (m *ReplicaMessage_SyncRepairReply) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ReplicaMessage_SyncRepairReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.SyncRepairReply != nil {
+		{
+			size, err := m.SyncRepairReply.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x8a
 	}
 	return len(dAtA) - i, nil
 }
@@ -3030,7 +4054,9 @@ func (m *ReplicaMessage_SyncReply) MarshalToSizedBuffer(dAtA []byte) (int, error
 			i = encodeVarintProtocol(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x62
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x92
 	}
 	return len(dAtA) - i, nil
 }
@@ -3051,7 +4077,9 @@ func (m *ReplicaMessage_SyncCommit) MarshalToSizedBuffer(dAtA []byte) (int, erro
 			i = encodeVarintProtocol(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x6a
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x9a
 	}
 	return len(dAtA) - i, nil
 }
@@ -3072,7 +4100,9 @@ func (m *ReplicaMessage_Ping) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i = encodeVarintProtocol(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x72
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0xa2
 	}
 	return len(dAtA) - i, nil
 }
@@ -3136,12 +4166,12 @@ func (m *CommandRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x22
 	}
-	n19, err19 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.Timestamp, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.Timestamp):])
-	if err19 != nil {
-		return 0, err19
+	n25, err25 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.Timestamp, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.Timestamp):])
+	if err25 != nil {
+		return 0, err25
 	}
-	i -= n19
-	i = encodeVarintProtocol(dAtA, i, uint64(n19))
+	i -= n25
+	i = encodeVarintProtocol(dAtA, i, uint64(n25))
 	i--
 	dAtA[i] = 0x1a
 	if m.MessageNum != 0 {
@@ -3243,12 +4273,12 @@ func (m *QueryRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x22
 	}
-	n21, err21 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.Timestamp, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.Timestamp):])
-	if err21 != nil {
-		return 0, err21
+	n27, err27 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.Timestamp, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.Timestamp):])
+	if err27 != nil {
+		return 0, err27
 	}
-	i -= n21
-	i = encodeVarintProtocol(dAtA, i, uint64(n21))
+	i -= n27
+	i = encodeVarintProtocol(dAtA, i, uint64(n27))
 	i--
 	dAtA[i] = 0x1a
 	if m.MessageNum != 0 {
@@ -3521,19 +4551,22 @@ func (m *ViewChange) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Log) > 0 {
-		for iNdEx := len(m.Log) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.Log[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintProtocol(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0x2a
-		}
+	if m.LastLogSlotNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.LastLogSlotNum))
+		i--
+		dAtA[i] = 0x38
+	}
+	if m.FirstLogSlotNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.FirstLogSlotNum))
+		i--
+		dAtA[i] = 0x30
+	}
+	if len(m.NoOpFilter) > 0 {
+		i -= len(m.NoOpFilter)
+		copy(dAtA[i:], m.NoOpFilter)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.NoOpFilter)))
+		i--
+		dAtA[i] = 0x2a
 	}
 	if m.MessageNum != 0 {
 		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
@@ -3551,6 +4584,136 @@ func (m *ViewChange) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		}
 		i--
 		dAtA[i] = 0x1a
+	}
+	if m.ViewID != nil {
+		{
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Sender)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ViewChangeRepair) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ViewChangeRepair) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ViewChangeRepair) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.SlotNums) > 0 {
+		dAtA36 := make([]byte, len(m.SlotNums)*10)
+		var j35 int
+		for _, num := range m.SlotNums {
+			for num >= 1<<7 {
+				dAtA36[j35] = uint8(uint64(num)&0x7f | 0x80)
+				num >>= 7
+				j35++
+			}
+			dAtA36[j35] = uint8(num)
+			j35++
+		}
+		i -= j35
+		copy(dAtA[i:], dAtA36[:j35])
+		i = encodeVarintProtocol(dAtA, i, uint64(j35))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.MessageNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.ViewID != nil {
+		{
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Sender)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ViewChangeRepairReply) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ViewChangeRepairReply) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ViewChangeRepairReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.SlotNums) > 0 {
+		dAtA39 := make([]byte, len(m.SlotNums)*10)
+		var j38 int
+		for _, num := range m.SlotNums {
+			for num >= 1<<7 {
+				dAtA39[j38] = uint8(uint64(num)&0x7f | 0x80)
+				num >>= 7
+				j38++
+			}
+			dAtA39[j38] = uint8(num)
+			j38++
+		}
+		i -= j38
+		copy(dAtA[i:], dAtA39[:j38])
+		i = encodeVarintProtocol(dAtA, i, uint64(j38))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.MessageNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
+		i--
+		dAtA[i] = 0x18
 	}
 	if m.ViewID != nil {
 		{
@@ -3594,10 +4757,139 @@ func (m *StartView) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Log) > 0 {
-		for iNdEx := len(m.Log) - 1; iNdEx >= 0; iNdEx-- {
+	if m.LastLogSlotNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.LastLogSlotNum))
+		i--
+		dAtA[i] = 0x30
+	}
+	if m.FirstLogSlotNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.FirstLogSlotNum))
+		i--
+		dAtA[i] = 0x28
+	}
+	if len(m.NoOpFilter) > 0 {
+		i -= len(m.NoOpFilter)
+		copy(dAtA[i:], m.NoOpFilter)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.NoOpFilter)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.MessageNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.ViewID != nil {
+		{
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Sender)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ViewRepair) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ViewRepair) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ViewRepair) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.SlotNums) > 0 {
+		dAtA43 := make([]byte, len(m.SlotNums)*10)
+		var j42 int
+		for _, num := range m.SlotNums {
+			for num >= 1<<7 {
+				dAtA43[j42] = uint8(uint64(num)&0x7f | 0x80)
+				num >>= 7
+				j42++
+			}
+			dAtA43[j42] = uint8(num)
+			j42++
+		}
+		i -= j42
+		copy(dAtA[i:], dAtA43[:j42])
+		i = encodeVarintProtocol(dAtA, i, uint64(j42))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.MessageNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.ViewID != nil {
+		{
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Sender)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ViewRepairReply) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ViewRepairReply) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ViewRepairReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Entries) > 0 {
+		for iNdEx := len(m.Entries) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.Log[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.Entries[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -3605,13 +4897,8 @@ func (m *StartView) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i = encodeVarintProtocol(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x22
+			dAtA[i] = 0x1a
 		}
-	}
-	if m.MessageNum != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
-		i--
-		dAtA[i] = 0x18
 	}
 	if m.ViewID != nil {
 		{
@@ -3655,10 +4942,134 @@ func (m *SyncPrepare) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Log) > 0 {
-		for iNdEx := len(m.Log) - 1; iNdEx >= 0; iNdEx-- {
+	if m.LastLogSlotNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.LastLogSlotNum))
+		i--
+		dAtA[i] = 0x30
+	}
+	if m.FirstLogSlotNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.FirstLogSlotNum))
+		i--
+		dAtA[i] = 0x28
+	}
+	if len(m.NoOpFilter) > 0 {
+		i -= len(m.NoOpFilter)
+		copy(dAtA[i:], m.NoOpFilter)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.NoOpFilter)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.MessageNum != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.ViewID != nil {
+		{
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Sender)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *SyncRepair) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *SyncRepair) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *SyncRepair) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.SlotNums) > 0 {
+		dAtA48 := make([]byte, len(m.SlotNums)*10)
+		var j47 int
+		for _, num := range m.SlotNums {
+			for num >= 1<<7 {
+				dAtA48[j47] = uint8(uint64(num)&0x7f | 0x80)
+				num >>= 7
+				j47++
+			}
+			dAtA48[j47] = uint8(num)
+			j47++
+		}
+		i -= j47
+		copy(dAtA[i:], dAtA48[:j47])
+		i = encodeVarintProtocol(dAtA, i, uint64(j47))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.ViewID != nil {
+		{
+			size, err := m.ViewID.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintProtocol(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintProtocol(dAtA, i, uint64(len(m.Sender)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *SyncRepairReply) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *SyncRepairReply) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *SyncRepairReply) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Entries) > 0 {
+		for iNdEx := len(m.Entries) - 1; iNdEx >= 0; iNdEx-- {
 			{
-				size, err := m.Log[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				size, err := m.Entries[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -3666,13 +5077,8 @@ func (m *SyncPrepare) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i = encodeVarintProtocol(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x22
+			dAtA[i] = 0x1a
 		}
-	}
-	if m.MessageNum != 0 {
-		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
-		i--
-		dAtA[i] = 0x18
 	}
 	if m.ViewID != nil {
 		{
@@ -3763,19 +5169,10 @@ func (m *SyncCommit) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Log) > 0 {
-		for iNdEx := len(m.Log) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.Log[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintProtocol(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0x22
-		}
+	if m.SyncPoint != 0 {
+		i = encodeVarintProtocol(dAtA, i, uint64(m.SyncPoint))
+		i--
+		dAtA[i] = 0x20
 	}
 	if m.MessageNum != 0 {
 		i = encodeVarintProtocol(dAtA, i, uint64(m.MessageNum))
@@ -3897,7 +5294,7 @@ func NewPopulatedClientMessage_QueryReply(r randyProtocol, easy bool) *ClientMes
 }
 func NewPopulatedReplicaMessage(r randyProtocol, easy bool) *ReplicaMessage {
 	this := &ReplicaMessage{}
-	oneofNumber_Message := []int32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}[r.Intn(14)]
+	oneofNumber_Message := []int32{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}[r.Intn(20)]
 	switch oneofNumber_Message {
 	case 1:
 		this.Message = NewPopulatedReplicaMessage_Command(r, easy)
@@ -3918,14 +5315,26 @@ func NewPopulatedReplicaMessage(r randyProtocol, easy bool) *ReplicaMessage {
 	case 9:
 		this.Message = NewPopulatedReplicaMessage_ViewChange(r, easy)
 	case 10:
-		this.Message = NewPopulatedReplicaMessage_StartView(r, easy)
+		this.Message = NewPopulatedReplicaMessage_ViewChangeRepair(r, easy)
 	case 11:
-		this.Message = NewPopulatedReplicaMessage_SyncPrepare(r, easy)
+		this.Message = NewPopulatedReplicaMessage_ViewChangeRepairReply(r, easy)
 	case 12:
-		this.Message = NewPopulatedReplicaMessage_SyncReply(r, easy)
+		this.Message = NewPopulatedReplicaMessage_StartView(r, easy)
 	case 13:
-		this.Message = NewPopulatedReplicaMessage_SyncCommit(r, easy)
+		this.Message = NewPopulatedReplicaMessage_ViewRepair(r, easy)
 	case 14:
+		this.Message = NewPopulatedReplicaMessage_ViewRepairReply(r, easy)
+	case 15:
+		this.Message = NewPopulatedReplicaMessage_SyncPrepare(r, easy)
+	case 16:
+		this.Message = NewPopulatedReplicaMessage_SyncRepair(r, easy)
+	case 17:
+		this.Message = NewPopulatedReplicaMessage_SyncRepairReply(r, easy)
+	case 18:
+		this.Message = NewPopulatedReplicaMessage_SyncReply(r, easy)
+	case 19:
+		this.Message = NewPopulatedReplicaMessage_SyncCommit(r, easy)
+	case 20:
 		this.Message = NewPopulatedReplicaMessage_Ping(r, easy)
 	}
 	if !easy && r.Intn(10) != 0 {
@@ -3978,14 +5387,44 @@ func NewPopulatedReplicaMessage_ViewChange(r randyProtocol, easy bool) *ReplicaM
 	this.ViewChange = NewPopulatedViewChange(r, easy)
 	return this
 }
+func NewPopulatedReplicaMessage_ViewChangeRepair(r randyProtocol, easy bool) *ReplicaMessage_ViewChangeRepair {
+	this := &ReplicaMessage_ViewChangeRepair{}
+	this.ViewChangeRepair = NewPopulatedViewChangeRepair(r, easy)
+	return this
+}
+func NewPopulatedReplicaMessage_ViewChangeRepairReply(r randyProtocol, easy bool) *ReplicaMessage_ViewChangeRepairReply {
+	this := &ReplicaMessage_ViewChangeRepairReply{}
+	this.ViewChangeRepairReply = NewPopulatedViewChangeRepairReply(r, easy)
+	return this
+}
 func NewPopulatedReplicaMessage_StartView(r randyProtocol, easy bool) *ReplicaMessage_StartView {
 	this := &ReplicaMessage_StartView{}
 	this.StartView = NewPopulatedStartView(r, easy)
 	return this
 }
+func NewPopulatedReplicaMessage_ViewRepair(r randyProtocol, easy bool) *ReplicaMessage_ViewRepair {
+	this := &ReplicaMessage_ViewRepair{}
+	this.ViewRepair = NewPopulatedViewRepair(r, easy)
+	return this
+}
+func NewPopulatedReplicaMessage_ViewRepairReply(r randyProtocol, easy bool) *ReplicaMessage_ViewRepairReply {
+	this := &ReplicaMessage_ViewRepairReply{}
+	this.ViewRepairReply = NewPopulatedViewRepairReply(r, easy)
+	return this
+}
 func NewPopulatedReplicaMessage_SyncPrepare(r randyProtocol, easy bool) *ReplicaMessage_SyncPrepare {
 	this := &ReplicaMessage_SyncPrepare{}
 	this.SyncPrepare = NewPopulatedSyncPrepare(r, easy)
+	return this
+}
+func NewPopulatedReplicaMessage_SyncRepair(r randyProtocol, easy bool) *ReplicaMessage_SyncRepair {
+	this := &ReplicaMessage_SyncRepair{}
+	this.SyncRepair = NewPopulatedSyncRepair(r, easy)
+	return this
+}
+func NewPopulatedReplicaMessage_SyncRepairReply(r randyProtocol, easy bool) *ReplicaMessage_SyncRepairReply {
+	this := &ReplicaMessage_SyncRepairReply{}
+	this.SyncRepairReply = NewPopulatedSyncRepairReply(r, easy)
 	return this
 }
 func NewPopulatedReplicaMessage_SyncReply(r randyProtocol, easy bool) *ReplicaMessage_SyncReply {
@@ -4136,12 +5575,46 @@ func NewPopulatedViewChange(r randyProtocol, easy bool) *ViewChange {
 		this.LastNormal = NewPopulatedViewId(r, easy)
 	}
 	this.MessageNum = MessageID(uint64(r.Uint32()))
+	v7 := r.Intn(100)
+	this.NoOpFilter = make([]byte, v7)
+	for i := 0; i < v7; i++ {
+		this.NoOpFilter[i] = byte(r.Intn(256))
+	}
+	this.FirstLogSlotNum = LogSlotID(uint64(r.Uint32()))
+	this.LastLogSlotNum = LogSlotID(uint64(r.Uint32()))
+	if !easy && r.Intn(10) != 0 {
+	}
+	return this
+}
+
+func NewPopulatedViewChangeRepair(r randyProtocol, easy bool) *ViewChangeRepair {
+	this := &ViewChangeRepair{}
+	this.Sender = MemberID(randStringProtocol(r))
 	if r.Intn(5) != 0 {
-		v7 := r.Intn(5)
-		this.Log = make([]*LogEntry, v7)
-		for i := 0; i < v7; i++ {
-			this.Log[i] = NewPopulatedLogEntry(r, easy)
-		}
+		this.ViewID = NewPopulatedViewId(r, easy)
+	}
+	this.MessageNum = MessageID(uint64(r.Uint32()))
+	v8 := r.Intn(10)
+	this.SlotNums = make([]LogSlotID, v8)
+	for i := 0; i < v8; i++ {
+		this.SlotNums[i] = LogSlotID(uint64(r.Uint32()))
+	}
+	if !easy && r.Intn(10) != 0 {
+	}
+	return this
+}
+
+func NewPopulatedViewChangeRepairReply(r randyProtocol, easy bool) *ViewChangeRepairReply {
+	this := &ViewChangeRepairReply{}
+	this.Sender = MemberID(randStringProtocol(r))
+	if r.Intn(5) != 0 {
+		this.ViewID = NewPopulatedViewId(r, easy)
+	}
+	this.MessageNum = MessageID(uint64(r.Uint32()))
+	v9 := r.Intn(10)
+	this.SlotNums = make([]LogSlotID, v9)
+	for i := 0; i < v9; i++ {
+		this.SlotNums[i] = LogSlotID(uint64(r.Uint32()))
 	}
 	if !easy && r.Intn(10) != 0 {
 	}
@@ -4155,11 +5628,46 @@ func NewPopulatedStartView(r randyProtocol, easy bool) *StartView {
 		this.ViewID = NewPopulatedViewId(r, easy)
 	}
 	this.MessageNum = MessageID(uint64(r.Uint32()))
+	v10 := r.Intn(100)
+	this.NoOpFilter = make([]byte, v10)
+	for i := 0; i < v10; i++ {
+		this.NoOpFilter[i] = byte(r.Intn(256))
+	}
+	this.FirstLogSlotNum = LogSlotID(uint64(r.Uint32()))
+	this.LastLogSlotNum = LogSlotID(uint64(r.Uint32()))
+	if !easy && r.Intn(10) != 0 {
+	}
+	return this
+}
+
+func NewPopulatedViewRepair(r randyProtocol, easy bool) *ViewRepair {
+	this := &ViewRepair{}
+	this.Sender = MemberID(randStringProtocol(r))
 	if r.Intn(5) != 0 {
-		v8 := r.Intn(5)
-		this.Log = make([]*LogEntry, v8)
-		for i := 0; i < v8; i++ {
-			this.Log[i] = NewPopulatedLogEntry(r, easy)
+		this.ViewID = NewPopulatedViewId(r, easy)
+	}
+	this.MessageNum = MessageID(uint64(r.Uint32()))
+	v11 := r.Intn(10)
+	this.SlotNums = make([]LogSlotID, v11)
+	for i := 0; i < v11; i++ {
+		this.SlotNums[i] = LogSlotID(uint64(r.Uint32()))
+	}
+	if !easy && r.Intn(10) != 0 {
+	}
+	return this
+}
+
+func NewPopulatedViewRepairReply(r randyProtocol, easy bool) *ViewRepairReply {
+	this := &ViewRepairReply{}
+	this.Sender = MemberID(randStringProtocol(r))
+	if r.Intn(5) != 0 {
+		this.ViewID = NewPopulatedViewId(r, easy)
+	}
+	if r.Intn(5) != 0 {
+		v12 := r.Intn(5)
+		this.Entries = make([]*LogEntry, v12)
+		for i := 0; i < v12; i++ {
+			this.Entries[i] = NewPopulatedLogEntry(r, easy)
 		}
 	}
 	if !easy && r.Intn(10) != 0 {
@@ -4174,11 +5682,45 @@ func NewPopulatedSyncPrepare(r randyProtocol, easy bool) *SyncPrepare {
 		this.ViewID = NewPopulatedViewId(r, easy)
 	}
 	this.MessageNum = MessageID(uint64(r.Uint32()))
+	v13 := r.Intn(100)
+	this.NoOpFilter = make([]byte, v13)
+	for i := 0; i < v13; i++ {
+		this.NoOpFilter[i] = byte(r.Intn(256))
+	}
+	this.FirstLogSlotNum = LogSlotID(uint64(r.Uint32()))
+	this.LastLogSlotNum = LogSlotID(uint64(r.Uint32()))
+	if !easy && r.Intn(10) != 0 {
+	}
+	return this
+}
+
+func NewPopulatedSyncRepair(r randyProtocol, easy bool) *SyncRepair {
+	this := &SyncRepair{}
+	this.Sender = MemberID(randStringProtocol(r))
 	if r.Intn(5) != 0 {
-		v9 := r.Intn(5)
-		this.Log = make([]*LogEntry, v9)
-		for i := 0; i < v9; i++ {
-			this.Log[i] = NewPopulatedLogEntry(r, easy)
+		this.ViewID = NewPopulatedViewId(r, easy)
+	}
+	v14 := r.Intn(10)
+	this.SlotNums = make([]LogSlotID, v14)
+	for i := 0; i < v14; i++ {
+		this.SlotNums[i] = LogSlotID(uint64(r.Uint32()))
+	}
+	if !easy && r.Intn(10) != 0 {
+	}
+	return this
+}
+
+func NewPopulatedSyncRepairReply(r randyProtocol, easy bool) *SyncRepairReply {
+	this := &SyncRepairReply{}
+	this.Sender = MemberID(randStringProtocol(r))
+	if r.Intn(5) != 0 {
+		this.ViewID = NewPopulatedViewId(r, easy)
+	}
+	if r.Intn(5) != 0 {
+		v15 := r.Intn(5)
+		this.Entries = make([]*LogEntry, v15)
+		for i := 0; i < v15; i++ {
+			this.Entries[i] = NewPopulatedLogEntry(r, easy)
 		}
 	}
 	if !easy && r.Intn(10) != 0 {
@@ -4205,13 +5747,7 @@ func NewPopulatedSyncCommit(r randyProtocol, easy bool) *SyncCommit {
 		this.ViewID = NewPopulatedViewId(r, easy)
 	}
 	this.MessageNum = MessageID(uint64(r.Uint32()))
-	if r.Intn(5) != 0 {
-		v10 := r.Intn(5)
-		this.Log = make([]*LogEntry, v10)
-		for i := 0; i < v10; i++ {
-			this.Log[i] = NewPopulatedLogEntry(r, easy)
-		}
-	}
+	this.SyncPoint = LogSlotID(uint64(r.Uint32()))
 	if !easy && r.Intn(10) != 0 {
 	}
 	return this
@@ -4247,9 +5783,9 @@ func randUTF8RuneProtocol(r randyProtocol) rune {
 	return rune(ru + 61)
 }
 func randStringProtocol(r randyProtocol) string {
-	v11 := r.Intn(100)
-	tmps := make([]rune, v11)
-	for i := 0; i < v11; i++ {
+	v16 := r.Intn(100)
+	tmps := make([]rune, v16)
+	for i := 0; i < v16; i++ {
 		tmps[i] = randUTF8RuneProtocol(r)
 	}
 	return string(tmps)
@@ -4271,11 +5807,11 @@ func randFieldProtocol(dAtA []byte, r randyProtocol, fieldNumber int, wire int) 
 	switch wire {
 	case 0:
 		dAtA = encodeVarintPopulateProtocol(dAtA, uint64(key))
-		v12 := r.Int63()
+		v17 := r.Int63()
 		if r.Intn(2) == 0 {
-			v12 *= -1
+			v17 *= -1
 		}
-		dAtA = encodeVarintPopulateProtocol(dAtA, uint64(v12))
+		dAtA = encodeVarintPopulateProtocol(dAtA, uint64(v17))
 	case 1:
 		dAtA = encodeVarintPopulateProtocol(dAtA, uint64(key))
 		dAtA = append(dAtA, byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)), byte(r.Intn(256)))
@@ -4480,6 +6016,30 @@ func (m *ReplicaMessage_ViewChange) Size() (n int) {
 	}
 	return n
 }
+func (m *ReplicaMessage_ViewChangeRepair) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ViewChangeRepair != nil {
+		l = m.ViewChangeRepair.Size()
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	return n
+}
+func (m *ReplicaMessage_ViewChangeRepairReply) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ViewChangeRepairReply != nil {
+		l = m.ViewChangeRepairReply.Size()
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	return n
+}
 func (m *ReplicaMessage_StartView) Size() (n int) {
 	if m == nil {
 		return 0
@@ -4488,6 +6048,30 @@ func (m *ReplicaMessage_StartView) Size() (n int) {
 	_ = l
 	if m.StartView != nil {
 		l = m.StartView.Size()
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	return n
+}
+func (m *ReplicaMessage_ViewRepair) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ViewRepair != nil {
+		l = m.ViewRepair.Size()
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	return n
+}
+func (m *ReplicaMessage_ViewRepairReply) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.ViewRepairReply != nil {
+		l = m.ViewRepairReply.Size()
 		n += 1 + l + sovProtocol(uint64(l))
 	}
 	return n
@@ -4504,6 +6088,30 @@ func (m *ReplicaMessage_SyncPrepare) Size() (n int) {
 	}
 	return n
 }
+func (m *ReplicaMessage_SyncRepair) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.SyncRepair != nil {
+		l = m.SyncRepair.Size()
+		n += 2 + l + sovProtocol(uint64(l))
+	}
+	return n
+}
+func (m *ReplicaMessage_SyncRepairReply) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.SyncRepairReply != nil {
+		l = m.SyncRepairReply.Size()
+		n += 2 + l + sovProtocol(uint64(l))
+	}
+	return n
+}
 func (m *ReplicaMessage_SyncReply) Size() (n int) {
 	if m == nil {
 		return 0
@@ -4512,7 +6120,7 @@ func (m *ReplicaMessage_SyncReply) Size() (n int) {
 	_ = l
 	if m.SyncReply != nil {
 		l = m.SyncReply.Size()
-		n += 1 + l + sovProtocol(uint64(l))
+		n += 2 + l + sovProtocol(uint64(l))
 	}
 	return n
 }
@@ -4524,7 +6132,7 @@ func (m *ReplicaMessage_SyncCommit) Size() (n int) {
 	_ = l
 	if m.SyncCommit != nil {
 		l = m.SyncCommit.Size()
-		n += 1 + l + sovProtocol(uint64(l))
+		n += 2 + l + sovProtocol(uint64(l))
 	}
 	return n
 }
@@ -4536,7 +6144,7 @@ func (m *ReplicaMessage_Ping) Size() (n int) {
 	_ = l
 	if m.Ping != nil {
 		l = m.Ping.Size()
-		n += 1 + l + sovProtocol(uint64(l))
+		n += 2 + l + sovProtocol(uint64(l))
 	}
 	return n
 }
@@ -4746,11 +6354,69 @@ func (m *ViewChange) Size() (n int) {
 	if m.MessageNum != 0 {
 		n += 1 + sovProtocol(uint64(m.MessageNum))
 	}
-	if len(m.Log) > 0 {
-		for _, e := range m.Log {
-			l = e.Size()
-			n += 1 + l + sovProtocol(uint64(l))
+	l = len(m.NoOpFilter)
+	if l > 0 {
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if m.FirstLogSlotNum != 0 {
+		n += 1 + sovProtocol(uint64(m.FirstLogSlotNum))
+	}
+	if m.LastLogSlotNum != 0 {
+		n += 1 + sovProtocol(uint64(m.LastLogSlotNum))
+	}
+	return n
+}
+
+func (m *ViewChangeRepair) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Sender)
+	if l > 0 {
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if m.MessageNum != 0 {
+		n += 1 + sovProtocol(uint64(m.MessageNum))
+	}
+	if len(m.SlotNums) > 0 {
+		l = 0
+		for _, e := range m.SlotNums {
+			l += sovProtocol(uint64(e))
 		}
+		n += 1 + sovProtocol(uint64(l)) + l
+	}
+	return n
+}
+
+func (m *ViewChangeRepairReply) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Sender)
+	if l > 0 {
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if m.MessageNum != 0 {
+		n += 1 + sovProtocol(uint64(m.MessageNum))
+	}
+	if len(m.SlotNums) > 0 {
+		l = 0
+		for _, e := range m.SlotNums {
+			l += sovProtocol(uint64(e))
+		}
+		n += 1 + sovProtocol(uint64(l)) + l
 	}
 	return n
 }
@@ -4772,8 +6438,62 @@ func (m *StartView) Size() (n int) {
 	if m.MessageNum != 0 {
 		n += 1 + sovProtocol(uint64(m.MessageNum))
 	}
-	if len(m.Log) > 0 {
-		for _, e := range m.Log {
+	l = len(m.NoOpFilter)
+	if l > 0 {
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if m.FirstLogSlotNum != 0 {
+		n += 1 + sovProtocol(uint64(m.FirstLogSlotNum))
+	}
+	if m.LastLogSlotNum != 0 {
+		n += 1 + sovProtocol(uint64(m.LastLogSlotNum))
+	}
+	return n
+}
+
+func (m *ViewRepair) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Sender)
+	if l > 0 {
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if m.MessageNum != 0 {
+		n += 1 + sovProtocol(uint64(m.MessageNum))
+	}
+	if len(m.SlotNums) > 0 {
+		l = 0
+		for _, e := range m.SlotNums {
+			l += sovProtocol(uint64(e))
+		}
+		n += 1 + sovProtocol(uint64(l)) + l
+	}
+	return n
+}
+
+func (m *ViewRepairReply) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Sender)
+	if l > 0 {
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if len(m.Entries) > 0 {
+		for _, e := range m.Entries {
 			l = e.Size()
 			n += 1 + l + sovProtocol(uint64(l))
 		}
@@ -4798,8 +6518,59 @@ func (m *SyncPrepare) Size() (n int) {
 	if m.MessageNum != 0 {
 		n += 1 + sovProtocol(uint64(m.MessageNum))
 	}
-	if len(m.Log) > 0 {
-		for _, e := range m.Log {
+	l = len(m.NoOpFilter)
+	if l > 0 {
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if m.FirstLogSlotNum != 0 {
+		n += 1 + sovProtocol(uint64(m.FirstLogSlotNum))
+	}
+	if m.LastLogSlotNum != 0 {
+		n += 1 + sovProtocol(uint64(m.LastLogSlotNum))
+	}
+	return n
+}
+
+func (m *SyncRepair) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Sender)
+	if l > 0 {
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if len(m.SlotNums) > 0 {
+		l = 0
+		for _, e := range m.SlotNums {
+			l += sovProtocol(uint64(e))
+		}
+		n += 1 + sovProtocol(uint64(l)) + l
+	}
+	return n
+}
+
+func (m *SyncRepairReply) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Sender)
+	if l > 0 {
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if m.ViewID != nil {
+		l = m.ViewID.Size()
+		n += 1 + l + sovProtocol(uint64(l))
+	}
+	if len(m.Entries) > 0 {
+		for _, e := range m.Entries {
 			l = e.Size()
 			n += 1 + l + sovProtocol(uint64(l))
 		}
@@ -4844,11 +6615,8 @@ func (m *SyncCommit) Size() (n int) {
 	if m.MessageNum != 0 {
 		n += 1 + sovProtocol(uint64(m.MessageNum))
 	}
-	if len(m.Log) > 0 {
-		for _, e := range m.Log {
-			l = e.Size()
-			n += 1 + l + sovProtocol(uint64(l))
-		}
+	if m.SyncPoint != 0 {
+		n += 1 + sovProtocol(uint64(m.SyncPoint))
 	}
 	return n
 }
@@ -5415,6 +7183,76 @@ func (m *ReplicaMessage) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 10:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewChangeRepair", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &ViewChangeRepair{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Message = &ReplicaMessage_ViewChangeRepair{v}
+			iNdEx = postIndex
+		case 11:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewChangeRepairReply", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &ViewChangeRepairReply{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Message = &ReplicaMessage_ViewChangeRepairReply{v}
+			iNdEx = postIndex
+		case 12:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field StartView", wireType)
 			}
 			var msglen int
@@ -5448,7 +7286,77 @@ func (m *ReplicaMessage) Unmarshal(dAtA []byte) error {
 			}
 			m.Message = &ReplicaMessage_StartView{v}
 			iNdEx = postIndex
-		case 11:
+		case 13:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewRepair", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &ViewRepair{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Message = &ReplicaMessage_ViewRepair{v}
+			iNdEx = postIndex
+		case 14:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewRepairReply", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &ViewRepairReply{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Message = &ReplicaMessage_ViewRepairReply{v}
+			iNdEx = postIndex
+		case 15:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field SyncPrepare", wireType)
 			}
@@ -5483,7 +7391,77 @@ func (m *ReplicaMessage) Unmarshal(dAtA []byte) error {
 			}
 			m.Message = &ReplicaMessage_SyncPrepare{v}
 			iNdEx = postIndex
-		case 12:
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SyncRepair", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &SyncRepair{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Message = &ReplicaMessage_SyncRepair{v}
+			iNdEx = postIndex
+		case 17:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SyncRepairReply", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &SyncRepairReply{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Message = &ReplicaMessage_SyncRepairReply{v}
+			iNdEx = postIndex
+		case 18:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field SyncReply", wireType)
 			}
@@ -5518,7 +7496,7 @@ func (m *ReplicaMessage) Unmarshal(dAtA []byte) error {
 			}
 			m.Message = &ReplicaMessage_SyncReply{v}
 			iNdEx = postIndex
-		case 13:
+		case 19:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field SyncCommit", wireType)
 			}
@@ -5553,7 +7531,7 @@ func (m *ReplicaMessage) Unmarshal(dAtA []byte) error {
 			}
 			m.Message = &ReplicaMessage_SyncCommit{v}
 			iNdEx = postIndex
-		case 14:
+		case 20:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Ping", wireType)
 			}
@@ -7081,7 +9059,164 @@ func (m *ViewChange) Unmarshal(dAtA []byte) error {
 			}
 		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Log", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field NoOpFilter", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NoOpFilter = append(m.NoOpFilter[:0], dAtA[iNdEx:postIndex]...)
+			if m.NoOpFilter == nil {
+				m.NoOpFilter = []byte{}
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field FirstLogSlotNum", wireType)
+			}
+			m.FirstLogSlotNum = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.FirstLogSlotNum |= LogSlotID(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 7:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LastLogSlotNum", wireType)
+			}
+			m.LastLogSlotNum = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.LastLogSlotNum |= LogSlotID(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipProtocol(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ViewChangeRepair) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowProtocol
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ViewChangeRepair: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ViewChangeRepair: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Sender = MemberID(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -7108,11 +9243,324 @@ func (m *ViewChange) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Log = append(m.Log, &LogEntry{})
-			if err := m.Log[len(m.Log)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
+			}
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageNum", wireType)
+			}
+			m.MessageNum = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.MessageNum |= MessageID(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType == 0 {
+				var v LogSlotID
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowProtocol
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					v |= LogSlotID(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				m.SlotNums = append(m.SlotNums, v)
+			} else if wireType == 2 {
+				var packedLen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowProtocol
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					packedLen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if packedLen < 0 {
+					return ErrInvalidLengthProtocol
+				}
+				postIndex := iNdEx + packedLen
+				if postIndex < 0 {
+					return ErrInvalidLengthProtocol
+				}
+				if postIndex > l {
+					return io.ErrUnexpectedEOF
+				}
+				var elementCount int
+				var count int
+				for _, integer := range dAtA[iNdEx:postIndex] {
+					if integer < 128 {
+						count++
+					}
+				}
+				elementCount = count
+				if elementCount != 0 && len(m.SlotNums) == 0 {
+					m.SlotNums = make([]LogSlotID, 0, elementCount)
+				}
+				for iNdEx < postIndex {
+					var v LogSlotID
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowProtocol
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						v |= LogSlotID(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					m.SlotNums = append(m.SlotNums, v)
+				}
+			} else {
+				return fmt.Errorf("proto: wrong wireType = %d for field SlotNums", wireType)
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipProtocol(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ViewChangeRepairReply) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowProtocol
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ViewChangeRepairReply: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ViewChangeRepairReply: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Sender = MemberID(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
+			}
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageNum", wireType)
+			}
+			m.MessageNum = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.MessageNum |= MessageID(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType == 0 {
+				var v LogSlotID
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowProtocol
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					v |= LogSlotID(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				m.SlotNums = append(m.SlotNums, v)
+			} else if wireType == 2 {
+				var packedLen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowProtocol
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					packedLen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if packedLen < 0 {
+					return ErrInvalidLengthProtocol
+				}
+				postIndex := iNdEx + packedLen
+				if postIndex < 0 {
+					return ErrInvalidLengthProtocol
+				}
+				if postIndex > l {
+					return io.ErrUnexpectedEOF
+				}
+				var elementCount int
+				var count int
+				for _, integer := range dAtA[iNdEx:postIndex] {
+					if integer < 128 {
+						count++
+					}
+				}
+				elementCount = count
+				if elementCount != 0 && len(m.SlotNums) == 0 {
+					m.SlotNums = make([]LogSlotID, 0, elementCount)
+				}
+				for iNdEx < postIndex {
+					var v LogSlotID
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowProtocol
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						v |= LogSlotID(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					m.SlotNums = append(m.SlotNums, v)
+				}
+			} else {
+				return fmt.Errorf("proto: wrong wireType = %d for field SlotNums", wireType)
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipProtocol(dAtA[iNdEx:])
@@ -7255,7 +9703,164 @@ func (m *StartView) Unmarshal(dAtA []byte) error {
 			}
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Log", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field NoOpFilter", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NoOpFilter = append(m.NoOpFilter[:0], dAtA[iNdEx:postIndex]...)
+			if m.NoOpFilter == nil {
+				m.NoOpFilter = []byte{}
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field FirstLogSlotNum", wireType)
+			}
+			m.FirstLogSlotNum = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.FirstLogSlotNum |= LogSlotID(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LastLogSlotNum", wireType)
+			}
+			m.LastLogSlotNum = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.LastLogSlotNum |= LogSlotID(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipProtocol(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ViewRepair) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowProtocol
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ViewRepair: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ViewRepair: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Sender = MemberID(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -7282,8 +9887,260 @@ func (m *StartView) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Log = append(m.Log, &LogEntry{})
-			if err := m.Log[len(m.Log)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
+			}
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MessageNum", wireType)
+			}
+			m.MessageNum = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.MessageNum |= MessageID(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType == 0 {
+				var v LogSlotID
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowProtocol
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					v |= LogSlotID(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				m.SlotNums = append(m.SlotNums, v)
+			} else if wireType == 2 {
+				var packedLen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowProtocol
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					packedLen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if packedLen < 0 {
+					return ErrInvalidLengthProtocol
+				}
+				postIndex := iNdEx + packedLen
+				if postIndex < 0 {
+					return ErrInvalidLengthProtocol
+				}
+				if postIndex > l {
+					return io.ErrUnexpectedEOF
+				}
+				var elementCount int
+				var count int
+				for _, integer := range dAtA[iNdEx:postIndex] {
+					if integer < 128 {
+						count++
+					}
+				}
+				elementCount = count
+				if elementCount != 0 && len(m.SlotNums) == 0 {
+					m.SlotNums = make([]LogSlotID, 0, elementCount)
+				}
+				for iNdEx < postIndex {
+					var v LogSlotID
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowProtocol
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						v |= LogSlotID(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					m.SlotNums = append(m.SlotNums, v)
+				}
+			} else {
+				return fmt.Errorf("proto: wrong wireType = %d for field SlotNums", wireType)
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipProtocol(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ViewRepairReply) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowProtocol
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ViewRepairReply: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ViewRepairReply: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Sender = MemberID(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
+			}
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Entries", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Entries = append(m.Entries, &LogEntry{})
+			if err := m.Entries[len(m.Entries)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -7429,7 +10286,164 @@ func (m *SyncPrepare) Unmarshal(dAtA []byte) error {
 			}
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Log", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field NoOpFilter", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.NoOpFilter = append(m.NoOpFilter[:0], dAtA[iNdEx:postIndex]...)
+			if m.NoOpFilter == nil {
+				m.NoOpFilter = []byte{}
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field FirstLogSlotNum", wireType)
+			}
+			m.FirstLogSlotNum = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.FirstLogSlotNum |= LogSlotID(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field LastLogSlotNum", wireType)
+			}
+			m.LastLogSlotNum = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.LastLogSlotNum |= LogSlotID(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipProtocol(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *SyncRepair) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowProtocol
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: SyncRepair: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: SyncRepair: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Sender = MemberID(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -7456,8 +10470,241 @@ func (m *SyncPrepare) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Log = append(m.Log, &LogEntry{})
-			if err := m.Log[len(m.Log)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
+			}
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType == 0 {
+				var v LogSlotID
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowProtocol
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					v |= LogSlotID(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				m.SlotNums = append(m.SlotNums, v)
+			} else if wireType == 2 {
+				var packedLen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowProtocol
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					packedLen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if packedLen < 0 {
+					return ErrInvalidLengthProtocol
+				}
+				postIndex := iNdEx + packedLen
+				if postIndex < 0 {
+					return ErrInvalidLengthProtocol
+				}
+				if postIndex > l {
+					return io.ErrUnexpectedEOF
+				}
+				var elementCount int
+				var count int
+				for _, integer := range dAtA[iNdEx:postIndex] {
+					if integer < 128 {
+						count++
+					}
+				}
+				elementCount = count
+				if elementCount != 0 && len(m.SlotNums) == 0 {
+					m.SlotNums = make([]LogSlotID, 0, elementCount)
+				}
+				for iNdEx < postIndex {
+					var v LogSlotID
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowProtocol
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						v |= LogSlotID(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					m.SlotNums = append(m.SlotNums, v)
+				}
+			} else {
+				return fmt.Errorf("proto: wrong wireType = %d for field SlotNums", wireType)
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipProtocol(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *SyncRepairReply) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowProtocol
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: SyncRepairReply: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: SyncRepairReply: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Sender = MemberID(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ViewID", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ViewID == nil {
+				m.ViewID = &ViewId{}
+			}
+			if err := m.ViewID.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Entries", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowProtocol
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthProtocol
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Entries = append(m.Entries, &LogEntry{})
+			if err := m.Entries[len(m.Entries)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -7742,10 +10989,10 @@ func (m *SyncCommit) Unmarshal(dAtA []byte) error {
 				}
 			}
 		case 4:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Log", wireType)
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field SyncPoint", wireType)
 			}
-			var msglen int
+			m.SyncPoint = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowProtocol
@@ -7755,26 +11002,11 @@ func (m *SyncCommit) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				m.SyncPoint |= LogSlotID(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
-				return ErrInvalidLengthProtocol
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthProtocol
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Log = append(m.Log, &LogEntry{})
-			if err := m.Log[len(m.Log)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipProtocol(dAtA[iNdEx:])
