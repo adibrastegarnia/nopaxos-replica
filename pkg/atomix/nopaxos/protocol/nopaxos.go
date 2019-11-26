@@ -18,6 +18,7 @@ import (
 	"github.com/atomix/atomix-go-node/pkg/atomix/node"
 	"github.com/atomix/atomix-go-node/pkg/atomix/service"
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/config"
+	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/util"
 	"io"
 	"math"
 	"sync"
@@ -27,6 +28,7 @@ import (
 // NewNOPaxos returns a new NOPaxos protocol state struct
 func NewNOPaxos(cluster Cluster, registry *node.Registry, config *config.ProtocolConfig) *NOPaxos {
 	nopaxos := &NOPaxos{
+		logger:  util.NewNodeLogger(string(cluster.Member())),
 		config:  config,
 		cluster: cluster,
 		state:   newStateMachine(string(cluster.Member()), registry),
@@ -78,6 +80,7 @@ const (
 
 // NOPaxos is an interface for managing the state of the NOPaxos consensus protocol
 type NOPaxos struct {
+	logger            util.Logger
 	config            *config.ProtocolConfig
 	cluster           Cluster
 	state             *stateMachine
@@ -109,6 +112,7 @@ func (s *NOPaxos) start() {
 }
 
 func (s *NOPaxos) resetTimeout() {
+	s.logger.Debug("Resetting leader timeout")
 	s.timeoutTimer = time.NewTimer(s.config.GetLeaderTimeoutOrDefault())
 	go func() {
 		select {
@@ -122,6 +126,7 @@ func (s *NOPaxos) resetTimeout() {
 }
 
 func (s *NOPaxos) setPingTicker() {
+	s.logger.Debug("Setting ping ticker")
 	s.pingTicker = time.NewTicker(s.config.GetPingIntervalOrDefault())
 	go func() {
 		for {
@@ -211,6 +216,8 @@ func (s *NOPaxos) slot(request *CommandRequest) {
 }
 
 func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientStreamServer) {
+	s.logger.Receive("CommandRequest", request)
+
 	s.stateMu.RLock()
 	defer s.stateMu.RUnlock()
 
@@ -234,25 +241,43 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 		s.logMu.Unlock()
 
 		// Apply the command to the state machine before responding if leader
-		if stream != nil && s.getLeader(s.viewID) == s.cluster.Member() {
-			ch := make(chan node.Output)
-			s.state.applyCommand(entry, ch)
-			go func() {
-				for result := range ch {
-					// TODO: Send state machine errors
-					_ = stream.Send(&ClientMessage{
-						Message: &ClientMessage_CommandReply{
-							CommandReply: &CommandReply{
-								MessageNum: request.MessageNum,
-								Sender:     s.cluster.Member(),
-								ViewID:     s.viewID,
-								SlotNum:    slotNum,
-								Value:      result.Value,
+		if stream != nil {
+			if s.getLeader(s.viewID) == s.cluster.Member() {
+				ch := make(chan node.Output)
+				viewID := s.viewID
+				go func() {
+					for result := range ch {
+						message := &ClientMessage{
+							Message: &ClientMessage_CommandReply{
+								CommandReply: &CommandReply{
+									MessageNum: request.MessageNum,
+									Sender:     s.cluster.Member(),
+									ViewID:     viewID,
+									SlotNum:    slotNum,
+									Value:      result.Value,
+								},
 							},
+						}
+						// TODO: Send state machine errors
+						s.logger.Send("CommandReply", message)
+						_ = stream.Send(message)
+					}
+				}()
+				s.state.applyCommand(entry, ch)
+			} else {
+				message := &ClientMessage{
+					Message: &ClientMessage_CommandReply{
+						CommandReply: &CommandReply{
+							MessageNum: request.MessageNum,
+							Sender:     s.cluster.Member(),
+							ViewID:     s.viewID,
+							SlotNum:    slotNum,
 						},
-					})
+					},
 				}
-			}()
+				s.logger.Send("CommandReply", message)
+				_ = stream.Send(message)
+			}
 		}
 	} else if request.SessionNum > s.viewID.SessionNum {
 		// Command received in the session terminated case
@@ -294,6 +319,8 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 }
 
 func (s *NOPaxos) query(request *QueryRequest, stream ClientService_ClientStreamServer) {
+	s.logger.Receive("QueryRequest", request)
+
 	s.stateMu.RLock()
 	defer s.stateMu.RUnlock()
 
@@ -326,10 +353,12 @@ func (s *NOPaxos) query(request *QueryRequest, stream ClientService_ClientStream
 }
 
 func (s *NOPaxos) slotLookup(request *SlotLookup, stream ReplicaService_ReplicaStreamServer) {
+	s.logger.ReceiveFrom("SlotLookup", request, request.Sender)
+
 	s.stateMu.RLock()
 
 	// If the view ID does not match the sender's view ID, skip the message
-	if s.viewID == nil || s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
+	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
 		s.stateMu.RUnlock()
 		return
 	}
@@ -392,26 +421,32 @@ func (s *NOPaxos) sendGapCommit() {
 	// Set the current gap slot
 	s.currentGapSlot = slotID
 
+	message := &ReplicaMessage{
+		Message: &ReplicaMessage_GapCommit{
+			GapCommit: &GapCommitRequest{
+				Sender:  s.cluster.Member(),
+				ViewID:  s.viewID,
+				SlotNum: slotID,
+			},
+		},
+	}
+
 	// Send a GapCommit to each replica
 	for _, member := range s.cluster.Members() {
 		if stream, err := s.cluster.GetStream(member); err == nil {
-			_ = stream.Send(&ReplicaMessage{
-				Message: &ReplicaMessage_GapCommit{
-					GapCommit: &GapCommitRequest{
-						ViewID:  s.viewID,
-						SlotNum: slotID,
-					},
-				},
-			})
+			s.logger.SendTo("GapCommit", message, member)
+			_ = stream.Send(message)
 		}
 	}
 }
 
 func (s *NOPaxos) gapCommit(request *GapCommitRequest, stream ReplicaService_ReplicaStreamServer) {
+	s.logger.ReceiveFrom("GapCommitRequest", request, request.Sender)
+
 	s.stateMu.RLock()
 
 	// If the view ID does not match the sender's view ID, skip the message
-	if s.viewID == nil || s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
+	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
 		s.stateMu.RUnlock()
 		return
 	}
@@ -449,11 +484,13 @@ func (s *NOPaxos) gapCommit(request *GapCommitRequest, stream ReplicaService_Rep
 }
 
 func (s *NOPaxos) gapCommitReply(reply *GapCommitReply) {
+	s.logger.ReceiveFrom("GapCommitReply", reply, reply.Sender)
+
 	s.stateMu.Lock()
 	defer s.stateMu.Unlock()
 
 	// If the view ID does not match the sender's view ID, skip the message
-	if s.viewID == nil || s.viewID.LeaderNum != reply.ViewID.LeaderNum || s.viewID.SessionNum != reply.ViewID.SessionNum {
+	if s.viewID.LeaderNum != reply.ViewID.LeaderNum || s.viewID.SessionNum != reply.ViewID.SessionNum {
 		return
 	}
 
@@ -496,22 +533,27 @@ func (s *NOPaxos) startLeaderChange() {
 	}
 	s.stateMu.RUnlock()
 
+	message := &ReplicaMessage{
+		Message: &ReplicaMessage_ViewChangeRequest{
+			ViewChangeRequest: &ViewChangeRequest{
+				ViewID: newViewID,
+			},
+		},
+	}
+
 	for _, member := range s.cluster.Members() {
 		if member != s.getLeader(newViewID) {
 			if stream, err := s.cluster.GetStream(member); err == nil {
-				_ = stream.Send(&ReplicaMessage{
-					Message: &ReplicaMessage_ViewChangeRequest{
-						ViewChangeRequest: &ViewChangeRequest{
-							ViewID: newViewID,
-						},
-					},
-				})
+				s.logger.SendTo("ViewChangeRequest", message, member)
+				_ = stream.Send(message)
 			}
 		}
 	}
 }
 
 func (s *NOPaxos) viewChangeRequest(request *ViewChangeRequest) {
+	s.logger.ReceiveFrom("ViewChangeRequest", request, request.Sender)
+
 	s.stateMu.RLock()
 	newLeaderID := LeaderID(math.Max(float64(s.viewID.LeaderNum), float64(request.ViewID.LeaderNum)))
 	newSessionID := SessionID(math.Max(float64(s.viewID.SessionNum), float64(request.ViewID.SessionNum)))
@@ -522,7 +564,7 @@ func (s *NOPaxos) viewChangeRequest(request *ViewChangeRequest) {
 	s.stateMu.RUnlock()
 
 	// If the view IDs match, ignore the request
-	if s.viewID != nil && s.viewID.LeaderNum == newViewID.LeaderNum && s.viewID.SessionNum == newViewID.SessionNum {
+	if s.viewID.LeaderNum == newViewID.LeaderNum && s.viewID.SessionNum == newViewID.SessionNum {
 		return
 	}
 
@@ -536,7 +578,8 @@ func (s *NOPaxos) viewChangeRequest(request *ViewChangeRequest) {
 	s.viewChanges = make(map[MemberID]*ViewChange)
 
 	// Send a ViewChange to the new leader
-	stream, err := s.cluster.GetStream(s.getLeader(newViewID))
+	leader := s.getLeader(newViewID)
+	stream, err := s.cluster.GetStream(leader)
 	if err != nil {
 		return
 	}
@@ -546,7 +589,8 @@ func (s *NOPaxos) viewChangeRequest(request *ViewChangeRequest) {
 	for _, entry := range s.log {
 		log = append(log, entry)
 	}
-	_ = stream.Send(&ReplicaMessage{
+
+	message := &ReplicaMessage{
 		Message: &ReplicaMessage_ViewChange{
 			ViewChange: &ViewChange{
 				Sender:     s.cluster.Member(),
@@ -556,45 +600,57 @@ func (s *NOPaxos) viewChangeRequest(request *ViewChangeRequest) {
 				Log:        log,
 			},
 		},
-	})
+	}
+	s.logger.SendTo("ViewChange", message, leader)
+	_ = stream.Send(message)
+
+	message = &ReplicaMessage{
+		Message: &ReplicaMessage_ViewChangeRequest{
+			ViewChangeRequest: &ViewChangeRequest{
+				Sender: s.cluster.Member(),
+				ViewID: newViewID,
+			},
+		},
+	}
 
 	// Send a view change request to all replicas other than the leader
 	for _, member := range s.cluster.Members() {
 		if stream, err := s.cluster.GetStream(member); err == nil {
-			_ = stream.Send(&ReplicaMessage{
-				Message: &ReplicaMessage_ViewChangeRequest{
-					ViewChangeRequest: &ViewChangeRequest{
-						ViewID: newViewID,
-					},
-				},
-			})
+			s.logger.SendTo("ViewChangeRequest", message, member)
+			_ = stream.Send(message)
 		}
 	}
 }
 
 func (s *NOPaxos) viewChange(request *ViewChange) {
+	s.logger.ReceiveFrom("ViewChange", request, request.Sender)
+
 	s.stateMu.RLock()
-	defer s.stateMu.RUnlock()
 
 	// If the view IDs do not match, ignore the request
-	if s.viewID == nil || s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
+	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
+		s.stateMu.RUnlock()
 		return
 	}
 
 	// If the replica's status is not ViewChange, ignore the request
 	if s.status != StatusViewChange {
+		s.stateMu.RUnlock()
 		return
 	}
 
 	// If this replica is not the leader of the view, ignore the request
 	if s.getLeader(request.ViewID) != s.cluster.Member() {
+		s.stateMu.RUnlock()
 		return
 	}
+	s.stateMu.RUnlock()
 
 	// Add the view change to the set of view changes
 	s.stateMu.Lock()
 	s.viewChanges[request.Sender] = request
 	s.stateMu.Unlock()
+	s.stateMu.RLock()
 
 	// Aggregate the view changes for the current view
 	localViewChanged := false
@@ -663,24 +719,30 @@ func (s *NOPaxos) viewChange(request *ViewChange) {
 			}
 		}
 
+		message := &ReplicaMessage{
+			Message: &ReplicaMessage_StartView{
+				StartView: &StartView{
+					Sender:     s.cluster.Member(),
+					ViewID:     s.viewID,
+					MessageNum: newMessageID,
+					Log:        log,
+				},
+			},
+		}
+
 		// Send a StartView to each replica
 		for _, member := range s.cluster.Members() {
 			if stream, err := s.cluster.GetStream(member); err == nil {
-				_ = stream.Send(&ReplicaMessage{
-					Message: &ReplicaMessage_StartView{
-						StartView: &StartView{
-							ViewID:     s.viewID,
-							MessageNum: newMessageID,
-							Log:        log,
-						},
-					},
-				})
+				s.logger.SendTo("StartView", message, member)
+				_ = stream.Send(message)
 			}
 		}
 	}
 }
 
 func (s *NOPaxos) startView(request *StartView) {
+	s.logger.ReceiveFrom("StartView", request, request.Sender)
+
 	s.stateMu.Lock()
 	defer s.stateMu.Unlock()
 
@@ -764,25 +826,30 @@ func (s *NOPaxos) startSync() {
 		log = append(log, entry)
 	}
 
+	message := &ReplicaMessage{
+		Message: &ReplicaMessage_SyncPrepare{
+			SyncPrepare: &SyncPrepare{
+				Sender:     s.cluster.Member(),
+				ViewID:     s.viewID,
+				MessageNum: s.sessionMessageNum,
+				Log:        log,
+			},
+		},
+	}
+
 	for _, member := range s.cluster.Members() {
 		if member != s.cluster.Member() {
 			if stream, err := s.cluster.GetStream(member); err == nil {
-				_ = stream.Send(&ReplicaMessage{
-					Message: &ReplicaMessage_SyncPrepare{
-						SyncPrepare: &SyncPrepare{
-							Sender:     s.cluster.Member(),
-							ViewID:     s.viewID,
-							MessageNum: s.sessionMessageNum,
-							Log:        log,
-						},
-					},
-				})
+				s.logger.SendTo("SyncPrepare", message, member)
+				_ = stream.Send(message)
 			}
 		}
 	}
 }
 
 func (s *NOPaxos) syncPrepare(request *SyncPrepare, stream ReplicaService_ReplicaStreamServer) {
+	s.logger.ReceiveFrom("SyncPrepare", request, request.Sender)
+
 	s.stateMu.RLock()
 	defer s.stateMu.RUnlock()
 
@@ -792,7 +859,7 @@ func (s *NOPaxos) syncPrepare(request *SyncPrepare, stream ReplicaService_Replic
 	}
 
 	// If the view IDs do not match, ignore the request
-	if s.viewID == nil || s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
+	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
 		return
 	}
 
@@ -865,6 +932,8 @@ func (s *NOPaxos) syncPrepare(request *SyncPrepare, stream ReplicaService_Replic
 }
 
 func (s *NOPaxos) syncReply(reply *SyncReply) {
+	s.logger.ReceiveFrom("SyncReply", reply, reply.Sender)
+
 	s.stateMu.RLock()
 	defer s.stateMu.RUnlock()
 
@@ -914,6 +983,8 @@ func (s *NOPaxos) syncReply(reply *SyncReply) {
 }
 
 func (s *NOPaxos) syncCommit(request *SyncCommit) {
+	s.logger.ReceiveFrom("SyncCommit", request, request.Sender)
+
 	s.stateMu.RLock()
 	defer s.stateMu.RUnlock()
 
@@ -923,7 +994,7 @@ func (s *NOPaxos) syncCommit(request *SyncCommit) {
 	}
 
 	// If the view IDs do not match, ignore the request
-	if s.viewID == nil || s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
+	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
 		return
 	}
 
@@ -962,23 +1033,37 @@ func (s *NOPaxos) syncCommit(request *SyncCommit) {
 }
 
 func (s *NOPaxos) sendPing() {
+	s.stateMu.RLock()
+
+	// If this replica is not the leader of the view, do not send the ping
+	if s.getLeader(s.viewID) != s.cluster.Member() {
+		s.stateMu.RUnlock()
+		return
+	}
+
+	message := &ReplicaMessage{
+		Message: &ReplicaMessage_Ping{
+			Ping: &Ping{
+				Sender: s.cluster.Member(),
+				ViewID: s.viewID,
+			},
+		},
+	}
+	s.stateMu.RUnlock()
+
 	for _, member := range s.cluster.Members() {
 		if member != s.cluster.Member() {
 			if stream, err := s.cluster.GetStream(member); err == nil {
-				_ = stream.Send(&ReplicaMessage{
-					Message: &ReplicaMessage_Ping{
-						Ping: &Ping{
-							Sender: s.cluster.Member(),
-							ViewID: s.viewID,
-						},
-					},
-				})
+				s.logger.SendTo("Ping", message, member)
+				_ = stream.Send(message)
 			}
 		}
 	}
 }
 
 func (s *NOPaxos) ping(request *Ping) {
+	s.logger.ReceiveFrom("Ping", request, request.Sender)
+
 	s.stateMu.Lock()
 	defer s.stateMu.Unlock()
 
@@ -996,6 +1081,7 @@ func (s *NOPaxos) ping(request *Ping) {
 }
 
 func (s *NOPaxos) timeout() {
+	s.logger.Debug("Leader ping timed out")
 	s.startLeaderChange()
 }
 

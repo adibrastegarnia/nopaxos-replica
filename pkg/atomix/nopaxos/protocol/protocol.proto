@@ -95,8 +95,9 @@ message SlotLookup {
 }
 
 message GapCommitRequest {
-    ViewId view_id = 1 [(gogoproto.customname) = "ViewID"];
-    uint64 slot_num = 2 [(gogoproto.casttype) = "LogSlotID"];
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
+    uint64 slot_num = 3 [(gogoproto.casttype) = "LogSlotID"];
 }
 
 message GapCommitReply {
@@ -106,7 +107,8 @@ message GapCommitReply {
 }
 
 message ViewChangeRequest {
-    ViewId view_id = 1 [(gogoproto.customname) = "ViewID"];
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
 }
 
 message ViewChange {
@@ -118,9 +120,10 @@ message ViewChange {
 }
 
 message StartView {
-    ViewId view_id = 1 [(gogoproto.customname) = "ViewID"];
-    uint64 message_num = 2 [(gogoproto.casttype) = "MessageID"];
-    repeated LogEntry log = 3;
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
+    uint64 message_num = 3 [(gogoproto.casttype) = "MessageID"];
+    repeated LogEntry log = 4;
 }
 
 message SyncPrepare {

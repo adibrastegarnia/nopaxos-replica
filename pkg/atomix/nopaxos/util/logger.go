@@ -23,16 +23,6 @@ func NewNodeLogger(node string) Logger {
 	}
 }
 
-// NewRoleLogger creates a new role logger
-func NewRoleLogger(node string, role string) Logger {
-	return &roleLogger{
-		nodeLogger: &nodeLogger{
-			node: node,
-		},
-		role: role,
-	}
-}
-
 // Logger provides logging for requests and responses
 type Logger interface {
 	// Error logs an Error level message
@@ -127,43 +117,6 @@ func (l *nodeLogger) Request(requestType string, request interface{}) {
 
 func (l *nodeLogger) Response(responseType string, response interface{}, err error) error {
 	util.ResponseEntry(l.node, responseType).
-		Tracef("Sending %v", response)
-	return err
-}
-
-// roleLogger is a Logger implementation for server roles
-type roleLogger struct {
-	*nodeLogger
-	role string
-}
-
-func (l *roleLogger) Error(message string, args ...interface{}) {
-	util.MessageEntry(l.node, l.role).Errorf(message, args...)
-}
-
-func (l *roleLogger) Warn(message string, args ...interface{}) {
-	util.MessageEntry(l.node, l.role).Warnf(message, args...)
-}
-
-func (l *roleLogger) Info(message string, args ...interface{}) {
-	util.MessageEntry(l.node, l.role).Infof(message, args...)
-}
-
-func (l *roleLogger) Debug(message string, args ...interface{}) {
-	util.MessageEntry(l.node, l.role).Debugf(message, args...)
-}
-
-func (l *roleLogger) Trace(message string, args ...interface{}) {
-	util.MessageEntry(l.node, l.role).Tracef(message, args...)
-}
-
-func (l *roleLogger) Request(requestType string, request interface{}) {
-	util.RequestEntry(l.node, l.role, requestType).
-		Tracef("Received %v", request)
-}
-
-func (l *roleLogger) Response(responseType string, response interface{}, err error) error {
-	util.ResponseEntry(l.node, l.role, responseType).
 		Tracef("Sending %v", response)
 	return err
 }
