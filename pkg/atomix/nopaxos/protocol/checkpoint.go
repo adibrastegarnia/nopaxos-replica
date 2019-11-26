@@ -20,6 +20,36 @@ import (
 	"io"
 )
 
+func (s *NOPaxos) checkpoint() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Only take checkpoints when in Normal status
+	if s.status != StatusNormal {
+		return
+	}
+
+	// Only take checkpoints once the log has exceeded the configured max length
+	if s.log.Len() < s.config.GetMaxLogLengthOrDefault() {
+		return
+	}
+
+	// Checkpoints can only be created for consistent portions of the log, so a checkpoint can only be taken up
+	// to the sync point
+	if s.applied == 0 || (s.currentCheckpoint != nil && s.currentCheckpoint.SlotNum >= s.applied) {
+		return
+	}
+
+	// Record the checkpoint
+	s.logger.Info("Checkpointing system state")
+	checkpoint := newCheckpoint(s.applied)
+	s.state.checkpoint(checkpoint)
+	s.currentCheckpoint = checkpoint
+
+	// Once the checkpoint has been recorded, remove checkpointed entries from the log
+	s.log.Truncate(checkpoint.SlotNum + 1)
+}
+
 // newCheckpoint creates a new checkpoint
 func newCheckpoint(slotNum LogSlotID) *Checkpoint {
 	return &Checkpoint{

@@ -28,4 +28,6 @@ option (gogoproto.equal_all) = true;
 message ProtocolConfig {
     google.protobuf.Duration leader_timeout = 1 [(gogoproto.stdduration) = true];
     google.protobuf.Duration ping_interval = 2 [(gogoproto.stdduration) = true];
+    google.protobuf.Duration checkpoint_interval = 3 [(gogoproto.stdduration) = true];
+    uint32 max_log_length = 4;
 }

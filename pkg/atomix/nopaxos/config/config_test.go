@@ -22,8 +22,8 @@ import (
 
 func TestAdditionalConfigFunctions(t *testing.T) {
 	config := &ProtocolConfig{}
-	assert.Equal(t, defaultElectionTimeout, config.GetLeaderTimeoutOrDefault())
-	assert.Equal(t, defaultHeartbeatInterval, config.GetPingIntervalOrDefault())
+	assert.Equal(t, defaultLeaderTimeout, config.GetLeaderTimeoutOrDefault())
+	assert.Equal(t, defaultPingInterval, config.GetPingIntervalOrDefault())
 
 	electionTimeout := 30 * time.Second
 	heartbeatInterval := 1 * time.Second

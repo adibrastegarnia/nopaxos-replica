@@ -70,14 +70,14 @@ type MessageID uint64
 type Status int
 
 const (
+	// StatusRecovering is used by a recovering replica to avoid operating on old state
+	StatusRecovering Status = iota
 	// StatusNormal is the normal status
-	StatusNormal Status = iota
+	StatusNormal
 	// StatusViewChange is used to ignore certain messages during view changes
 	StatusViewChange
 	// StatusGapCommit indicates the replica is undergoing a gap commit
 	StatusGapCommit
-	// StatusRecovering is used by a recovering replica to avoid operating on old state
-	StatusRecovering
 )
 
 // NOPaxos is an interface for managing the state of the NOPaxos consensus protocol
@@ -87,16 +87,16 @@ type NOPaxos struct {
 	cluster              Cluster                             // The cluster state
 	state                *stateMachine                       // The replica's state machine
 	applied              LogSlotID                           // The highest slot applied to the state machine
-	sequencer         ClientService_ClientStreamServer       // The stream to the sequencer
-	log               *Log                                   // The primary log
-	status            Status                                 // The status of the replica TODO: Ensure statuses are correctly filtered
-	recoveryID        string                                 // A nonce indicating the recovery attempt
-	recoverReps       map[MemberID]*RecoverReply             // The set of recover replies received
-	currentCheckpoint *Checkpoint                            // The current checkpoint (if any)
-	sessionMessageNum MessageID                              // The latest message num for the sequencer session
-	viewID            *ViewId                                // The current view ID
-	lastNormView      *ViewId                                // The last normal view ID TODO: Ensure this is used correctly
-	viewChanges       map[MemberID]*ViewChange               // The set of view changes received TODO: Ensure this is cleared
+	sequencer            ClientService_ClientStreamServer    // The stream to the sequencer
+	log                  *Log                                // The primary log
+	status               Status                              // The status of the replica TODO: Ensure statuses are correctly filtered
+	recoveryID           string                              // A nonce indicating the recovery attempt
+	recoverReps          map[MemberID]*RecoverReply          // The set of recover replies received
+	currentCheckpoint    *Checkpoint                         // The current checkpoint (if any)
+	sessionMessageNum    MessageID                           // The latest message num for the sequencer session
+	viewID               *ViewId                             // The current view ID
+	lastNormView         *ViewId                             // The last normal view ID TODO: Ensure this is used correctly
+	viewChanges          map[MemberID]*ViewChange            // The set of view changes received TODO: Ensure this is cleared
 	viewChangeRepairs    map[MemberID]*ViewChangeRepair      // The set of view change repairs received TODO: Ensure this is cleared
 	viewChangeRepairReps map[MemberID]*ViewChangeRepairReply // The set of view change repair replies received TODO: Ensure this is cleared
 	viewRepair           *ViewRepair                         // The last view repair requested TODO: Ensure this is cleared
@@ -110,6 +110,7 @@ type NOPaxos struct {
 	syncReps             map[MemberID]*SyncReply             // The set of sync replies received TODO: Ensure this is cleared
 	syncLog              *Log                                // A temporary log for synchronization TODO: Ensure this is garbage collected
 	pingTicker           *time.Ticker
+	checkpointTicker     *time.Ticker
 	timeoutTimer         *time.Timer
 	mu                   sync.RWMutex
 }
@@ -118,6 +119,7 @@ func (s *NOPaxos) start() {
 	s.mu.Lock()
 	s.resetTimeout()
 	s.setPingTicker()
+	s.setCheckpointTicker()
 	s.mu.Unlock()
 }
 
@@ -146,6 +148,22 @@ func (s *NOPaxos) setPingTicker() {
 					return
 				}
 				s.sendPing()
+			}
+		}
+	}()
+}
+
+func (s *NOPaxos) setCheckpointTicker() {
+	s.logger.Debug("Setting checkpoint ticker")
+	s.checkpointTicker = time.NewTicker(s.config.GetCheckpointIntervalOrDefault())
+	go func() {
+		for {
+			select {
+			case _, ok := <-s.checkpointTicker.C:
+				if !ok {
+					return
+				}
+				s.checkpoint()
 			}
 		}
 	}()
@@ -252,6 +270,20 @@ type stateMachine struct {
 	registry *node.Registry
 	state    node.StateMachine
 	context  *stateMachineContext
+}
+
+// checkpoint takes a checkpoint
+func (s *stateMachine) checkpoint(checkpoint *Checkpoint) {
+	writer := checkpoint.Writer()
+	defer writer.Close()
+	_ = s.state.Snapshot(writer)
+}
+
+// restore restores the state from a checkpoint
+func (s *stateMachine) restore(checkpoint *Checkpoint) {
+	reader := checkpoint.Reader()
+	defer reader.Close()
+	_ = s.state.Install(reader)
 }
 
 // applyCommand applies a command to the state machine

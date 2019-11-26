@@ -17,8 +17,10 @@ package config
 import "time"
 
 const (
-	defaultElectionTimeout   = 5 * time.Second
-	defaultHeartbeatInterval = 500 * time.Millisecond
+	defaultLeaderTimeout      = 5 * time.Second
+	defaultPingInterval       = 500 * time.Millisecond
+	defaultCheckpointInterval = 1 * time.Minute
+	defaultMaxLogLength       = 10000
 )
 
 // GetLeaderTimeoutOrDefault returns the configured election timeout if set, otherwise the default election timeout
@@ -27,7 +29,7 @@ func (c *ProtocolConfig) GetLeaderTimeoutOrDefault() time.Duration {
 	if timeout != nil {
 		return *timeout
 	}
-	return defaultElectionTimeout
+	return defaultLeaderTimeout
 }
 
 // GetPingIntervalOrDefault returns the configured heartbeat interval if set, otherwise the default heartbeat interval
@@ -36,5 +38,23 @@ func (c *ProtocolConfig) GetPingIntervalOrDefault() time.Duration {
 	if interval != nil {
 		return *interval
 	}
-	return defaultHeartbeatInterval
+	return defaultPingInterval
+}
+
+// GetCheckpointIntervalOrDefault returns the configured checkpoint interval if set, otherwise the default interval
+func (c *ProtocolConfig) GetCheckpointIntervalOrDefault() time.Duration {
+	interval := c.GetCheckpointInterval()
+	if interval != nil {
+		return *interval
+	}
+	return defaultCheckpointInterval
+}
+
+// GetMaxLogLengthOrDefault returns the configured maximum log length, otherwise the default
+func (c *ProtocolConfig) GetMaxLogLengthOrDefault() int {
+	length := c.GetMaxLogLength()
+	if length > 0 {
+		return int(length)
+	}
+	return defaultMaxLogLength
 }

@@ -32,6 +32,11 @@ type Log struct {
 	entries      map[LogSlotID]*LogEntry
 }
 
+// Len returns the length of the log
+func (l *Log) Len() int {
+	return len(l.entries)
+}
+
 // FirstSlot returns the first slot in the log
 func (l *Log) FirstSlot() LogSlotID {
 	return l.firstSlotNum
@@ -61,4 +66,12 @@ func (l *Log) Set(entry *LogEntry) {
 // Delete deletes a log entry
 func (l *Log) Delete(slotNum LogSlotID) {
 	delete(l.entries, slotNum)
+}
+
+// Truncate removes entries from the head of the log
+func (l *Log) Truncate(slotNum LogSlotID) {
+	for slot := l.firstSlotNum; slot < slotNum; slot++ {
+		l.Delete(slot)
+	}
+	l.firstSlotNum = slotNum
 }
