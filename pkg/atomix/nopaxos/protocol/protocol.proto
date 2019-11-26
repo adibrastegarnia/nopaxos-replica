@@ -56,7 +56,9 @@ message ReplicaMessage {
         SyncRepairReply sync_repair_reply = 17;
         SyncReply sync_reply = 18;
         SyncCommit sync_commit = 19;
-        Ping ping = 20;
+        Recover recover = 20;
+        RecoverReply recover_reply = 21;
+        Ping ping = 22;
     }
 }
 
@@ -92,6 +94,19 @@ message QueryReply {
     string sender = 2 [(gogoproto.casttype) = "MemberID"];
     ViewId view_id = 3 [(gogoproto.customname) = "ViewID"];
     bytes value = 4;
+}
+
+message Recover {
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    string recovery_id = 2 [(gogoproto.customname) = "RecoveryID"];
+}
+
+message RecoverReply {
+    string sender = 1 [(gogoproto.casttype) = "MemberID"];
+    string recovery_id = 2 [(gogoproto.customname) = "RecoveryID"];
+    ViewId view_id = 3 [(gogoproto.customname) = "ViewID"];
+    uint64 message_num = 4 [(gogoproto.casttype) = "MessageID"];
+    repeated LogEntry log = 5;
 }
 
 message SlotLookup {

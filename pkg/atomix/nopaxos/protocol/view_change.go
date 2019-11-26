@@ -22,12 +22,12 @@ import (
 )
 
 func (s *NOPaxos) startLeaderChange() {
-	s.stateMu.RLock()
+	s.mu.RLock()
 	newViewID := &ViewId{
 		SessionNum: s.viewID.SessionNum,
 		LeaderNum:  s.viewID.LeaderNum + 1,
 	}
-	s.stateMu.RUnlock()
+	s.mu.RUnlock()
 
 	viewChangeRequest := &ViewChangeRequest{
 		Sender: s.cluster.Member(),
@@ -52,7 +52,7 @@ func (s *NOPaxos) startLeaderChange() {
 func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 	s.logger.ReceiveFrom("ViewChangeRequest", request, request.Sender)
 
-	s.stateMu.RLock()
+	s.mu.RLock()
 	newLeaderID := LeaderID(math.Max(float64(s.viewID.LeaderNum), float64(request.ViewID.LeaderNum)))
 	newSessionID := SessionID(math.Max(float64(s.viewID.SessionNum), float64(request.ViewID.SessionNum)))
 	newViewID := &ViewId{
@@ -62,11 +62,11 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 
 	// If the view IDs match, ignore the request
 	if s.viewID.LeaderNum == newViewID.LeaderNum && s.viewID.SessionNum == newViewID.SessionNum {
-		s.stateMu.RUnlock()
+		s.mu.RUnlock()
 		return
 	}
-	s.stateMu.RUnlock()
-	s.stateMu.Lock()
+	s.mu.RUnlock()
+	s.mu.Lock()
 
 	// Set the replica's status to ViewChange
 	s.status = StatusViewChange
@@ -77,9 +77,9 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 	// Reset the view changes
 	s.viewChanges = make(map[MemberID]*ViewChange)
 
-	s.stateMu.Unlock()
-	s.stateMu.RLock()
-	defer s.stateMu.RUnlock()
+	s.mu.Unlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	// Send a ViewChange to the new leader
 	leader := s.getLeader(newViewID)
@@ -145,8 +145,8 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 func (s *NOPaxos) handleViewChange(request *ViewChange) {
 	s.logger.ReceiveFrom("ViewChange", request, request.Sender)
 
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	// If the view IDs do not match, ignore the request
 	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
@@ -319,8 +319,8 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 }
 
 func (s *NOPaxos) handleViewChangeRepair(request *ViewChangeRepair) {
-	s.stateMu.RLock()
-	defer s.stateMu.RUnlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	// If the request views do not match, ignore the request
 	if s.viewID.SessionNum != request.ViewID.SessionNum || s.viewID.LeaderNum != request.ViewID.LeaderNum {
@@ -355,8 +355,8 @@ func (s *NOPaxos) handleViewChangeRepair(request *ViewChangeRepair) {
 }
 
 func (s *NOPaxos) handleViewChangeRepairReply(reply *ViewChangeRepairReply) {
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	// If the reply view does not match the current view, skip the reply
 	if s.viewID.SessionNum != reply.ViewID.SessionNum || s.viewID.LeaderNum != reply.ViewID.LeaderNum {

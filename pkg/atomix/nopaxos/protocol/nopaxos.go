@@ -19,6 +19,7 @@ import (
 	"github.com/atomix/atomix-go-node/pkg/atomix/service"
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/config"
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/util"
+	"github.com/google/uuid"
 	"io"
 	"sync"
 	"time"
@@ -43,6 +44,8 @@ func NewNOPaxos(cluster Cluster, registry *node.Registry, config *config.Protoco
 		},
 		sessionMessageNum: 1,
 		log:               newLog(1),
+		recoveryID:        uuid.New().String(),
+		recoverReps:       make(map[MemberID]*RecoverReply),
 		viewChanges:       make(map[MemberID]*ViewChange),
 		gapCommitReps:     make(map[MemberID]*GapCommitReply),
 		syncReps:          make(map[MemberID]*SyncReply),
@@ -72,48 +75,52 @@ type Status int
 const (
 	// StatusNormal is the normal status
 	StatusNormal Status = iota
-	// StatusViewChange is the view change status
+	// StatusViewChange is used to ignore certain messages during view changes
 	StatusViewChange
-	// StatusGapCommit is the gap commit status
+	// StatusGapCommit indicates the replica is undergoing a gap commit
 	StatusGapCommit
+	// StatusRecovering is used by a recovering replica to avoid operating on old state
+	StatusRecovering
 )
 
 // NOPaxos is an interface for managing the state of the NOPaxos consensus protocol
 type NOPaxos struct {
 	logger               util.Logger
 	config               *config.ProtocolConfig
-	cluster              Cluster
-	state                *stateMachine
-	applied              LogSlotID
-	sequencer            ClientService_ClientStreamServer
-	log                  *Log
-	viewChangeLog        *Log
-	viewLog              *Log
-	status               Status
-	sessionMessageNum    MessageID
-	viewID               *ViewId
-	lastNormView         *ViewId
-	viewChanges          map[MemberID]*ViewChange
-	viewChangeRepairs    map[MemberID]*ViewChangeRepair
-	viewChangeRepairReps map[MemberID]*ViewChangeRepairReply
-	viewRepair           *ViewRepair
-	currentGapSlot       LogSlotID
-	gapCommitReps        map[MemberID]*GapCommitReply
-	tentativeSync        LogSlotID
-	syncPoint            LogSlotID
-	syncRepair           *SyncRepair
-	syncReps             map[MemberID]*SyncReply
-	syncLog              *Log
+	cluster              Cluster                             // The cluster state
+	state                *stateMachine                       // The replica's state machine
+	applied              LogSlotID                           // The highest slot applied to the state machine
+	sequencer            ClientService_ClientStreamServer    // The stream to the sequencer
+	log                  *Log                                // The primary log
+	status               Status                              // The status of the replica TODO: Ensure statuses are correctly filtered
+	recoveryID           string                              // A nonce indicating the recovery attempt
+	recoverReps          map[MemberID]*RecoverReply          // The set of recover replies received
+	sessionMessageNum    MessageID                           // The latest message num for the sequencer session
+	viewID               *ViewId                             // The current view ID
+	lastNormView         *ViewId                             // The last normal view ID TODO: Ensure this is used correctly
+	viewChanges          map[MemberID]*ViewChange            // The set of view changes received TODO: Ensure this is cleared
+	viewChangeRepairs    map[MemberID]*ViewChangeRepair      // The set of view change repairs received TODO: Ensure this is cleared
+	viewChangeRepairReps map[MemberID]*ViewChangeRepairReply // The set of view change repair replies received TODO: Ensure this is cleared
+	viewRepair           *ViewRepair                         // The last view repair requested TODO: Ensure this is cleared
+	viewChangeLog        *Log                                // A temporary log for view changes TODO: Ensure this is garbage collected
+	viewLog              *Log                                // A temporary log for view starts TODO: Ensure this is garbage collected
+	currentGapSlot       LogSlotID                           // The current slot for which a gap is being committed TODO: Ensure this is used correctly
+	gapCommitReps        map[MemberID]*GapCommitReply        // The set of gap commit replies TODO: Ensure this is cleared
+	tentativeSync        LogSlotID                           // The tentative sync point TODO: Ensure this is used correctly
+	syncPoint            LogSlotID                           // The last known sync point TODO: Ensure this is used correctly
+	syncRepair           *SyncRepair                         // The last sent sync repair
+	syncReps             map[MemberID]*SyncReply             // The set of sync replies received TODO: Ensure this is cleared
+	syncLog              *Log                                // A temporary log for synchronization TODO: Ensure this is garbage collected
 	pingTicker           *time.Ticker
 	timeoutTimer         *time.Timer
-	stateMu              sync.RWMutex
+	mu                   sync.RWMutex
 }
 
 func (s *NOPaxos) start() {
-	s.stateMu.Lock()
+	s.mu.Lock()
 	s.resetTimeout()
 	s.setPingTicker()
-	s.stateMu.Unlock()
+	s.mu.Unlock()
 }
 
 func (s *NOPaxos) resetTimeout() {
@@ -147,9 +154,9 @@ func (s *NOPaxos) setPingTicker() {
 }
 
 func (s *NOPaxos) ClientStream(stream ClientService_ClientStreamServer) error {
-	s.stateMu.Lock()
+	s.mu.Lock()
 	s.sequencer = stream
-	s.stateMu.Unlock()
+	s.mu.Unlock()
 	for {
 		message, err := stream.Recv()
 		if err == io.EOF {
@@ -218,6 +225,10 @@ func (s *NOPaxos) handleReplica(message *ReplicaMessage) {
 		s.handleSyncReply(m.SyncReply)
 	case *ReplicaMessage_SyncCommit:
 		s.handleSyncCommit(m.SyncCommit)
+	case *ReplicaMessage_Recover:
+		s.handleRecover(m.Recover)
+	case *ReplicaMessage_RecoverReply:
+		s.handleRecoverReply(m.RecoverReply)
 	case *ReplicaMessage_Ping:
 		s.handlePing(m.Ping)
 	}

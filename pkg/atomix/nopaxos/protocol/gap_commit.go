@@ -15,8 +15,8 @@
 package protocol
 
 func (s *NOPaxos) sendGapCommit() {
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	// If this replica is not the leader, skip the commit
 	if s.getLeader(s.viewID) != s.cluster.Member() {
@@ -59,24 +59,24 @@ func (s *NOPaxos) sendGapCommit() {
 func (s *NOPaxos) handleGapCommit(request *GapCommitRequest) {
 	s.logger.ReceiveFrom("GapCommitRequest", request, request.Sender)
 
-	s.stateMu.RLock()
+	s.mu.RLock()
 
 	// If the view ID does not match the sender's view ID, skip the message
 	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
-		s.stateMu.RUnlock()
+		s.mu.RUnlock()
 		return
 	}
 
 	// If the replica's status is not Normal or GapCommit, skip the message
 	if s.status != StatusNormal && s.status != StatusGapCommit {
-		s.stateMu.RUnlock()
+		s.mu.RUnlock()
 		return
 	}
 
-	s.stateMu.RUnlock()
+	s.mu.RUnlock()
 
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	// If the request slot ID is not the next slot in the replica's log, skip the message
 	lastSlotID := s.log.LastSlot()
@@ -111,8 +111,8 @@ func (s *NOPaxos) handleGapCommit(request *GapCommitRequest) {
 func (s *NOPaxos) handleGapCommitReply(reply *GapCommitReply) {
 	s.logger.ReceiveFrom("GapCommitReply", reply, reply.Sender)
 
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	// If the view ID does not match the sender's view ID, skip the message
 	if s.viewID.LeaderNum != reply.ViewID.LeaderNum || s.viewID.SessionNum != reply.ViewID.SessionNum {
@@ -153,23 +153,23 @@ func (s *NOPaxos) handleGapCommitReply(reply *GapCommitReply) {
 func (s *NOPaxos) handleSlotLookup(request *SlotLookup) {
 	s.logger.ReceiveFrom("SlotLookup", request, request.Sender)
 
-	s.stateMu.RLock()
+	s.mu.RLock()
 
 	// If the view ID does not match the sender's view ID, skip the message
 	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
-		s.stateMu.RUnlock()
+		s.mu.RUnlock()
 		return
 	}
 
 	// If this replica is not the leader, skip the message
 	if s.getLeader(s.viewID) != s.cluster.Member() {
-		s.stateMu.RUnlock()
+		s.mu.RUnlock()
 		return
 	}
 
 	// If the replica's status is not Normal, skip the message
 	if s.status != StatusNormal {
-		s.stateMu.RUnlock()
+		s.mu.RUnlock()
 		return
 	}
 
@@ -195,9 +195,9 @@ func (s *NOPaxos) handleSlotLookup(request *SlotLookup) {
 				}
 			}
 		}
-		s.stateMu.RUnlock()
+		s.mu.RUnlock()
 	} else if slotNum == s.log.LastSlot()+1 {
-		s.stateMu.RUnlock()
+		s.mu.RUnlock()
 		s.sendGapCommit()
 	}
 }

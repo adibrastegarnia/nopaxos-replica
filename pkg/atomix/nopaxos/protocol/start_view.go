@@ -23,8 +23,8 @@ import (
 func (s *NOPaxos) handleStartView(request *StartView) {
 	s.logger.ReceiveFrom("StartView", request, request.Sender)
 
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	// If the local view is newer than the request view, skip the view
 	if s.viewID.SessionNum > request.ViewID.SessionNum && s.viewID.LeaderNum > request.ViewID.LeaderNum {
@@ -112,8 +112,8 @@ func (s *NOPaxos) handleStartView(request *StartView) {
 }
 
 func (s *NOPaxos) handleViewRepair(request *ViewRepair) {
-	s.stateMu.RLock()
-	defer s.stateMu.RUnlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	// If the request views do not match, ignore the request
 	if s.viewID.SessionNum != request.ViewID.SessionNum || s.viewID.LeaderNum != request.ViewID.LeaderNum {

@@ -21,8 +21,8 @@ import (
 )
 
 func (s *NOPaxos) startSync() {
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	// If this replica is not the leader of the view, ignore the request
 	if s.getLeader(s.viewID) != s.cluster.Member() {
@@ -81,8 +81,8 @@ func (s *NOPaxos) startSync() {
 func (s *NOPaxos) handleSyncPrepare(request *SyncPrepare) {
 	s.logger.ReceiveFrom("SyncPrepare", request, request.Sender)
 
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	// If the replica's status is not Normal, ignore the request
 	if s.status != StatusNormal {
@@ -185,8 +185,8 @@ func (s *NOPaxos) handleSyncPrepare(request *SyncPrepare) {
 }
 
 func (s *NOPaxos) handleSyncRepair(request *SyncRepair) {
-	s.stateMu.RLock()
-	defer s.stateMu.RUnlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	// If the request views do not match, ignore the request
 	if s.viewID.SessionNum != request.ViewID.SessionNum || s.viewID.LeaderNum != request.ViewID.LeaderNum {
@@ -290,8 +290,8 @@ func (s *NOPaxos) handleSyncRepairReply(reply *SyncRepairReply) {
 func (s *NOPaxos) handleSyncReply(reply *SyncReply) {
 	s.logger.ReceiveFrom("SyncReply", reply, reply.Sender)
 
-	s.stateMu.RLock()
-	defer s.stateMu.RUnlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	// If the view IDs do not match, ignore the request
 	if s.viewID.LeaderNum != reply.ViewID.LeaderNum || s.viewID.SessionNum != reply.ViewID.SessionNum {
@@ -340,8 +340,8 @@ func (s *NOPaxos) handleSyncReply(reply *SyncReply) {
 func (s *NOPaxos) handleSyncCommit(request *SyncCommit) {
 	s.logger.ReceiveFrom("SyncCommit", request, request.Sender)
 
-	s.stateMu.RLock()
-	defer s.stateMu.RUnlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	// If the replica's status is not Normal, ignore the request
 	if s.status != StatusNormal {

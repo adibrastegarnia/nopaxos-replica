@@ -15,11 +15,11 @@
 package protocol
 
 func (s *NOPaxos) sendPing() {
-	s.stateMu.RLock()
+	s.mu.RLock()
 
 	// If this replica is not the leader of the view, do not send the ping
 	if s.getLeader(s.viewID) != s.cluster.Member() {
-		s.stateMu.RUnlock()
+		s.mu.RUnlock()
 		return
 	}
 
@@ -32,7 +32,7 @@ func (s *NOPaxos) sendPing() {
 			Ping: ping,
 		},
 	}
-	s.stateMu.RUnlock()
+	s.mu.RUnlock()
 
 	for _, member := range s.cluster.Members() {
 		if member != s.cluster.Member() {
@@ -47,8 +47,8 @@ func (s *NOPaxos) sendPing() {
 func (s *NOPaxos) handlePing(request *Ping) {
 	s.logger.ReceiveFrom("Ping", request, request.Sender)
 
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	// If the view IDs do not match, ignore the request
 	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
@@ -64,12 +64,14 @@ func (s *NOPaxos) handlePing(request *Ping) {
 }
 
 func (s *NOPaxos) Timeout() {
-	s.stateMu.RLock()
-	if s.getLeader(s.viewID) != s.cluster.Member() {
-		s.stateMu.RUnlock()
+	s.mu.RLock()
+	if s.status == StatusRecovering {
+		s.startRecovery()
+	} else if s.getLeader(s.viewID) != s.cluster.Member() {
+		s.mu.RUnlock()
 		s.logger.Debug("Leader ping timed out")
 		s.startLeaderChange()
 	} else {
-		s.stateMu.RUnlock()
+		s.mu.RUnlock()
 	}
 }

@@ -19,8 +19,8 @@ import "github.com/atomix/atomix-go-node/pkg/atomix/node"
 func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientStreamServer) {
 	s.logger.Receive("CommandRequest", request)
 
-	s.stateMu.Lock()
-	defer s.stateMu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	// If the replica's status is not Normal, skip the commit
 	if s.status != StatusNormal {
@@ -126,8 +126,8 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 func (s *NOPaxos) query(request *QueryRequest, stream ClientService_ClientStreamServer) {
 	s.logger.Receive("QueryRequest", request)
 
-	s.stateMu.RLock()
-	defer s.stateMu.RUnlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	// If the replica's status is not Normal, skip the commit
 	if s.status != StatusNormal {
