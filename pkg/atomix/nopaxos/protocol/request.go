@@ -45,35 +45,37 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 				viewID := s.viewID
 				go func() {
 					for result := range ch {
+						commandReply := &CommandReply{
+							MessageNum: request.MessageNum,
+							Sender:     s.cluster.Member(),
+							ViewID:     viewID,
+							SlotNum:    slotNum,
+							Value:      result.Value,
+						}
 						message := &ClientMessage{
 							Message: &ClientMessage_CommandReply{
-								CommandReply: &CommandReply{
-									MessageNum: request.MessageNum,
-									Sender:     s.cluster.Member(),
-									ViewID:     viewID,
-									SlotNum:    slotNum,
-									Value:      result.Value,
-								},
+								CommandReply: commandReply,
 							},
 						}
 						// TODO: Send state machine errors
-						s.logger.Send("CommandReply", message)
+						s.logger.Send("CommandReply", commandReply)
 						_ = stream.Send(message)
 					}
 				}()
 				s.state.applyCommand(entry, ch)
 			} else {
+				commandReply := &CommandReply{
+					MessageNum: request.MessageNum,
+					Sender:     s.cluster.Member(),
+					ViewID:     s.viewID,
+					SlotNum:    slotNum,
+				}
 				message := &ClientMessage{
 					Message: &ClientMessage_CommandReply{
-						CommandReply: &CommandReply{
-							MessageNum: request.MessageNum,
-							Sender:     s.cluster.Member(),
-							ViewID:     s.viewID,
-							SlotNum:    slotNum,
-						},
+						CommandReply: commandReply,
 					},
 				}
-				s.logger.Send("CommandReply", message)
+				s.logger.Send("CommandReply", commandReply)
 				_ = stream.Send(message)
 			}
 		}
@@ -83,13 +85,15 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 			SessionNum: request.SessionNum,
 			LeaderNum:  s.viewID.LeaderNum,
 		}
+		viewChangeRequest := &ViewChangeRequest{
+			ViewID: newViewID,
+		}
 		for _, member := range s.cluster.Members() {
 			if stream, err := s.cluster.GetStream(member); err == nil {
+				s.logger.SendTo("ViewChangeRequest", viewChangeRequest, member)
 				_ = stream.Send(&ReplicaMessage{
 					Message: &ReplicaMessage_ViewChangeRequest{
-						ViewChangeRequest: &ViewChangeRequest{
-							ViewID: newViewID,
-						},
+						ViewChangeRequest: viewChangeRequest,
 					},
 				})
 			}
@@ -99,17 +103,20 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 		if s.getLeader(s.viewID) == s.cluster.Member() {
 			s.sendGapCommit()
 		} else {
-			stream, err := s.cluster.GetStream(s.getLeader(s.viewID))
+			leader := s.getLeader(s.viewID)
+			stream, err := s.cluster.GetStream(leader)
 			if err != nil {
 				return
 			}
+			slotLookup := &SlotLookup{
+				Sender:     s.cluster.Member(),
+				ViewID:     s.viewID,
+				MessageNum: request.MessageNum,
+			}
+			s.logger.SendTo("SlotLookup", slotLookup, leader)
 			_ = stream.Send(&ReplicaMessage{
 				Message: &ReplicaMessage_SlotLookup{
-					SlotLookup: &SlotLookup{
-						Sender:     s.cluster.Member(),
-						ViewID:     s.viewID,
-						MessageNum: request.MessageNum,
-					},
+					SlotLookup: slotLookup,
 				},
 			})
 		}
@@ -134,14 +141,16 @@ func (s *NOPaxos) query(request *QueryRequest, stream ClientService_ClientStream
 			go func() {
 				for result := range ch {
 					// TODO: Send state machine errors
+					queryReply := &QueryReply{
+						MessageNum: request.MessageNum,
+						Sender:     s.cluster.Member(),
+						ViewID:     s.viewID,
+						Value:      result.Value,
+					}
+					s.logger.Send("queryReply", queryReply)
 					_ = stream.Send(&ClientMessage{
 						Message: &ClientMessage_QueryReply{
-							QueryReply: &QueryReply{
-								MessageNum: request.MessageNum,
-								Sender:     s.cluster.Member(),
-								ViewID:     s.viewID,
-								Value:      result.Value,
-							},
+							QueryReply: queryReply,
 						},
 					})
 				}

@@ -23,12 +23,13 @@ func (s *NOPaxos) sendPing() {
 		return
 	}
 
+	ping := &Ping{
+		Sender: s.cluster.Member(),
+		ViewID: s.viewID,
+	}
 	message := &ReplicaMessage{
 		Message: &ReplicaMessage_Ping{
-			Ping: &Ping{
-				Sender: s.cluster.Member(),
-				ViewID: s.viewID,
-			},
+			Ping: ping,
 		},
 	}
 	s.stateMu.RUnlock()
@@ -36,7 +37,7 @@ func (s *NOPaxos) sendPing() {
 	for _, member := range s.cluster.Members() {
 		if member != s.cluster.Member() {
 			if stream, err := s.cluster.GetStream(member); err == nil {
-				s.logger.SendTo("Ping", message, member)
+				s.logger.SendTo("Ping", ping, member)
 				_ = stream.Send(message)
 			}
 		}

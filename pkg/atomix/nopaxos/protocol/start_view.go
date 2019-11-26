@@ -77,7 +77,7 @@ func (s *NOPaxos) handleStartView(request *StartView) {
 				},
 			}
 			s.viewRepair = repair
-			s.logger.SendTo("ViewRepair", message, leader)
+			s.logger.SendTo("ViewRepair", repair, leader)
 			_ = stream.Send(message)
 		}
 	} else {
@@ -130,16 +130,17 @@ func (s *NOPaxos) handleViewRepair(request *ViewRepair) {
 
 	// Send non-nil entries back to the sender
 	if stream, err := s.cluster.GetStream(request.Sender); err == nil {
+		viewRepairReply := &ViewRepairReply{
+			Sender:  s.cluster.Member(),
+			ViewID:  s.viewID,
+			Entries: entries,
+		}
 		message := &ReplicaMessage{
 			Message: &ReplicaMessage_ViewRepairReply{
-				ViewRepairReply: &ViewRepairReply{
-					Sender:  s.cluster.Member(),
-					ViewID:  s.viewID,
-					Entries: entries,
-				},
+				ViewRepairReply: viewRepairReply,
 			},
 		}
-		s.logger.SendTo("ViewRepairReply", message, request.Sender)
+		s.logger.SendTo("ViewRepairReply", viewRepairReply, request.Sender)
 		_ = stream.Send(message)
 	}
 }

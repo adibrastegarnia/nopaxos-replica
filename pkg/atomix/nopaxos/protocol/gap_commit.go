@@ -36,20 +36,21 @@ func (s *NOPaxos) sendGapCommit() {
 	// Set the current gap slot
 	s.currentGapSlot = slotID
 
+	gapCommit := &GapCommitRequest{
+		Sender:  s.cluster.Member(),
+		ViewID:  s.viewID,
+		SlotNum: slotID,
+	}
 	message := &ReplicaMessage{
 		Message: &ReplicaMessage_GapCommit{
-			GapCommit: &GapCommitRequest{
-				Sender:  s.cluster.Member(),
-				ViewID:  s.viewID,
-				SlotNum: slotID,
-			},
+			GapCommit: gapCommit,
 		},
 	}
 
 	// Send a GapCommit to each replica
 	for _, member := range s.cluster.Members() {
 		if stream, err := s.cluster.GetStream(member); err == nil {
-			s.logger.SendTo("GapCommit", message, member)
+			s.logger.SendTo("GapCommit", gapCommit, member)
 			_ = stream.Send(message)
 		}
 	}
@@ -92,16 +93,17 @@ func (s *NOPaxos) handleGapCommit(request *GapCommitRequest) {
 	}
 
 	if stream, err := s.cluster.GetStream(request.Sender); err == nil {
+		gapCommitReply := &GapCommitReply{
+			Sender:  s.cluster.Member(),
+			ViewID:  s.viewID,
+			SlotNum: request.SlotNum,
+		}
 		message := &ReplicaMessage{
 			Message: &ReplicaMessage_GapCommitReply{
-				GapCommitReply: &GapCommitReply{
-					Sender:  s.cluster.Member(),
-					ViewID:  s.viewID,
-					SlotNum: request.SlotNum,
-				},
+				GapCommitReply: gapCommitReply,
 			},
 		}
-		s.logger.SendTo("GapCommitReply", message, request.Sender)
+		s.logger.SendTo("GapCommitReply", gapCommitReply, request.Sender)
 		_ = stream.Send(message)
 	}
 }
@@ -178,16 +180,17 @@ func (s *NOPaxos) handleSlotLookup(request *SlotLookup) {
 			for i := slotNum; i <= s.log.LastSlot(); i++ {
 				entry := s.log.Get(i)
 				if entry != nil {
+					commandRequest := &CommandRequest{
+						SessionNum: s.viewID.SessionNum,
+						MessageNum: entry.MessageNum,
+						Value:      entry.Value,
+					}
 					message := &ReplicaMessage{
 						Message: &ReplicaMessage_Command{
-							Command: &CommandRequest{
-								SessionNum: s.viewID.SessionNum,
-								MessageNum: entry.MessageNum,
-								Value:      entry.Value,
-							},
+							Command: commandRequest,
 						},
 					}
-					s.logger.SendTo("CommandRequest", message, request.Sender)
+					s.logger.SendTo("CommandRequest", commandRequest, request.Sender)
 					_ = stream.Send(message)
 				}
 			}

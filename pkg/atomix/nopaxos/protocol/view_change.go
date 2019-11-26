@@ -29,18 +29,20 @@ func (s *NOPaxos) startLeaderChange() {
 	}
 	s.stateMu.RUnlock()
 
+	viewChangeRequest := &ViewChangeRequest{
+		Sender: s.cluster.Member(),
+		ViewID: newViewID,
+	}
 	message := &ReplicaMessage{
 		Message: &ReplicaMessage_ViewChangeRequest{
-			ViewChangeRequest: &ViewChangeRequest{
-				ViewID: newViewID,
-			},
+			ViewChangeRequest: viewChangeRequest,
 		},
 	}
 
 	for _, member := range s.cluster.Members() {
 		if member != s.getLeader(newViewID) {
 			if stream, err := s.cluster.GetStream(member); err == nil {
-				s.logger.SendTo("ViewChangeRequest", message, member)
+				s.logger.SendTo("ViewChangeRequest", viewChangeRequest, member)
 				_ = stream.Send(message)
 			}
 		}
@@ -121,19 +123,20 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 	_ = stream.Send(message)
 
 	// Send a ViewChangeRequest to all other replicas
+	viewChangeRequest := &ViewChangeRequest{
+		Sender: s.cluster.Member(),
+		ViewID: newViewID,
+	}
 	message = &ReplicaMessage{
 		Message: &ReplicaMessage_ViewChangeRequest{
-			ViewChangeRequest: &ViewChangeRequest{
-				Sender: s.cluster.Member(),
-				ViewID: newViewID,
-			},
+			ViewChangeRequest: viewChangeRequest,
 		},
 	}
 
 	// Send a view change request to all replicas other than the leader
 	for _, member := range s.cluster.Members() {
 		if stream, err := s.cluster.GetStream(member); err == nil {
-			s.logger.SendTo("ViewChangeRequest", message, member)
+			s.logger.SendTo("ViewChangeRequest", viewChangeRequest, member)
 			_ = stream.Send(message)
 		}
 	}
@@ -267,7 +270,7 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 						},
 					}
 					s.viewChangeRepairs[member] = repair
-					s.logger.SendTo("ViewChangeRepair", message, member)
+					s.logger.SendTo("ViewChangeRepair", repair, member)
 					_ = stream.Send(message)
 				}
 			}
@@ -290,23 +293,24 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 			}
 
 			// Create and send a StartView message to each replica with the no-op filter
+			startView := &StartView{
+				Sender:          s.cluster.Member(),
+				ViewID:          s.viewID,
+				MessageNum:      newMessageID,
+				NoOpFilter:      newNoOpFilterJson,
+				FirstLogSlotNum: firstSlotNum,
+				LastLogSlotNum:  lastSlotNum,
+			}
 			message := &ReplicaMessage{
 				Message: &ReplicaMessage_StartView{
-					StartView: &StartView{
-						Sender:          s.cluster.Member(),
-						ViewID:          s.viewID,
-						MessageNum:      newMessageID,
-						NoOpFilter:      newNoOpFilterJson,
-						FirstLogSlotNum: firstSlotNum,
-						LastLogSlotNum:  lastSlotNum,
-					},
+					StartView: startView,
 				},
 			}
 
 			// Send a StartView to each replica
 			for _, member := range s.cluster.Members() {
 				if stream, err := s.cluster.GetStream(member); err == nil {
-					s.logger.SendTo("StartView", message, member)
+					s.logger.SendTo("StartView", startView, member)
 					_ = stream.Send(message)
 				}
 			}
@@ -334,17 +338,18 @@ func (s *NOPaxos) handleViewChangeRepair(request *ViewChangeRepair) {
 
 	// Send non-nil entries back to the sender
 	if stream, err := s.cluster.GetStream(request.Sender); err == nil {
+		viewChangeReply := &ViewChangeRepairReply{
+			Sender:     s.cluster.Member(),
+			ViewID:     s.viewID,
+			MessageNum: request.MessageNum,
+			SlotNums:   slots,
+		}
 		message := &ReplicaMessage{
 			Message: &ReplicaMessage_ViewChangeRepairReply{
-				ViewChangeRepairReply: &ViewChangeRepairReply{
-					Sender:     s.cluster.Member(),
-					ViewID:     s.viewID,
-					MessageNum: request.MessageNum,
-					SlotNums:   slots,
-				},
+				ViewChangeRepairReply: viewChangeReply,
 			},
 		}
-		s.logger.SendTo("ViewChangeRepairReply", message, request.Sender)
+		s.logger.SendTo("ViewChangeRepairReply", viewChangeReply, request.Sender)
 		_ = stream.Send(message)
 	}
 }
@@ -412,23 +417,24 @@ func (s *NOPaxos) handleViewChangeRepairReply(reply *ViewChangeRepairReply) {
 		}
 
 		// Create and send a StartView message to each replica with the no-op filter
+		startView := &StartView{
+			Sender:          s.cluster.Member(),
+			ViewID:          s.viewID,
+			MessageNum:      reply.MessageNum,
+			NoOpFilter:      newNoOpFilterJson,
+			FirstLogSlotNum: s.log.FirstSlot(),
+			LastLogSlotNum:  s.log.LastSlot(),
+		}
 		message := &ReplicaMessage{
 			Message: &ReplicaMessage_StartView{
-				StartView: &StartView{
-					Sender:          s.cluster.Member(),
-					ViewID:          s.viewID,
-					MessageNum:      reply.MessageNum,
-					NoOpFilter:      newNoOpFilterJson,
-					FirstLogSlotNum: s.log.FirstSlot(),
-					LastLogSlotNum:  s.log.LastSlot(),
-				},
+				StartView: startView,
 			},
 		}
 
 		// Send a StartView to each replica
 		for _, member := range s.cluster.Members() {
 			if stream, err := s.cluster.GetStream(member); err == nil {
-				s.logger.SendTo("StartView", message, member)
+				s.logger.SendTo("StartView", startView, member)
 				_ = stream.Send(message)
 			}
 		}
