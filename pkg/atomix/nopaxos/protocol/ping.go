@@ -63,6 +63,12 @@ func (s *NOPaxos) handlePing(request *Ping) {
 }
 
 func (s *NOPaxos) timeout() {
-	s.logger.Debug("Leader ping timed out")
-	s.startLeaderChange()
+	s.stateMu.RLock()
+	if s.getLeader(s.viewID) != s.cluster.Member() {
+		s.stateMu.RUnlock()
+		s.logger.Debug("Leader ping timed out")
+		s.startLeaderChange()
+	} else {
+		s.stateMu.RUnlock()
+	}
 }
