@@ -34,6 +34,7 @@ func NewNOPaxos(cluster Cluster, registry *node.Registry, config *config.Protoco
 		config:  config,
 		cluster: cluster,
 		state:   newStateMachine(string(cluster.Member()), registry),
+		status:  StatusRecovering,
 		viewID: &ViewId{
 			SessionNum: 1,
 			LeaderNum:  1,
@@ -42,13 +43,15 @@ func NewNOPaxos(cluster Cluster, registry *node.Registry, config *config.Protoco
 			SessionNum: 1,
 			LeaderNum:  1,
 		},
-		sessionMessageNum: 1,
-		log:               newLog(1),
-		recoveryID:        uuid.New().String(),
-		recoverReps:       make(map[MemberID]*RecoverReply),
-		viewChanges:       make(map[MemberID]*ViewChange),
-		gapCommitReps:     make(map[MemberID]*GapCommitReply),
-		syncReps:          make(map[MemberID]*SyncReply),
+		sessionMessageNum:    1,
+		log:                  newLog(1),
+		recoveryID:           uuid.New().String(),
+		recoverReps:          make(map[MemberID]*RecoverReply),
+		viewChanges:          make(map[MemberID]*ViewChange),
+		viewChangeRepairs:    make(map[MemberID]*ViewChangeRepair),
+		viewChangeRepairReps: make(map[MemberID]*ViewChangeRepairReply),
+		gapCommitReps:        make(map[MemberID]*GapCommitReply),
+		syncReps:             make(map[MemberID]*SyncReply),
 	}
 	nopaxos.start()
 	return nopaxos
@@ -67,17 +70,17 @@ type SessionID uint64
 type MessageID uint64
 
 // Status is the protocol status
-type Status int
+type Status string
 
 const (
 	// StatusRecovering is used by a recovering replica to avoid operating on old state
-	StatusRecovering Status = iota
+	StatusRecovering Status = "Recovering"
 	// StatusNormal is the normal status
-	StatusNormal
+	StatusNormal Status = "Normal"
 	// StatusViewChange is used to ignore certain messages during view changes
-	StatusViewChange
+	StatusViewChange Status = "ViewChange"
 	// StatusGapCommit indicates the replica is undergoing a gap commit
-	StatusGapCommit
+	StatusGapCommit Status = "GapCommit"
 )
 
 // NOPaxos is an interface for managing the state of the NOPaxos consensus protocol
@@ -121,6 +124,13 @@ func (s *NOPaxos) start() {
 	s.setPingTicker()
 	s.setCheckpointTicker()
 	s.mu.Unlock()
+}
+
+func (s *NOPaxos) setStatus(status Status) {
+	if s.status != status {
+		s.logger.Debug("Replica status changed: %s", status)
+		s.status = status
+	}
 }
 
 func (s *NOPaxos) resetTimeout() {

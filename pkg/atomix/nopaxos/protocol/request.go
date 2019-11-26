@@ -24,6 +24,7 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 
 	// If the replica's status is not Normal, skip the commit
 	if s.status != StatusNormal {
+		s.logger.Trace("Dropping CommandRequest: Replica status is not Normal")
 		return
 	}
 
@@ -79,7 +80,11 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 				_ = stream.Send(message)
 			}
 		}
+		s.sessionMessageNum++
 	} else if request.SessionNum > s.viewID.SessionNum {
+		s.logger.Info("Session %d terminated", s.viewID.SessionNum)
+		s.logger.Info("Requesting view change for session %d", request.SessionNum)
+
 		// Command received in the session terminated case
 		newViewID := &ViewId{
 			SessionNum: request.SessionNum,
@@ -99,6 +104,8 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 			}
 		}
 	} else if request.SessionNum == s.viewID.SessionNum && request.MessageNum > s.sessionMessageNum {
+		s.logger.Debug("Received drop notification for %d", s.sessionMessageNum)
+
 		// Drop notification. If leader commit a gap, otherwise ask the leader for the slot
 		if s.getLeader(s.viewID) == s.cluster.Member() {
 			s.sendGapCommit()

@@ -33,72 +33,43 @@ import (
 func TestRaftProtocol(t *testing.T) {
 	logrus.SetLevel(logrus.TraceLevel)
 
-	leaderTimeout := 5 * time.Second
-	config := &config.ProtocolConfig{LeaderTimeout: &leaderTimeout}
+	pingInterval := 1 * time.Second
+	leaderTimeout := 2 * time.Second
+	config := &config.ProtocolConfig{PingInterval: &pingInterval, LeaderTimeout: &leaderTimeout}
+
+	members := map[string]atomix.Member{
+		"foo": {
+			ID:   "foo",
+			Host: "localhost",
+			Port: 5678,
+		},
+		"bar": {
+			ID:   "bar",
+			Host: "localhost",
+			Port: 5679,
+		},
+		"baz": {
+			ID:   "baz",
+			Host: "localhost",
+			Port: 5680,
+		},
+	}
 
 	clusterFoo := atomix.Cluster{
 		MemberID: "foo",
-		Members: map[string]atomix.Member{
-			"foo": {
-				ID:   "foo",
-				Host: "localhost",
-				Port: 5678,
-			},
-			"bar": {
-				ID:   "bar",
-				Host: "localhost",
-				Port: 5679,
-			},
-			"baz": {
-				ID:   "baz",
-				Host: "localhost",
-				Port: 5680,
-			},
-		},
+		Members:  members,
 	}
 	serverFoo := NewServer(clusterFoo, registry.Registry, config)
 
 	clusterBar := atomix.Cluster{
 		MemberID: "bar",
-		Members: map[string]atomix.Member{
-			"foo": {
-				ID:   "foo",
-				Host: "localhost",
-				Port: 5678,
-			},
-			"bar": {
-				ID:   "bar",
-				Host: "localhost",
-				Port: 5679,
-			},
-			"baz": {
-				ID:   "baz",
-				Host: "localhost",
-				Port: 5680,
-			},
-		},
+		Members:  members,
 	}
 	serverBar := NewServer(clusterBar, registry.Registry, config)
 
 	clusterBaz := atomix.Cluster{
 		MemberID: "baz",
-		Members: map[string]atomix.Member{
-			"foo": {
-				ID:   "foo",
-				Host: "localhost",
-				Port: 5678,
-			},
-			"bar": {
-				ID:   "bar",
-				Host: "localhost",
-				Port: 5679,
-			},
-			"baz": {
-				ID:   "baz",
-				Host: "localhost",
-				Port: 5680,
-			},
-		},
+		Members:  members,
 	}
 	serverBaz := NewServer(clusterBaz, registry.Registry, config)
 
@@ -106,7 +77,7 @@ func TestRaftProtocol(t *testing.T) {
 	go serverBar.Start()
 	go serverBaz.Start()
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(5 * time.Second)
 
 	connFoo, err := grpc.Dial("localhost:5678", grpc.WithInsecure())
 	assert.NoError(t, err)
@@ -188,18 +159,18 @@ func TestRaftProtocol(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, messageBaz)
 
-	time.Sleep(10 * time.Second)
+	time.Sleep(5 * time.Second)
 
 	// Timeout bar to force a view change
 	serverBar.timeout()
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	_ = streamFoo.Send(&protocol.ClientMessage{
 		Message: &protocol.ClientMessage_Command{
 			Command: &protocol.CommandRequest{
 				SessionNum: 1,
-				MessageNum: 1,
+				MessageNum: 2,
 				Timestamp:  time.Now(),
 				Value:      bytes,
 			},
@@ -209,7 +180,7 @@ func TestRaftProtocol(t *testing.T) {
 		Message: &protocol.ClientMessage_Command{
 			Command: &protocol.CommandRequest{
 				SessionNum: 1,
-				MessageNum: 1,
+				MessageNum: 2,
 				Timestamp:  time.Now(),
 				Value:      bytes,
 			},
@@ -219,7 +190,7 @@ func TestRaftProtocol(t *testing.T) {
 		Message: &protocol.ClientMessage_Command{
 			Command: &protocol.CommandRequest{
 				SessionNum: 1,
-				MessageNum: 1,
+				MessageNum: 2,
 				Timestamp:  time.Now(),
 				Value:      bytes,
 			},

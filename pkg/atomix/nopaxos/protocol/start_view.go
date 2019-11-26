@@ -90,7 +90,7 @@ func (s *NOPaxos) handleStartView(request *StartView) {
 	} else {
 		s.log = newLog
 		s.sessionMessageNum = request.MessageNum
-		s.status = StatusNormal
+		s.setStatus(StatusNormal)
 		s.viewID = request.ViewID
 		s.lastNormView = request.ViewID
 
@@ -197,7 +197,7 @@ func (s *NOPaxos) handleViewRepairReply(reply *ViewRepairReply) {
 
 	s.log = s.viewLog
 	s.sessionMessageNum = request.MessageNum
-	s.status = StatusNormal
+	s.setStatus(StatusNormal)
 	s.viewID = request.ViewID
 	s.lastNormView = request.ViewID
 

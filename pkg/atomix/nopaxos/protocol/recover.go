@@ -16,7 +16,7 @@ package protocol
 
 func (s *NOPaxos) startRecovery() {
 	// Set the replica's status to Recovering
-	s.status = StatusRecovering
+	s.setStatus(StatusRecovering)
 
 	// Request a recovery from all other replicas
 	recover := &Recover{
@@ -144,7 +144,7 @@ func (s *NOPaxos) handleRecoverReply(reply *RecoverReply) {
 	// If a quorum of nodes are recovering, start in the initial state
 	// Otherwise, if a quorum of views has been received, initialize the state from the leader
 	if recovering >= s.cluster.QuorumSize() {
-		s.status = StatusNormal
+		s.setStatus(StatusNormal)
 	} else if len(viewReplies) >= s.cluster.QuorumSize() {
 		if len(leaderReply.Log) > 0 {
 			newLog := newLog(leaderReply.Log[0].SlotNum)
@@ -159,6 +159,6 @@ func (s *NOPaxos) handleRecoverReply(reply *RecoverReply) {
 			s.currentCheckpoint.Data = leaderReply.Checkpoint
 		}
 		s.sessionMessageNum = leaderReply.MessageNum
-		s.status = StatusNormal
+		s.setStatus(StatusNormal)
 	}
 }

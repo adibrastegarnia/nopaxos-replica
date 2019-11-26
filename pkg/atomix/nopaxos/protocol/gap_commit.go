@@ -31,7 +31,7 @@ func (s *NOPaxos) sendGapCommit() {
 	slotID := s.log.LastSlot() + 1
 
 	// Set the replica's status to GapCommit
-	s.status = StatusGapCommit
+	s.setStatus(StatusGapCommit)
 
 	// Set the current gap slot
 	s.currentGapSlot = slotID
@@ -146,7 +146,7 @@ func (s *NOPaxos) handleGapCommitReply(reply *GapCommitReply) {
 
 	// If a quorum of gap commits has been received for the slot, return the status to normal
 	if len(gapCommits) >= s.cluster.QuorumSize() {
-		s.status = StatusNormal
+		s.setStatus(StatusNormal)
 	}
 }
 

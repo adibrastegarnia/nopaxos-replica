@@ -69,7 +69,7 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 	s.mu.Lock()
 
 	// Set the replica's status to ViewChange
-	s.status = StatusViewChange
+	s.setStatus(StatusViewChange)
 
 	// Set the replica's view ID to the new view ID
 	s.viewID = newViewID
