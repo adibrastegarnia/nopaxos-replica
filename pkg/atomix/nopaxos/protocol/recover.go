@@ -15,6 +15,9 @@
 package protocol
 
 func (s *NOPaxos) startRecovery() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	// Set the replica's status to Recovering
 	s.setStatus(StatusRecovering)
 

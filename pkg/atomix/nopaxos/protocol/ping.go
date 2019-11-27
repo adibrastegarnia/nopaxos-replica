@@ -16,10 +16,15 @@ package protocol
 
 func (s *NOPaxos) sendPing() {
 	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	// If the replica's status is Recovering, skip the ping
+	if s.status == StatusRecovering {
+		return
+	}
 
 	// If this replica is not the leader of the view, do not send the ping
 	if s.getLeader(s.viewID) != s.cluster.Member() {
-		s.mu.RUnlock()
 		return
 	}
 
@@ -32,7 +37,6 @@ func (s *NOPaxos) sendPing() {
 			Ping: ping,
 		},
 	}
-	s.mu.RUnlock()
 
 	for _, member := range s.cluster.Members() {
 		if member != s.cluster.Member() {
