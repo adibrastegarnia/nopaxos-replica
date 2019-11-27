@@ -72,11 +72,14 @@ func (s *NOPaxos) Timeout() {
 	if s.status == StatusRecovering {
 		s.mu.RUnlock()
 		s.startRecovery()
+		s.resetTimeout()
 	} else if s.getLeader(s.viewID) != s.cluster.Member() {
 		s.mu.RUnlock()
 		s.logger.Debug("Leader ping timed out")
 		s.startLeaderChange()
+		s.resetTimeout()
 	} else {
+		s.resetTimeout()
 		s.mu.RUnlock()
 	}
 }
