@@ -40,11 +40,11 @@ func (s *NOPaxos) startLeaderChange() {
 	}
 
 	for _, member := range s.cluster.Members() {
-		if member != s.getLeader(newViewID) {
-			if stream, err := s.cluster.GetStream(member); err == nil {
-				s.logger.SendTo("ViewChangeRequest", viewChangeRequest, member)
-				_ = stream.Send(message)
-			}
+		if stream, err := s.cluster.GetStream(member); err == nil {
+			s.logger.SendTo("ViewChangeRequest", viewChangeRequest, member)
+			_ = stream.Send(message)
+		} else {
+			s.logger.Error("Failed to send ViewChangeRequest to %s", member, err)
 		}
 	}
 }
@@ -62,6 +62,7 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 
 	// If the view IDs match, ignore the request
 	if s.viewID.LeaderNum == newViewID.LeaderNum && s.viewID.SessionNum == newViewID.SessionNum {
+		s.logger.Debug("Dropping ViewChangeRequest: Already in the requested view")
 		s.mu.RUnlock()
 		return
 	}
@@ -85,6 +86,7 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 	leader := s.getLeader(newViewID)
 	stream, err := s.cluster.GetStream(leader)
 	if err != nil {
+		s.logger.Error("Failed to send ViewChange to %s", leader, err)
 		return
 	}
 
@@ -106,20 +108,21 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 	}
 
 	// Send a ViewChange message to the leader
+	viewChange := &ViewChange{
+		Sender:          s.cluster.Member(),
+		ViewID:          newViewID,
+		LastNormal:      s.lastNormView,
+		MessageNum:      s.sessionMessageNum,
+		NoOpFilter:      noOpFilterBytes,
+		FirstLogSlotNum: s.log.FirstSlot(),
+		LastLogSlotNum:  s.log.LastSlot(),
+	}
 	message := &ReplicaMessage{
 		Message: &ReplicaMessage_ViewChange{
-			ViewChange: &ViewChange{
-				Sender:          s.cluster.Member(),
-				ViewID:          newViewID,
-				LastNormal:      s.lastNormView,
-				MessageNum:      s.sessionMessageNum,
-				NoOpFilter:      noOpFilterBytes,
-				FirstLogSlotNum: s.log.FirstSlot(),
-				LastLogSlotNum:  s.log.LastSlot(),
-			},
+			ViewChange: viewChange,
 		},
 	}
-	s.logger.SendTo("ViewChange", message, leader)
+	s.logger.SendTo("ViewChange", viewChange, leader)
 	_ = stream.Send(message)
 
 	// Send a ViewChangeRequest to all other replicas
@@ -138,6 +141,8 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 		if stream, err := s.cluster.GetStream(member); err == nil {
 			s.logger.SendTo("ViewChangeRequest", viewChangeRequest, member)
 			_ = stream.Send(message)
+		} else {
+			s.logger.Error("Failed to send ViewChangeRequest to %s", member, err)
 		}
 	}
 }
@@ -150,16 +155,19 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 
 	// If the view IDs do not match, ignore the request
 	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
+		s.logger.Debug("Dropping ViewChange: Views do not match")
 		return
 	}
 
 	// If the replica's status is not ViewChange, ignore the request
 	if s.status != StatusViewChange {
+		s.logger.Debug("Dropping ViewChange: Replica status is not ViewChange")
 		return
 	}
 
 	// If this replica is not the leader of the view, ignore the request
 	if s.getLeader(request.ViewID) != s.cluster.Member() {
+		s.logger.Debug("Dropping ViewChange: Replica is not the leader of the requested view")
 		return
 	}
 
@@ -280,6 +288,8 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 					s.viewChangeRepairs[member] = repair
 					s.logger.SendTo("ViewChangeRepair", repair, member)
 					_ = stream.Send(message)
+				} else {
+					s.logger.Error("Failed to send ViewChangeRepair to %s", member, err)
 				}
 			}
 		} else {
@@ -320,6 +330,8 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 				if stream, err := s.cluster.GetStream(member); err == nil {
 					s.logger.SendTo("StartView", startView, member)
 					_ = stream.Send(message)
+				} else {
+					s.logger.Error("Failed to send StartView to %s", member, err)
 				}
 			}
 		}
@@ -332,6 +344,7 @@ func (s *NOPaxos) handleViewChangeRepair(request *ViewChangeRepair) {
 
 	// If the request views do not match, ignore the request
 	if s.viewID.SessionNum != request.ViewID.SessionNum || s.viewID.LeaderNum != request.ViewID.LeaderNum {
+		s.logger.Debug("Dropping ViewChangeRepair: Views do not match")
 		return
 	}
 
@@ -369,6 +382,8 @@ func (s *NOPaxos) handleViewChangeRepair(request *ViewChangeRepair) {
 		}
 		s.logger.SendTo("ViewChangeRepairReply", viewChangeReply, request.Sender)
 		_ = stream.Send(message)
+	} else {
+		s.logger.Error("Failed to send ViewChangeRepairReply to %s", request.Sender, err)
 	}
 }
 
@@ -378,6 +393,7 @@ func (s *NOPaxos) handleViewChangeRepairReply(reply *ViewChangeRepairReply) {
 
 	// If the reply view does not match the current view, skip the reply
 	if s.viewID.SessionNum != reply.ViewID.SessionNum || s.viewID.LeaderNum != reply.ViewID.LeaderNum {
+		s.logger.Debug("Dropping ViewChangeRepairReply: Views do not match")
 		return
 	}
 
@@ -462,6 +478,8 @@ func (s *NOPaxos) handleViewChangeRepairReply(reply *ViewChangeRepairReply) {
 			if stream, err := s.cluster.GetStream(member); err == nil {
 				s.logger.SendTo("StartView", startView, member)
 				_ = stream.Send(message)
+			} else {
+				s.logger.Error("Failed to send StartView to %s", member, err)
 			}
 		}
 
