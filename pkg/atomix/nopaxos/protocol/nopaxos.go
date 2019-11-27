@@ -207,7 +207,7 @@ func (s *NOPaxos) ClientStream(stream ClientService_ClientStreamServer) error {
 		if err != nil {
 			return err
 		}
-		go s.handleClient(message, stream)
+		s.handleClient(message, stream)
 	}
 }
 
