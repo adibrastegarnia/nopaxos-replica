@@ -19,7 +19,7 @@ func (s *NOPaxos) sendPing() {
 	defer s.mu.RUnlock()
 
 	// If the replica's status is Recovering, skip the ping
-	if s.status == StatusRecovering {
+	if s.status == StatusRecovering || s.status == StatusViewChange {
 		return
 	}
 

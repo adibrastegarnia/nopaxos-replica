@@ -130,7 +130,7 @@ func (s *NOPaxos) handleViewRepair(request *ViewRepair) {
 	// Lookup entries for the requested slots
 	entries := make([]*LogEntry, 0, len(request.SlotNums))
 	for _, slotNum := range request.SlotNums {
-		if entry := s.log.Get(slotNum); entry != nil {
+		if entry := s.viewLog.Get(slotNum); entry != nil {
 			entries = append(entries, entry)
 		}
 	}
@@ -196,6 +196,7 @@ func (s *NOPaxos) handleViewRepairReply(reply *ViewRepairReply) {
 	}
 
 	s.log = s.viewLog
+	s.viewLog = nil
 	s.sessionMessageNum = request.MessageNum
 	s.setStatus(StatusNormal)
 	s.viewID = request.ViewID

@@ -92,28 +92,28 @@ type NOPaxos struct {
 	applied              LogSlotID                           // The highest slot applied to the state machine
 	sequencer            ClientService_ClientStreamServer    // The stream to the sequencer
 	log                  *Log                                // The primary log
-	status               Status                              // The status of the replica TODO: Ensure statuses are correctly filtered
+	status               Status                              // The status of the replica
 	recoveryID           string                              // A nonce indicating the recovery attempt
 	recoverReps          map[MemberID]*RecoverReply          // The set of recover replies received
 	currentCheckpoint    *Checkpoint                         // The current checkpoint (if any)
 	sessionMessageNum    MessageID                           // The latest message num for the sequencer session
 	viewID               *ViewId                             // The current view ID
-	lastNormView         *ViewId                             // The last normal view ID TODO: Ensure this is used correctly
-	viewChanges          map[MemberID]*ViewChange            // The set of view changes received TODO: Ensure this is cleared
-	viewChangeRepairs    map[MemberID]*ViewChangeRepair      // The set of view change repairs received TODO: Ensure this is cleared
-	viewChangeRepairReps map[MemberID]*ViewChangeRepairReply // The set of view change repair replies received TODO: Ensure this is cleared
-	viewRepair           *ViewRepair                         // The last view repair requested TODO: Ensure this is cleared
-	viewChangeLog        *Log                                // A temporary log for view changes TODO: Ensure this is garbage collected
-	viewLog              *Log                                // A temporary log for view starts TODO: Ensure this is garbage collected
-	currentGapSlot       LogSlotID                           // The current slot for which a gap is being committed TODO: Ensure this is used correctly
-	gapCommitReps        map[MemberID]*GapCommitReply        // The set of gap commit replies TODO: Ensure this is cleared
-	tentativeSync        LogSlotID                           // The tentative sync point TODO: Ensure this is used correctly
-	syncPoint            LogSlotID                           // The last known sync point TODO: Ensure this is used correctly
+	lastNormView         *ViewId                             // The last normal view ID
+	viewChanges          map[MemberID]*ViewChange            // The set of view changes received
+	viewChangeRepairs    map[MemberID]*ViewChangeRepair      // The set of view change repairs received
+	viewChangeRepairReps map[MemberID]*ViewChangeRepairReply // The set of view change repair replies received
+	viewRepair           *ViewRepair                         // The last view repair requested
+	viewLog              *Log                                // A temporary log for view starts
+	currentGapSlot       LogSlotID                           // The current slot for which a gap is being committed
+	gapCommitReps        map[MemberID]*GapCommitReply        // The set of gap commit replies
+	tentativeSync        LogSlotID                           // The tentative sync point
+	syncPoint            LogSlotID                           // The last known sync point
 	syncRepair           *SyncRepair                         // The last sent sync repair
-	syncReps             map[MemberID]*SyncReply             // The set of sync replies received TODO: Ensure this is cleared
-	syncLog              *Log                                // A temporary log for synchronization TODO: Ensure this is garbage collected
+	syncReps             map[MemberID]*SyncReply             // The set of sync replies received
+	syncLog              *Log                                // A temporary log for synchronization
 	pingTicker           *time.Ticker
 	checkpointTicker     *time.Ticker
+	syncTicker           *time.Ticker
 	timeoutTimer         *time.Timer
 	mu                   sync.RWMutex
 }
@@ -174,6 +174,22 @@ func (s *NOPaxos) setCheckpointTicker() {
 					return
 				}
 				s.checkpoint()
+			}
+		}
+	}()
+}
+
+func (s *NOPaxos) setSyncTicker() {
+	s.logger.Debug("Setting sync ticker")
+	s.checkpointTicker = time.NewTicker(s.config.GetSyncIntervalOrDefault())
+	go func() {
+		for {
+			select {
+			case _, ok := <-s.syncTicker.C:
+				if !ok {
+					return
+				}
+				s.startSync()
 			}
 		}
 	}()

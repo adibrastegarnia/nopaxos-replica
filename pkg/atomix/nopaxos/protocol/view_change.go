@@ -265,7 +265,7 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 		}
 
 		// Set the view change log. Note this log is maintained separate from the primary log until the view is started.
-		s.viewChangeLog = newLog
+		s.viewLog = newLog
 
 		// If there are any missing slots in the log, store the new log and send LogRepair requests to peers to
 		// determine whether a no-op entry should be written to the log. Otherwise, send a StartView.
@@ -296,7 +296,7 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 			// Create a new no-op filter and add no-op entries
 			newNoOpFilter := bloom.New(uint(lastSlotNum-firstSlotNum+1), bloomFilterHashFunctions)
 			for slotNum := firstSlotNum; slotNum <= lastSlotNum; slotNum++ {
-				if entry := newLog.Get(slotNum); entry == nil {
+				if entry := s.viewLog.Get(slotNum); entry == nil {
 					key := make([]byte, 8)
 					binary.BigEndian.PutUint64(key, uint64(slotNum))
 					newNoOpFilter.Add(key)
@@ -437,14 +437,14 @@ func (s *NOPaxos) handleViewChangeRepairReply(reply *ViewChangeRepairReply) {
 		// For each slot, remove entries where the replies do not equal the requests
 		for slotNum, slot := range slots {
 			if slot.requests != slot.replies {
-				s.viewChangeLog.Delete(slotNum)
+				s.viewLog.Delete(slotNum)
 			}
 		}
 
 		// Create a new no-op filter and add no-op entries
-		newNoOpFilter := bloom.New(uint(s.log.LastSlot()-s.log.FirstSlot()+1), bloomFilterHashFunctions)
-		for slotNum := s.log.FirstSlot(); slotNum <= s.log.LastSlot(); slotNum++ {
-			if entry := s.log.Get(slotNum); entry == nil {
+		newNoOpFilter := bloom.New(uint(s.viewLog.LastSlot()-s.viewLog.FirstSlot()+1), bloomFilterHashFunctions)
+		for slotNum := s.viewLog.FirstSlot(); slotNum <= s.viewLog.LastSlot(); slotNum++ {
+			if entry := s.viewLog.Get(slotNum); entry == nil {
 				key := make([]byte, 8)
 				binary.BigEndian.PutUint64(key, uint64(slotNum))
 				newNoOpFilter.Add(key)
@@ -464,8 +464,8 @@ func (s *NOPaxos) handleViewChangeRepairReply(reply *ViewChangeRepairReply) {
 			ViewID:          s.viewID,
 			MessageNum:      reply.MessageNum,
 			NoOpFilter:      newNoOpFilterJson,
-			FirstLogSlotNum: s.log.FirstSlot(),
-			LastLogSlotNum:  s.log.LastSlot(),
+			FirstLogSlotNum: s.viewLog.FirstSlot(),
+			LastLogSlotNum:  s.viewLog.LastSlot(),
 		}
 		message := &ReplicaMessage{
 			Message: &ReplicaMessage_StartView{

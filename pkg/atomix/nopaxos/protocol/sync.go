@@ -271,6 +271,7 @@ func (s *NOPaxos) handleSyncRepairReply(reply *SyncRepairReply) {
 	// Once the repair is complete, send a SyncReply
 	s.sessionMessageNum = s.sessionMessageNum + MessageID(s.syncLog.LastSlot()-s.log.LastSlot())
 	s.log = s.syncLog
+	s.syncLog = nil
 
 	// Send a SyncReply back to the leader
 	if stream, err := s.cluster.GetStream(reply.Sender); err == nil {
@@ -340,6 +341,8 @@ func (s *NOPaxos) handleSyncReply(reply *SyncReply) {
 		}
 	}
 
+	sessionMessageNum := s.sessionMessageNum - MessageID(s.log.LastSlot()-s.tentativeSync)
+
 	if localSynced && len(syncReps) >= s.cluster.QuorumSize() {
 		for _, member := range s.cluster.Members() {
 			if member != s.cluster.Member() {
@@ -349,7 +352,7 @@ func (s *NOPaxos) handleSyncReply(reply *SyncReply) {
 							SyncCommit: &SyncCommit{
 								Sender:     s.cluster.Member(),
 								ViewID:     s.viewID,
-								MessageNum: s.sessionMessageNum,
+								MessageNum: sessionMessageNum,
 								SyncPoint:  s.tentativeSync,
 							},
 						},

@@ -107,7 +107,7 @@ func TestRaftProtocol(t *testing.T) {
 	})
 	bytes, _ = proto.Marshal(&service.ServiceRequest{
 		Id: &service.ServiceId{
-			Type:      "test",
+			Type:      "counter",
 			Name:      "test",
 			Namespace: "test",
 		},

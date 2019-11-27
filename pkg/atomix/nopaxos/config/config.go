@@ -19,7 +19,8 @@ import "time"
 const (
 	defaultLeaderTimeout      = 5 * time.Second
 	defaultPingInterval       = 500 * time.Millisecond
-	defaultCheckpointInterval = 1 * time.Minute
+	defaultCheckpointInterval = 5 * time.Minute
+	defaultSyncInterval       = 5 * time.Minute
 	defaultMaxLogLength       = 10000
 )
 
@@ -48,6 +49,15 @@ func (c *ProtocolConfig) GetCheckpointIntervalOrDefault() time.Duration {
 		return *interval
 	}
 	return defaultCheckpointInterval
+}
+
+// GetSyncIntervalOrDefault returns the configured sync interval if set, otherwise the default interval
+func (c *ProtocolConfig) GetSyncIntervalOrDefault() time.Duration {
+	interval := c.GetSyncInterval()
+	if interval != nil {
+		return *interval
+	}
+	return defaultSyncInterval
 }
 
 // GetMaxLogLengthOrDefault returns the configured maximum log length, otherwise the default
