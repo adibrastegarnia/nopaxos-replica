@@ -20,6 +20,7 @@ import (
 	"github.com/atomix/atomix-api/proto/atomix/controller"
 	"github.com/atomix/atomix-go-node/pkg/atomix/cluster"
 	"github.com/atomix/atomix-go-node/pkg/atomix/registry"
+	"github.com/atomix/atomix-go-node/pkg/atomix/util"
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos"
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/config"
 	"github.com/gogo/protobuf/jsonpb"
@@ -57,6 +58,10 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	// Set the ready file to indicate startup of the protocol is complete.
+	ready := util.NewFileReady()
+	_ = ready.Set()
 
 	// Wait for an interrupt signal
 	ch := make(chan os.Signal, 1)

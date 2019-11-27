@@ -48,6 +48,7 @@ type Server struct {
 	server  *grpc.Server
 	port    int
 	mu      sync.Mutex
+	started bool
 }
 
 // Start starts the NOPaxos server
@@ -63,7 +64,24 @@ func (s *Server) Start() error {
 	nopaxos.RegisterClientServiceServer(s.server, s.nopaxos)
 	nopaxos.RegisterReplicaServiceServer(s.server, s.nopaxos)
 	s.mu.Unlock()
-	return s.server.Serve(lis)
+	go s.server.Serve(lis)
+	return s.WaitForReady()
+}
+
+// WaitForReady waits for the NOPaxos server to finish startup
+func (s *Server) WaitForReady() error {
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	s.nopaxos.Watch(func(status nopaxos.Status) {
+		s.mu.Lock()
+		if !s.started && status == nopaxos.StatusNormal {
+			wg.Done()
+			s.started = true
+		}
+		s.mu.Unlock()
+	})
+	wg.Wait()
+	return nil
 }
 
 // timeout times out the server to start a view change

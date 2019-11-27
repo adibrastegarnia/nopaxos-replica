@@ -18,11 +18,15 @@ import (
 	"context"
 	"fmt"
 	node "github.com/atomix/atomix-go-node/pkg/atomix/cluster"
+	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/util"
 	"google.golang.org/grpc"
 	"math"
 	"sort"
 	"sync"
+	"time"
 )
+
+const retryPeriod = 100 * time.Millisecond
 
 // Cluster provides cluster information for the NOPaxos protocol
 type Cluster interface {
@@ -92,7 +96,10 @@ func (c *cluster) getConn(member MemberID) (*grpc.ClientConn, error) {
 			return nil, fmt.Errorf("unknown member %s", member)
 		}
 
-		conn, err := grpc.Dial(fmt.Sprintf("%s:%d", location.Host, location.Port), grpc.WithInsecure())
+		conn, err := grpc.Dial(
+			fmt.Sprintf("%s:%d", location.Host, location.Port),
+			grpc.WithInsecure(),
+			grpc.WithStreamInterceptor(util.RetryingStreamClientInterceptor(retryPeriod)))
 		if err != nil {
 			return nil, err
 		}

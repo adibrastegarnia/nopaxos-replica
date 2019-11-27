@@ -30,11 +30,12 @@ const bloomFilterHashFunctions = 5
 // NewNOPaxos returns a new NOPaxos protocol state struct
 func NewNOPaxos(cluster Cluster, registry *node.Registry, config *config.ProtocolConfig) *NOPaxos {
 	nopaxos := &NOPaxos{
-		logger:  util.NewNodeLogger(string(cluster.Member())),
-		config:  config,
-		cluster: cluster,
-		state:   newStateMachine(string(cluster.Member()), registry),
-		status:  StatusRecovering,
+		logger:   util.NewNodeLogger(string(cluster.Member())),
+		config:   config,
+		cluster:  cluster,
+		state:    newStateMachine(string(cluster.Member()), registry),
+		status:   StatusRecovering,
+		watchers: make([]func(Status), 0),
 		viewID: &ViewId{
 			SessionNum: 1,
 			LeaderNum:  1,
@@ -93,6 +94,7 @@ type NOPaxos struct {
 	sequencer            ClientService_ClientStreamServer    // The stream to the sequencer
 	log                  *Log                                // The primary log
 	status               Status                              // The status of the replica
+	watchers             []func(Status)                      // A list of status watchers
 	recoveryID           string                              // A nonce indicating the recovery attempt
 	recoverReps          map[MemberID]*RecoverReply          // The set of recover replies received
 	currentCheckpoint    *Checkpoint                         // The current checkpoint (if any)
@@ -126,10 +128,17 @@ func (s *NOPaxos) start() {
 	s.mu.Unlock()
 }
 
+func (s *NOPaxos) Watch(watcher func(Status)) {
+	s.watchers = append(s.watchers, watcher)
+}
+
 func (s *NOPaxos) setStatus(status Status) {
 	if s.status != status {
 		s.logger.Debug("Replica status changed: %s", status)
 		s.status = status
+		for _, watcher := range s.watchers {
+			watcher(status)
+		}
 	}
 }
 
