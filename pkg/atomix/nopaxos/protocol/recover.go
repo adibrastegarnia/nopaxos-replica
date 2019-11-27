@@ -125,7 +125,7 @@ func (s *NOPaxos) handleRecoverReply(reply *RecoverReply) {
 	for _, recoverReply := range s.recoverReps {
 		if recoverReply.ViewID == nil {
 			recovering++
-		} else if recoverReply.ViewID.SessionNum > s.viewID.SessionNum || (recoverReply.ViewID.SessionNum == s.viewID.SessionNum && recoverReply.ViewID.LeaderNum > s.viewID.LeaderNum) {
+		} else if recoverReply.ViewID.SessionNum > s.viewID.SessionNum || recoverReply.ViewID.LeaderNum > s.viewID.LeaderNum {
 			s.viewID = recoverReply.ViewID
 		}
 	}

@@ -201,12 +201,18 @@ func (s *NOPaxos) handleViewRepairReply(reply *ViewRepairReply) {
 	s.viewID = request.ViewID
 	s.lastNormView = request.ViewID
 
-	// Send a reply for all commands in the log
+	// If a checkpoint exists and is less than the sync point, restore the checkpoint
+	if s.currentCheckpoint != nil && s.currentCheckpoint.SlotNum <= s.log.LastSlot() && s.currentCheckpoint.SlotNum > s.applied {
+		s.state.restore(s.currentCheckpoint)
+		s.applied = s.currentCheckpoint.SlotNum
+	}
+
 	sequencer := s.sequencer
-	if sequencer != nil {
-		for slotNum := s.log.FirstSlot(); slotNum <= s.log.LastSlot(); slotNum++ {
-			entry := s.log.Get(slotNum)
-			if entry != nil {
+	for slotNum := s.applied + 1; slotNum <= s.log.LastSlot(); slotNum++ {
+		entry := s.log.Get(slotNum)
+		if entry != nil {
+			s.state.applyCommand(entry, nil)
+			if sequencer != nil {
 				_ = sequencer.Send(&ClientMessage{
 					Message: &ClientMessage_CommandReply{
 						CommandReply: &CommandReply{
@@ -219,5 +225,6 @@ func (s *NOPaxos) handleViewRepairReply(reply *ViewRepairReply) {
 				})
 			}
 		}
+		s.applied = slotNum
 	}
 }
