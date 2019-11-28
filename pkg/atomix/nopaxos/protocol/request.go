@@ -141,28 +141,26 @@ func (s *NOPaxos) query(request *QueryRequest, stream ClientService_ClientStream
 		return
 	}
 
-	if request.SessionNum == s.viewID.SessionNum {
-		if stream != nil && s.getLeader(s.viewID) == s.cluster.Member() {
-			ch := make(chan node.Output)
-			s.state.applyQuery(request, ch)
-			go func() {
-				for result := range ch {
-					// TODO: Send state machine errors
-					queryReply := &QueryReply{
-						MessageNum: request.MessageNum,
-						Sender:     s.cluster.Member(),
-						ViewID:     s.viewID,
-						Value:      result.Value,
-					}
-					s.logger.Send("queryReply", queryReply)
-					_ = stream.Send(&ClientMessage{
-						Message: &ClientMessage_QueryReply{
-							QueryReply: queryReply,
-						},
-					})
+	if request.SessionNum == s.viewID.SessionNum && stream != nil && s.getLeader(s.viewID) == s.cluster.Member() {
+		ch := make(chan node.Output)
+		s.state.applyQuery(request, ch)
+		go func() {
+			for result := range ch {
+				// TODO: Send state machine errors
+				queryReply := &QueryReply{
+					MessageNum: request.MessageNum,
+					Sender:     s.cluster.Member(),
+					ViewID:     s.viewID,
+					Value:      result.Value,
 				}
-			}()
-		}
+				s.logger.Send("QueryReply", queryReply)
+				_ = stream.Send(&ClientMessage{
+					Message: &ClientMessage_QueryReply{
+						QueryReply: queryReply,
+					},
+				})
+			}
+		}()
 	}
 }
 

@@ -122,9 +122,9 @@ type NOPaxos struct {
 
 func (s *NOPaxos) start() {
 	s.mu.Lock()
-	s.resetTimeout()
 	s.setPingTicker()
 	s.setCheckpointTicker()
+	s.resetTimeout()
 	s.mu.Unlock()
 }
 
@@ -143,15 +143,16 @@ func (s *NOPaxos) setStatus(status Status) {
 }
 
 func (s *NOPaxos) resetTimeout() {
-	s.logger.Debug("Resetting leader timeout")
+	if s.timeoutTimer != nil {
+		s.timeoutTimer.Stop()
+	}
 	s.timeoutTimer = time.NewTimer(s.config.GetLeaderTimeoutOrDefault())
 	go func() {
 		select {
 		case _, ok := <-s.timeoutTimer.C:
-			if !ok {
-				return
+			if ok {
+				s.Timeout()
 			}
-			s.Timeout()
 		}
 	}()
 }

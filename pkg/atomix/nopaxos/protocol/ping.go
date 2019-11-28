@@ -18,7 +18,7 @@ func (s *NOPaxos) sendPing() {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	// If the replica's status is Recovering, skip the ping
+	// If the replica is recovering, do not send the ping
 	if s.status == StatusRecovering || s.status == StatusViewChange {
 		return
 	}
@@ -64,7 +64,7 @@ func (s *NOPaxos) handlePing(request *Ping) {
 		return
 	}
 
-	s.timeoutTimer.Reset(s.config.GetLeaderTimeoutOrDefault())
+	s.resetTimeout()
 }
 
 func (s *NOPaxos) Timeout() {
