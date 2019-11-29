@@ -30,8 +30,10 @@ message ClientMessage {
     oneof message {
         CommandRequest command = 1;
         CommandReply command_reply = 2;
-        QueryRequest query = 3;
-        QueryReply query_reply = 4;
+        CommandClose command_close = 3;
+        QueryRequest query = 4;
+        QueryReply query_reply = 5;
+        QueryClose query_close = 6;
     }
 }
 
@@ -82,6 +84,10 @@ message CommandReply {
     bytes value = 5;
 }
 
+message CommandClose {
+    uint64 message_num = 1 [(gogoproto.casttype) = "MessageID"];
+}
+
 message QueryRequest {
     uint64 session_num = 1 [(gogoproto.casttype) = "SessionID"];
     uint64 message_num = 2 [(gogoproto.casttype) = "MessageID"];
@@ -94,6 +100,10 @@ message QueryReply {
     string sender = 2 [(gogoproto.casttype) = "MemberID"];
     ViewId view_id = 3 [(gogoproto.customname) = "ViewID"];
     bytes value = 4;
+}
+
+message QueryClose {
+    uint64 message_num = 1 [(gogoproto.casttype) = "MessageID"];
 }
 
 message Recover {

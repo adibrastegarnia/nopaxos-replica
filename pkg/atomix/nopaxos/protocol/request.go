@@ -60,7 +60,22 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 						}
 						// TODO: Send state machine errors
 						s.logger.Send("CommandReply", commandReply)
-						_ = stream.Send(message)
+						if err := stream.Send(message); err != nil {
+							s.logger.Error("Failed to send CommandReply")
+						}
+					}
+
+					commandClose := &CommandClose{
+						MessageNum: request.MessageNum,
+					}
+					message := &ClientMessage{
+						Message: &ClientMessage_CommandClose{
+							CommandClose: commandClose,
+						},
+					}
+					s.logger.Send("CommandClose", commandClose)
+					if err := stream.Send(message); err != nil {
+						s.logger.Error("Failed to send CommandClose")
 					}
 				}()
 				s.state.applyCommand(entry, ch)
@@ -149,12 +164,28 @@ func (s *NOPaxos) query(request *QueryRequest, stream ClientService_ClientStream
 					ViewID:     s.viewID,
 					Value:      result.Value,
 				}
-				s.logger.Send("QueryReply", queryReply)
-				_ = stream.Send(&ClientMessage{
+				message := &ClientMessage{
 					Message: &ClientMessage_QueryReply{
 						QueryReply: queryReply,
 					},
-				})
+				}
+				s.logger.Send("QueryReply", queryReply)
+				if err := stream.Send(message); err != nil {
+					s.logger.Error("Failed to send QueryReply")
+				}
+			}
+
+			queryClose := &QueryClose{
+				MessageNum: request.MessageNum,
+			}
+			message := &ClientMessage{
+				Message: &ClientMessage_QueryClose{
+					QueryClose: queryClose,
+				},
+			}
+			s.logger.Send("QueryClose", queryClose)
+			if err := stream.Send(message); err != nil {
+				s.logger.Error("Failed to send QueryClose")
 			}
 		}()
 	}
