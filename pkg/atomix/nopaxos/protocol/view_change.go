@@ -53,6 +53,11 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	// If the replica is recovering, ignore the view change
+	if s.status == StatusRecovering {
+		return
+	}
+
 	newLeaderID := LeaderID(math.Max(float64(s.viewID.LeaderNum), float64(request.ViewID.LeaderNum)))
 	newSessionID := SessionID(math.Max(float64(s.viewID.SessionNum), float64(request.ViewID.SessionNum)))
 	newViewID := &ViewId{
