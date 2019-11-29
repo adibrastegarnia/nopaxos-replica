@@ -67,6 +67,7 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 
 					commandClose := &CommandClose{
 						MessageNum: request.MessageNum,
+						ViewID:     s.viewID,
 					}
 					message := &ClientMessage{
 						Message: &ClientMessage_CommandClose{
@@ -92,7 +93,9 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 					},
 				}
 				s.logger.Send("CommandReply", commandReply)
-				_ = stream.Send(message)
+				if err := stream.Send(message); err != nil {
+					s.logger.Error("Failed to send CommandReply")
+				}
 			}
 		}
 		s.sessionMessageNum++
@@ -177,6 +180,7 @@ func (s *NOPaxos) query(request *QueryRequest, stream ClientService_ClientStream
 
 			queryClose := &QueryClose{
 				MessageNum: request.MessageNum,
+				ViewID:     s.viewID,
 			}
 			message := &ClientMessage{
 				Message: &ClientMessage_QueryClose{

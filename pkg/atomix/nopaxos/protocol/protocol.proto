@@ -86,6 +86,7 @@ message CommandReply {
 
 message CommandClose {
     uint64 message_num = 1 [(gogoproto.casttype) = "MessageID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
 }
 
 message QueryRequest {
@@ -104,6 +105,7 @@ message QueryReply {
 
 message QueryClose {
     uint64 message_num = 1 [(gogoproto.casttype) = "MessageID"];
+    ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
 }
 
 message Recover {
