@@ -136,7 +136,7 @@ func (s *NOPaxos) handleRecoverReply(reply *RecoverReply) {
 	// Aggregate the replies changes for the most recent view
 	viewReplies := make([]*RecoverReply, 0, len(s.recoverReps))
 	for _, recoverReply := range s.recoverReps {
-		if recoverReply.ViewID != nil && recoverReply.ViewID.SessionNum == s.viewID.SessionNum && recoverReply.ViewID.LeaderNum == s.viewID.LeaderNum {
+		if recoverReply.ViewID == nil || (recoverReply.ViewID.SessionNum == s.viewID.SessionNum && recoverReply.ViewID.LeaderNum == s.viewID.LeaderNum) {
 			viewReplies = append(viewReplies, recoverReply)
 		}
 	}
@@ -145,6 +145,7 @@ func (s *NOPaxos) handleRecoverReply(reply *RecoverReply) {
 	// Otherwise, if a quorum of views has been received, initialize the state from the leader
 	if recovering >= s.cluster.QuorumSize() {
 		s.setStatus(StatusNormal)
+		go s.resetTimeout()
 	} else if len(viewReplies) >= s.cluster.QuorumSize() {
 		if len(leaderReply.Log) > 0 {
 			newLog := newLog(leaderReply.Log[0].SlotNum)
@@ -160,5 +161,6 @@ func (s *NOPaxos) handleRecoverReply(reply *RecoverReply) {
 		}
 		s.sessionMessageNum = leaderReply.MessageNum
 		s.setStatus(StatusNormal)
+		go s.resetTimeout()
 	}
 }
