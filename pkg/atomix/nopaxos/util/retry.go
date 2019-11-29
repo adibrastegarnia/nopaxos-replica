@@ -31,7 +31,6 @@ func RetryingStreamClientInterceptor(duration time.Duration) func(ctx context.Co
 	return func(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
 		stream := &retryingClientStream{
 			ctx:      ctx,
-			buffer:   make([]interface{}, 0, 1),
 			duration: duration,
 			newStream: func(ctx context.Context) (grpc.ClientStream, error) {
 				return streamer(ctx, desc, cc, method, opts...)
@@ -46,7 +45,6 @@ type retryingClientStream struct {
 	stream    grpc.ClientStream
 	duration  time.Duration
 	mu        sync.RWMutex
-	buffer    []interface{}
 	newStream func(ctx context.Context) (grpc.ClientStream, error)
 	closed    bool
 }
@@ -86,10 +84,22 @@ func (s *retryingClientStream) Trailer() metadata.MD {
 }
 
 func (s *retryingClientStream) SendMsg(m interface{}) error {
-	s.mu.Lock()
-	s.buffer = append(s.buffer, m)
-	s.mu.Unlock()
+	s.mu.RLock()
+	closed := s.closed
+	s.mu.RUnlock()
+
+	if closed {
+		stream, err := s.newStream(context.Background())
+		if err != nil {
+			return err
+		}
+		s.setStream(stream)
+	}
+
 	if err := s.getStream().SendMsg(m); err != nil {
+		s.mu.Lock()
+		s.closed = true
+		s.mu.Unlock()
 		return err
 	}
 	return nil
@@ -127,17 +137,8 @@ func (s *retryingClientStream) retryStream() error {
 		}
 
 		s.mu.RLock()
-		buffer := s.buffer
 		closed := s.closed
 		s.mu.RUnlock()
-		for _, m := range buffer {
-			if err := stream.SendMsg(m); err != nil {
-				if isRetryable(err) {
-					return err
-				}
-				return backoff.Permanent(err)
-			}
-		}
 
 		if closed {
 			if err := stream.CloseSend(); err != nil {

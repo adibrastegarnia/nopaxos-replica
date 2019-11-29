@@ -124,7 +124,7 @@ func (s *NOPaxos) start() {
 	s.mu.Lock()
 	s.setPingTicker()
 	s.setCheckpointTicker()
-	s.resetTimeout()
+	go s.resetTimeout()
 	s.mu.Unlock()
 }
 
@@ -143,6 +143,8 @@ func (s *NOPaxos) setStatus(status Status) {
 }
 
 func (s *NOPaxos) resetTimeout() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if s.timeoutTimer != nil {
 		s.timeoutTimer.Stop()
 	}
@@ -283,6 +285,17 @@ func (s *NOPaxos) handleReplica(message *ReplicaMessage) {
 		s.handleRecoverReply(m.RecoverReply)
 	case *ReplicaMessage_Ping:
 		s.handlePing(m.Ping)
+	}
+}
+
+func (s *NOPaxos) send(message *ReplicaMessage, member MemberID) {
+	if stream, err := s.cluster.GetStream(member); err == nil {
+		err := stream.Send(message)
+		if err != nil {
+			s.logger.Error("Failed to send to %s: %v", member, err)
+		}
+	} else {
+		s.logger.Error("Failed to open stream to %s: %v", member, err)
 	}
 }
 

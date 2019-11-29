@@ -40,10 +40,8 @@ func (s *NOPaxos) sendPing() {
 
 	for _, member := range s.cluster.Members() {
 		if member != s.cluster.Member() {
-			if stream, err := s.cluster.GetStream(member); err == nil {
-				s.logger.SendTo("Ping", ping, member)
-				_ = stream.Send(message)
-			}
+			s.logger.SendTo("Ping", ping, member)
+			go s.send(message, member)
 		}
 	}
 }
@@ -64,22 +62,20 @@ func (s *NOPaxos) handlePing(request *Ping) {
 		return
 	}
 
-	s.resetTimeout()
+	go s.resetTimeout()
 }
 
 func (s *NOPaxos) Timeout() {
 	s.mu.RLock()
+	defer s.mu.RUnlock()
 	if s.status == StatusRecovering {
-		s.mu.RUnlock()
-		s.startRecovery()
-		s.resetTimeout()
+		go s.startRecovery()
+		go s.resetTimeout()
 	} else if s.getLeader(s.viewID) != s.cluster.Member() {
-		s.mu.RUnlock()
 		s.logger.Debug("Leader ping timed out")
-		s.startLeaderChange()
-		s.resetTimeout()
+		go s.startLeaderChange()
+		go s.resetTimeout()
 	} else {
-		s.resetTimeout()
-		s.mu.RUnlock()
+		go s.resetTimeout()
 	}
 }

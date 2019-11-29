@@ -26,15 +26,14 @@ func (s *NOPaxos) startRecovery() {
 		Sender:     s.cluster.Member(),
 		RecoveryID: s.recoveryID,
 	}
+	message := &ReplicaMessage{
+		Message: &ReplicaMessage_Recover{
+			Recover: recover,
+		},
+	}
 	for _, member := range s.cluster.Members() {
-		if stream, err := s.cluster.GetStream(member); err == nil {
-			s.logger.SendTo("Recover", recover, member)
-			_ = stream.Send(&ReplicaMessage{
-				Message: &ReplicaMessage_Recover{
-					Recover: recover,
-				},
-			})
-		}
+		s.logger.SendTo("Recover", recover, member)
+		go s.send(message, member)
 	}
 }
 
@@ -46,18 +45,17 @@ func (s *NOPaxos) handleRecover(request *Recover) {
 
 	// If this node is recovering, return an empty view
 	if s.status == StatusRecovering {
-		if stream, err := s.cluster.GetStream(request.Sender); err == nil {
-			reply := &RecoverReply{
-				Sender:     s.cluster.Member(),
-				RecoveryID: request.RecoveryID,
-			}
-			s.logger.SendTo("RecoverReply", reply, request.Sender)
-			_ = stream.Send(&ReplicaMessage{
-				Message: &ReplicaMessage_RecoverReply{
-					RecoverReply: reply,
-				},
-			})
+		reply := &RecoverReply{
+			Sender:     s.cluster.Member(),
+			RecoveryID: request.RecoveryID,
 		}
+		message := &ReplicaMessage{
+			Message: &ReplicaMessage_RecoverReply{
+				RecoverReply: reply,
+			},
+		}
+		s.logger.SendTo("RecoverReply", reply, request.Sender)
+		go s.send(message, request.Sender)
 	}
 
 	// If this node is not in the normal state, ignore the recovery
@@ -82,23 +80,22 @@ func (s *NOPaxos) handleRecover(request *Recover) {
 	}
 
 	// Send a RecoverReply back to the recovering node
-	if stream, err := s.cluster.GetStream(request.Sender); err == nil {
-		reply := &RecoverReply{
-			Sender:            s.cluster.Member(),
-			RecoveryID:        request.RecoveryID,
-			ViewID:            s.viewID,
-			MessageNum:        s.sessionMessageNum,
-			CheckpointSlotNum: checkpointSlotNum,
-			Checkpoint:        checkpointData,
-			Log:               log,
-		}
-		s.logger.SendTo("RecoverReply", reply, request.Sender)
-		_ = stream.Send(&ReplicaMessage{
-			Message: &ReplicaMessage_RecoverReply{
-				RecoverReply: reply,
-			},
-		})
+	reply := &RecoverReply{
+		Sender:            s.cluster.Member(),
+		RecoveryID:        request.RecoveryID,
+		ViewID:            s.viewID,
+		MessageNum:        s.sessionMessageNum,
+		CheckpointSlotNum: checkpointSlotNum,
+		Checkpoint:        checkpointData,
+		Log:               log,
 	}
+	message := &ReplicaMessage{
+		Message: &ReplicaMessage_RecoverReply{
+			RecoverReply: reply,
+		},
+	}
+	s.logger.SendTo("RecoverReply", reply, request.Sender)
+	go s.send(message, request.Sender)
 }
 
 func (s *NOPaxos) handleRecoverReply(reply *RecoverReply) {

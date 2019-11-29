@@ -93,15 +93,14 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 		viewChangeRequest := &ViewChangeRequest{
 			ViewID: newViewID,
 		}
+		message := &ReplicaMessage{
+			Message: &ReplicaMessage_ViewChangeRequest{
+				ViewChangeRequest: viewChangeRequest,
+			},
+		}
 		for _, member := range s.cluster.Members() {
-			if stream, err := s.cluster.GetStream(member); err == nil {
-				s.logger.SendTo("ViewChangeRequest", viewChangeRequest, member)
-				_ = stream.Send(&ReplicaMessage{
-					Message: &ReplicaMessage_ViewChangeRequest{
-						ViewChangeRequest: viewChangeRequest,
-					},
-				})
-			}
+			s.logger.SendTo("ViewChangeRequest", viewChangeRequest, member)
+			go s.send(message, member)
 		}
 	} else if request.SessionNum == s.viewID.SessionNum && request.MessageNum > s.sessionMessageNum {
 		s.logger.Debug("Received drop notification for %d", s.sessionMessageNum)
@@ -111,21 +110,18 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 			s.sendGapCommit()
 		} else {
 			leader := s.getLeader(s.viewID)
-			stream, err := s.cluster.GetStream(leader)
-			if err != nil {
-				return
-			}
 			slotLookup := &SlotLookup{
 				Sender:     s.cluster.Member(),
 				ViewID:     s.viewID,
 				MessageNum: request.MessageNum,
 			}
-			s.logger.SendTo("SlotLookup", slotLookup, leader)
-			_ = stream.Send(&ReplicaMessage{
+			message := &ReplicaMessage{
 				Message: &ReplicaMessage_SlotLookup{
 					SlotLookup: slotLookup,
 				},
-			})
+			}
+			s.logger.SendTo("SlotLookup", slotLookup, leader)
+			go s.send(message, leader)
 		}
 	}
 }

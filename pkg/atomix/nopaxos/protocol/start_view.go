@@ -70,23 +70,20 @@ func (s *NOPaxos) handleStartView(request *StartView) {
 	// If any entries need to be requested from the leader, request them
 	if len(entrySlots) > 0 {
 		leader := s.getLeader(s.viewID)
-		if stream, err := s.cluster.GetStream(leader); err == nil {
-			repair := &ViewRepair{
-				Sender:     s.cluster.Member(),
-				ViewID:     s.viewID,
-				MessageNum: request.MessageNum,
-				Checkpoint: checkpoint,
-				SlotNums:   entrySlots,
-			}
-			message := &ReplicaMessage{
-				Message: &ReplicaMessage_ViewRepair{
-					ViewRepair: repair,
-				},
-			}
-			s.viewRepair = repair
-			s.logger.SendTo("ViewRepair", repair, leader)
-			_ = stream.Send(message)
+		repair := &ViewRepair{
+			Sender:     s.cluster.Member(),
+			ViewID:     s.viewID,
+			MessageNum: request.MessageNum,
+			Checkpoint: checkpoint,
+			SlotNums:   entrySlots,
 		}
+		message := &ReplicaMessage{
+			Message: &ReplicaMessage_ViewRepair{
+				ViewRepair: repair,
+			},
+		}
+		s.logger.SendTo("ViewRepair", repair, leader)
+		go s.send(message, leader)
 	} else {
 		s.log = newLog
 		s.sessionMessageNum = request.MessageNum
@@ -115,7 +112,7 @@ func (s *NOPaxos) handleStartView(request *StartView) {
 		}
 	}
 
-	s.resetTimeout()
+	go s.resetTimeout()
 }
 
 func (s *NOPaxos) handleViewRepair(request *ViewRepair) {
@@ -144,22 +141,20 @@ func (s *NOPaxos) handleViewRepair(request *ViewRepair) {
 	}
 
 	// Send non-nil entries back to the sender
-	if stream, err := s.cluster.GetStream(request.Sender); err == nil {
-		viewRepairReply := &ViewRepairReply{
-			Sender:            s.cluster.Member(),
-			ViewID:            s.viewID,
-			CheckpointSlotNum: checkpointSlotNum,
-			Checkpoint:        checkpointData,
-			Entries:           entries,
-		}
-		message := &ReplicaMessage{
-			Message: &ReplicaMessage_ViewRepairReply{
-				ViewRepairReply: viewRepairReply,
-			},
-		}
-		s.logger.SendTo("ViewRepairReply", viewRepairReply, request.Sender)
-		_ = stream.Send(message)
+	viewRepairReply := &ViewRepairReply{
+		Sender:            s.cluster.Member(),
+		ViewID:            s.viewID,
+		CheckpointSlotNum: checkpointSlotNum,
+		Checkpoint:        checkpointData,
+		Entries:           entries,
 	}
+	message := &ReplicaMessage{
+		Message: &ReplicaMessage_ViewRepairReply{
+			ViewRepairReply: viewRepairReply,
+		},
+	}
+	s.logger.SendTo("ViewRepairReply", viewRepairReply, request.Sender)
+	go s.send(message, request.Sender)
 }
 
 func (s *NOPaxos) handleViewRepairReply(reply *ViewRepairReply) {

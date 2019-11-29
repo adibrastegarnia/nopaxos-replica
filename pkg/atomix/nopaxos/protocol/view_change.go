@@ -40,19 +40,19 @@ func (s *NOPaxos) startLeaderChange() {
 	}
 
 	for _, member := range s.cluster.Members() {
-		if stream, err := s.cluster.GetStream(member); err == nil {
-			s.logger.SendTo("ViewChangeRequest", viewChangeRequest, member)
-			_ = stream.Send(message)
-		} else {
-			s.logger.Error("Failed to send ViewChangeRequest to %s", member, err)
-		}
+		s.logger.SendTo("ViewChangeRequest", viewChangeRequest, member)
+		go s.send(message, member)
 	}
+
+	go s.resetTimeout()
 }
 
 func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 	s.logger.ReceiveFrom("ViewChangeRequest", request, request.Sender)
 
-	s.mu.RLock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	newLeaderID := LeaderID(math.Max(float64(s.viewID.LeaderNum), float64(request.ViewID.LeaderNum)))
 	newSessionID := SessionID(math.Max(float64(s.viewID.SessionNum), float64(request.ViewID.SessionNum)))
 	newViewID := &ViewId{
@@ -63,11 +63,8 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 	// If the view IDs match, ignore the request
 	if s.viewID.LeaderNum == newViewID.LeaderNum && s.viewID.SessionNum == newViewID.SessionNum {
 		s.logger.Debug("Dropping ViewChangeRequest: Already in the requested view")
-		s.mu.RUnlock()
 		return
 	}
-	s.mu.RUnlock()
-	s.mu.Lock()
 
 	// Set the replica's status to ViewChange
 	s.setStatus(StatusViewChange)
@@ -77,18 +74,6 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 
 	// Reset the view changes
 	s.viewChanges = make(map[MemberID]*ViewChange)
-
-	s.mu.Unlock()
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
-	// Send a ViewChange to the new leader
-	leader := s.getLeader(newViewID)
-	stream, err := s.cluster.GetStream(leader)
-	if err != nil {
-		s.logger.Error("Failed to send ViewChange to %s", leader, err)
-		return
-	}
 
 	// Create a bloom filter of the log and add non-empty entries
 	noOpFilter := bloom.New(uint(s.log.LastSlot()-s.log.FirstSlot()+1), bloomFilterHashFunctions)
@@ -108,6 +93,7 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 	}
 
 	// Send a ViewChange message to the leader
+	leader := s.getLeader(newViewID)
 	viewChange := &ViewChange{
 		Sender:          s.cluster.Member(),
 		ViewID:          newViewID,
@@ -123,7 +109,7 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 		},
 	}
 	s.logger.SendTo("ViewChange", viewChange, leader)
-	_ = stream.Send(message)
+	go s.send(message, leader)
 
 	// Send a ViewChangeRequest to all other replicas
 	viewChangeRequest := &ViewChangeRequest{
@@ -138,12 +124,8 @@ func (s *NOPaxos) handleViewChangeRequest(request *ViewChangeRequest) {
 
 	// Send a view change request to all replicas other than the leader
 	for _, member := range s.cluster.Members() {
-		if stream, err := s.cluster.GetStream(member); err == nil {
-			s.logger.SendTo("ViewChangeRequest", viewChangeRequest, member)
-			_ = stream.Send(message)
-		} else {
-			s.logger.Error("Failed to send ViewChangeRequest to %s", member, err)
-		}
+		s.logger.SendTo("ViewChangeRequest", viewChangeRequest, member)
+		go s.send(message, member)
 	}
 }
 
@@ -272,25 +254,20 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 		if len(noOpSlots) > 0 || maxCheckpoint > 0 {
 			s.viewChangeRepairs = make(map[MemberID]*ViewChangeRepair)
 			for member, slots := range noOpSlots {
-				if stream, err := s.cluster.GetStream(member); err == nil {
-					repair := &ViewChangeRepair{
-						Sender:     s.cluster.Member(),
-						ViewID:     s.viewID,
-						MessageNum: newMessageID,
-						Checkpoint: maxCheckpoint,
-						SlotNums:   slots,
-					}
-					message := &ReplicaMessage{
-						Message: &ReplicaMessage_ViewChangeRepair{
-							ViewChangeRepair: repair,
-						},
-					}
-					s.viewChangeRepairs[member] = repair
-					s.logger.SendTo("ViewChangeRepair", repair, member)
-					_ = stream.Send(message)
-				} else {
-					s.logger.Error("Failed to send ViewChangeRepair to %s", member, err)
+				repair := &ViewChangeRepair{
+					Sender:     s.cluster.Member(),
+					ViewID:     s.viewID,
+					MessageNum: newMessageID,
+					Checkpoint: maxCheckpoint,
+					SlotNums:   slots,
 				}
+				message := &ReplicaMessage{
+					Message: &ReplicaMessage_ViewChangeRepair{
+						ViewChangeRepair: repair,
+					},
+				}
+				s.logger.SendTo("ViewChangeRepair", repair, member)
+				go s.send(message, member)
 			}
 		} else {
 			// Create a new no-op filter and add no-op entries
@@ -327,12 +304,8 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 
 			// Send a StartView to each replica
 			for _, member := range s.cluster.Members() {
-				if stream, err := s.cluster.GetStream(member); err == nil {
-					s.logger.SendTo("StartView", startView, member)
-					_ = stream.Send(message)
-				} else {
-					s.logger.Error("Failed to send StartView to %s", member, err)
-				}
+				s.logger.SendTo("StartView", startView, member)
+				go s.send(message, member)
 			}
 		}
 	}
@@ -366,25 +339,21 @@ func (s *NOPaxos) handleViewChangeRepair(request *ViewChangeRepair) {
 	}
 
 	// Send non-nil entries back to the sender
-	if stream, err := s.cluster.GetStream(request.Sender); err == nil {
-		viewChangeReply := &ViewChangeRepairReply{
-			Sender:            s.cluster.Member(),
-			ViewID:            s.viewID,
-			MessageNum:        request.MessageNum,
-			CheckpointSlotNum: checkpointSlotNum,
-			Checkpoint:        checkpointData,
-			SlotNums:          slots,
-		}
-		message := &ReplicaMessage{
-			Message: &ReplicaMessage_ViewChangeRepairReply{
-				ViewChangeRepairReply: viewChangeReply,
-			},
-		}
-		s.logger.SendTo("ViewChangeRepairReply", viewChangeReply, request.Sender)
-		_ = stream.Send(message)
-	} else {
-		s.logger.Error("Failed to send ViewChangeRepairReply to %s", request.Sender, err)
+	viewChangeReply := &ViewChangeRepairReply{
+		Sender:            s.cluster.Member(),
+		ViewID:            s.viewID,
+		MessageNum:        request.MessageNum,
+		CheckpointSlotNum: checkpointSlotNum,
+		Checkpoint:        checkpointData,
+		SlotNums:          slots,
 	}
+	message := &ReplicaMessage{
+		Message: &ReplicaMessage_ViewChangeRepairReply{
+			ViewChangeRepairReply: viewChangeReply,
+		},
+	}
+	s.logger.SendTo("ViewChangeRepairReply", viewChangeReply, request.Sender)
+	go s.send(message, request.Sender)
 }
 
 func (s *NOPaxos) handleViewChangeRepairReply(reply *ViewChangeRepairReply) {
@@ -475,12 +444,8 @@ func (s *NOPaxos) handleViewChangeRepairReply(reply *ViewChangeRepairReply) {
 
 		// Send a StartView to each replica
 		for _, member := range s.cluster.Members() {
-			if stream, err := s.cluster.GetStream(member); err == nil {
-				s.logger.SendTo("StartView", startView, member)
-				_ = stream.Send(message)
-			} else {
-				s.logger.Error("Failed to send StartView to %s", member, err)
-			}
+			s.logger.SendTo("StartView", startView, member)
+			go s.send(message, member)
 		}
 
 		// Unset repair fields

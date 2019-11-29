@@ -70,10 +70,8 @@ func (s *NOPaxos) startSync() {
 
 	for _, member := range s.cluster.Members() {
 		if member != s.cluster.Member() {
-			if stream, err := s.cluster.GetStream(member); err == nil {
-				s.logger.SendTo("SyncPrepare", syncPrepare, member)
-				_ = stream.Send(message)
-			}
+			s.logger.SendTo("SyncPrepare", syncPrepare, member)
+			go s.send(message, member)
 		}
 	}
 }
@@ -133,40 +131,36 @@ func (s *NOPaxos) handleSyncPrepare(request *SyncPrepare) {
 	// If any entries need to be requested from the leader, request them. Otherwise, send a SyncReply
 	if len(entrySlots) > 0 || checkpoint > 0 {
 		leader := s.getLeader(s.viewID)
-		if stream, err := s.cluster.GetStream(leader); err == nil {
-			syncRepair := &SyncRepair{
-				Sender:     s.cluster.Member(),
-				ViewID:     s.viewID,
-				Checkpoint: checkpoint,
-				SlotNums:   entrySlots,
-			}
-			s.syncRepair = syncRepair
-			s.logger.SendTo("SyncRepair", syncRepair, leader)
-			_ = stream.Send(&ReplicaMessage{
-				Message: &ReplicaMessage_SyncRepair{
-					SyncRepair: syncRepair,
-				},
-			})
+		syncRepair := &SyncRepair{
+			Sender:     s.cluster.Member(),
+			ViewID:     s.viewID,
+			Checkpoint: checkpoint,
+			SlotNums:   entrySlots,
 		}
+		message := &ReplicaMessage{
+			Message: &ReplicaMessage_SyncRepair{
+				SyncRepair: syncRepair,
+			},
+		}
+		s.logger.SendTo("SyncRepair", syncRepair, leader)
+		go s.send(message, leader)
 	} else {
 		s.sessionMessageNum = s.sessionMessageNum + MessageID(newLog.LastSlot()-s.log.LastSlot())
 		s.log = newLog
 
 		// Send a SyncReply back to the leader
-		if stream, err := s.cluster.GetStream(request.Sender); err == nil {
-			syncReply := &SyncReply{
-				Sender:  s.cluster.Member(),
-				ViewID:  s.viewID,
-				SlotNum: s.log.LastSlot(),
-			}
-			message := &ReplicaMessage{
-				Message: &ReplicaMessage_SyncReply{
-					SyncReply: syncReply,
-				},
-			}
-			s.logger.SendTo("SyncReply", syncReply, request.Sender)
-			_ = stream.Send(message)
+		syncReply := &SyncReply{
+			Sender:  s.cluster.Member(),
+			ViewID:  s.viewID,
+			SlotNum: s.log.LastSlot(),
 		}
+		message := &ReplicaMessage{
+			Message: &ReplicaMessage_SyncReply{
+				SyncReply: syncReply,
+			},
+		}
+		s.logger.SendTo("SyncReply", syncReply, request.Sender)
+		go s.send(message, request.Sender)
 
 		// Send a RequestReply for all entries in the new log
 		sequencer := s.sequencer
@@ -217,22 +211,20 @@ func (s *NOPaxos) handleSyncRepair(request *SyncRepair) {
 	}
 
 	// Send non-nil entries back to the sender
-	if stream, err := s.cluster.GetStream(request.Sender); err == nil {
-		syncRepairReply := &SyncRepairReply{
-			Sender:            s.cluster.Member(),
-			ViewID:            s.viewID,
-			CheckpointSlotNum: checkpointSlotNum,
-			Checkpoint:        checkpointData,
-			Entries:           entries,
-		}
-		message := &ReplicaMessage{
-			Message: &ReplicaMessage_SyncRepairReply{
-				SyncRepairReply: syncRepairReply,
-			},
-		}
-		s.logger.SendTo("SyncRepairReply", syncRepairReply, request.Sender)
-		_ = stream.Send(message)
+	syncRepairReply := &SyncRepairReply{
+		Sender:            s.cluster.Member(),
+		ViewID:            s.viewID,
+		CheckpointSlotNum: checkpointSlotNum,
+		Checkpoint:        checkpointData,
+		Entries:           entries,
 	}
+	message := &ReplicaMessage{
+		Message: &ReplicaMessage_SyncRepairReply{
+			SyncRepairReply: syncRepairReply,
+		},
+	}
+	s.logger.SendTo("SyncRepairReply", syncRepairReply, request.Sender)
+	go s.send(message, request.Sender)
 }
 
 func (s *NOPaxos) handleSyncRepairReply(reply *SyncRepairReply) {
@@ -274,20 +266,18 @@ func (s *NOPaxos) handleSyncRepairReply(reply *SyncRepairReply) {
 	s.syncLog = nil
 
 	// Send a SyncReply back to the leader
-	if stream, err := s.cluster.GetStream(reply.Sender); err == nil {
-		syncReply := &SyncReply{
-			Sender:  s.cluster.Member(),
-			ViewID:  s.viewID,
-			SlotNum: s.log.LastSlot(),
-		}
-		message := &ReplicaMessage{
-			Message: &ReplicaMessage_SyncReply{
-				SyncReply: syncReply,
-			},
-		}
-		s.logger.SendTo("SyncReply", syncReply, reply.Sender)
-		_ = stream.Send(message)
+	syncReply := &SyncReply{
+		Sender:  s.cluster.Member(),
+		ViewID:  s.viewID,
+		SlotNum: s.log.LastSlot(),
 	}
+	message := &ReplicaMessage{
+		Message: &ReplicaMessage_SyncReply{
+			SyncReply: syncReply,
+		},
+	}
+	s.logger.SendTo("SyncReply", syncReply, reply.Sender)
+	go s.send(message, reply.Sender)
 
 	// Send a RequestReply for all entries in the new log
 	sequencer := s.sequencer
@@ -344,20 +334,22 @@ func (s *NOPaxos) handleSyncReply(reply *SyncReply) {
 	sessionMessageNum := s.sessionMessageNum - MessageID(s.log.LastSlot()-s.tentativeSync)
 
 	if localSynced && len(syncReps) >= s.cluster.QuorumSize() {
+		commit := &SyncCommit{
+			Sender:     s.cluster.Member(),
+			ViewID:     s.viewID,
+			MessageNum: sessionMessageNum,
+			SyncPoint:  s.tentativeSync,
+		}
+		message := &ReplicaMessage{
+			Message: &ReplicaMessage_SyncCommit{
+				SyncCommit: commit,
+			},
+		}
+
 		for _, member := range s.cluster.Members() {
 			if member != s.cluster.Member() {
-				if stream, err := s.cluster.GetStream(member); err == nil {
-					_ = stream.Send(&ReplicaMessage{
-						Message: &ReplicaMessage_SyncCommit{
-							SyncCommit: &SyncCommit{
-								Sender:     s.cluster.Member(),
-								ViewID:     s.viewID,
-								MessageNum: sessionMessageNum,
-								SyncPoint:  s.tentativeSync,
-							},
-						},
-					})
-				}
+				s.logger.SendTo("SyncCommit", commit, member)
+				go s.send(message, member)
 			}
 		}
 	}

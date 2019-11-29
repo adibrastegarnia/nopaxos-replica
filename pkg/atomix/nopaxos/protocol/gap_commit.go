@@ -49,34 +49,26 @@ func (s *NOPaxos) sendGapCommit() {
 
 	// Send a GapCommit to each replica
 	for _, member := range s.cluster.Members() {
-		if stream, err := s.cluster.GetStream(member); err == nil {
-			s.logger.SendTo("GapCommit", gapCommit, member)
-			_ = stream.Send(message)
-		}
+		s.logger.SendTo("GapCommit", gapCommit, member)
+		go s.send(message, member)
 	}
 }
 
 func (s *NOPaxos) handleGapCommit(request *GapCommitRequest) {
 	s.logger.ReceiveFrom("GapCommitRequest", request, request.Sender)
 
-	s.mu.RLock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	// If the view ID does not match the sender's view ID, skip the message
 	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
-		s.mu.RUnlock()
 		return
 	}
 
 	// If the replica's status is not Normal or GapCommit, skip the message
 	if s.status != StatusNormal && s.status != StatusGapCommit {
-		s.mu.RUnlock()
 		return
 	}
-
-	s.mu.RUnlock()
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
 
 	// If the request slot ID is not the next slot in the replica's log, skip the message
 	lastSlotID := s.log.LastSlot()
@@ -92,20 +84,19 @@ func (s *NOPaxos) handleGapCommit(request *GapCommitRequest) {
 		s.sessionMessageNum++
 	}
 
-	if stream, err := s.cluster.GetStream(request.Sender); err == nil {
-		gapCommitReply := &GapCommitReply{
-			Sender:  s.cluster.Member(),
-			ViewID:  s.viewID,
-			SlotNum: request.SlotNum,
-		}
-		message := &ReplicaMessage{
-			Message: &ReplicaMessage_GapCommitReply{
-				GapCommitReply: gapCommitReply,
-			},
-		}
-		s.logger.SendTo("GapCommitReply", gapCommitReply, request.Sender)
-		_ = stream.Send(message)
+	gapCommitReply := &GapCommitReply{
+		Sender:  s.cluster.Member(),
+		ViewID:  s.viewID,
+		SlotNum: request.SlotNum,
 	}
+	message := &ReplicaMessage{
+		Message: &ReplicaMessage_GapCommitReply{
+			GapCommitReply: gapCommitReply,
+		},
+	}
+
+	s.logger.SendTo("GapCommitReply", gapCommitReply, request.Sender)
+	go s.send(message, request.Sender)
 }
 
 func (s *NOPaxos) handleGapCommitReply(reply *GapCommitReply) {
@@ -154,50 +145,44 @@ func (s *NOPaxos) handleSlotLookup(request *SlotLookup) {
 	s.logger.ReceiveFrom("SlotLookup", request, request.Sender)
 
 	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	// If the view ID does not match the sender's view ID, skip the message
 	if s.viewID.LeaderNum != request.ViewID.LeaderNum || s.viewID.SessionNum != request.ViewID.SessionNum {
-		s.mu.RUnlock()
 		return
 	}
 
 	// If this replica is not the leader, skip the message
 	if s.getLeader(s.viewID) != s.cluster.Member() {
-		s.mu.RUnlock()
 		return
 	}
 
 	// If the replica's status is not Normal, skip the message
 	if s.status != StatusNormal {
-		s.mu.RUnlock()
 		return
 	}
 
 	slotNum := s.log.LastSlot() + 1 - LogSlotID(s.sessionMessageNum-request.MessageNum)
 
 	if slotNum <= s.log.LastSlot() {
-		if stream, err := s.cluster.GetStream(request.Sender); err == nil {
-			for i := slotNum; i <= s.log.LastSlot(); i++ {
-				entry := s.log.Get(i)
-				if entry != nil {
-					commandRequest := &CommandRequest{
-						SessionNum: s.viewID.SessionNum,
-						MessageNum: entry.MessageNum,
-						Value:      entry.Value,
-					}
-					message := &ReplicaMessage{
-						Message: &ReplicaMessage_Command{
-							Command: commandRequest,
-						},
-					}
-					s.logger.SendTo("CommandRequest", commandRequest, request.Sender)
-					_ = stream.Send(message)
+		for i := slotNum; i <= s.log.LastSlot(); i++ {
+			entry := s.log.Get(i)
+			if entry != nil {
+				commandRequest := &CommandRequest{
+					SessionNum: s.viewID.SessionNum,
+					MessageNum: entry.MessageNum,
+					Value:      entry.Value,
 				}
+				message := &ReplicaMessage{
+					Message: &ReplicaMessage_Command{
+						Command: commandRequest,
+					},
+				}
+				s.logger.SendTo("CommandRequest", commandRequest, request.Sender)
+				go s.send(message, request.Sender)
 			}
 		}
-		s.mu.RUnlock()
 	} else if slotNum == s.log.LastSlot()+1 {
-		s.mu.RUnlock()
-		s.sendGapCommit()
+		go s.sendGapCommit()
 	}
 }
