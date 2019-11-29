@@ -159,7 +159,10 @@ func (s *NOPaxos) handleRecoverReply(reply *RecoverReply) {
 			s.currentCheckpoint = newCheckpoint(leaderReply.CheckpointSlotNum)
 			s.currentCheckpoint.Data = leaderReply.Checkpoint
 		}
-		s.sessionMessageNum = leaderReply.MessageNum
+
+		if leaderReply.MessageNum > 0 {
+			s.sessionMessageNum = leaderReply.MessageNum
+		}
 		s.setStatus(StatusNormal)
 		go s.resetTimeout()
 	}
