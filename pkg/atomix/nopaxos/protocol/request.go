@@ -50,7 +50,7 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 							MessageNum: request.MessageNum,
 							Sender:     s.cluster.Member(),
 							ViewID:     viewID,
-							SlotNum:    slotNum,
+							SlotNum:    LogSlotID(result.Index),
 							Value:      result.Value,
 						}
 						message := &ClientMessage{

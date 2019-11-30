@@ -337,7 +337,7 @@ func (s *stateMachine) restore(checkpoint *Checkpoint) {
 
 // applyCommand applies a command to the state machine
 func (s *stateMachine) applyCommand(entry *LogEntry, ch chan<- node.Output) {
-	s.context.index++
+	s.context.index = uint64(entry.SlotNum)
 	s.context.op = service.OpTypeCommand
 	if entry.Timestamp.After(s.context.timestamp) {
 		s.context.timestamp = entry.Timestamp
