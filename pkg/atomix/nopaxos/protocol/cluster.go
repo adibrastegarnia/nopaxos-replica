@@ -115,11 +115,11 @@ func (c *cluster) GetStream(member MemberID) (ReplicaService_ReplicaStreamClient
 	c.mu.RUnlock()
 	if !ok {
 		c.mu.Lock()
+		defer c.mu.Unlock()
 		stream, ok = c.streams[member]
 		if !ok {
 			conn, err := c.getConn(member)
 			if err != nil {
-				c.mu.Unlock()
 				return nil, err
 			}
 			client := NewReplicaServiceClient(conn)
@@ -128,7 +128,6 @@ func (c *cluster) GetStream(member MemberID) (ReplicaService_ReplicaStreamClient
 				return nil, err
 			}
 			c.streams[member] = stream
-			c.mu.Unlock()
 		}
 	}
 	return stream, nil
