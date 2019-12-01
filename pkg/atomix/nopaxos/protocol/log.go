@@ -75,3 +75,10 @@ func (l *Log) Truncate(slotNum LogSlotID) {
 	}
 	l.firstSlotNum = slotNum
 }
+
+// Extend extends the tail of the log
+func (l *Log) Extend(slotNum LogSlotID) {
+	if slotNum > l.lastSlotNum {
+		l.lastSlotNum = slotNum
+	}
+}

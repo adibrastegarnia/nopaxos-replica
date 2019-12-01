@@ -28,7 +28,9 @@ func (s *NOPaxos) sendGapCommit() {
 		return
 	}
 
-	slotID := s.log.LastSlot() + 1
+	// Add a no-op entry to the log
+	s.log.Extend(s.log.LastSlot() + 1)
+	slotID := s.log.LastSlot()
 
 	// Set the replica's status to GapCommit
 	s.setStatus(StatusGapCommit)
