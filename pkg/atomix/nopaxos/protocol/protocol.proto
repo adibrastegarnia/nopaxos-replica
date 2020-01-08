@@ -242,6 +242,11 @@ message Ping {
     ViewId view_id = 2 [(gogoproto.customname) = "ViewID"];
 }
 
+message Indexed {
+    uint64 index = 1;
+    bytes value = 2;
+}
+
 service ClientService {
     rpc ClientStream (stream ClientMessage) returns (stream ClientMessage);
 }

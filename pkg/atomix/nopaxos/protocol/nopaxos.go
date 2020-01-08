@@ -17,8 +17,10 @@ package protocol
 import (
 	"github.com/atomix/atomix-go-node/pkg/atomix/node"
 	"github.com/atomix/atomix-go-node/pkg/atomix/service"
+	streams "github.com/atomix/atomix-go-node/pkg/atomix/stream"
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/config"
 	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/util"
+	"github.com/gogo/protobuf/proto"
 	"github.com/google/uuid"
 	"io"
 	"sync"
@@ -336,19 +338,24 @@ func (s *stateMachine) restore(checkpoint *Checkpoint) {
 }
 
 // applyCommand applies a command to the state machine
-func (s *stateMachine) applyCommand(entry *LogEntry, ch chan<- node.Output) {
+func (s *stateMachine) applyCommand(entry *LogEntry, stream streams.Stream) {
 	s.context.index = uint64(entry.SlotNum)
 	s.context.op = service.OpTypeCommand
 	if entry.Timestamp.After(s.context.timestamp) {
 		s.context.timestamp = entry.Timestamp
 	}
-	s.state.Command(entry.Value, ch)
+	s.state.Command(entry.Value, streams.NewEncodingStream(stream, func(bytes []byte) ([]byte, error) {
+		return proto.Marshal(&Indexed{
+			Index: s.context.index,
+			Value: bytes,
+		})
+	}))
 }
 
 // applyQuery applies a query to the state machine
-func (s *stateMachine) applyQuery(request *QueryRequest, ch chan<- node.Output) {
+func (s *stateMachine) applyQuery(request *QueryRequest, stream streams.Stream) {
 	s.context.op = service.OpTypeQuery
-	s.state.Query(request.Value, ch)
+	s.state.Query(request.Value, stream)
 }
 
 // reset resets the state machine

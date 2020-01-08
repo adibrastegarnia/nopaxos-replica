@@ -36,7 +36,7 @@ func NewServer(clusterConfig cluster.Cluster, registry *node.Registry, protocolC
 	nopaxos := nopaxos.NewNOPaxos(cluster, registry, protocolConfig)
 	server := &Server{
 		nopaxos: nopaxos,
-		port:    member.Port,
+		port:    member.ProtocolPort,
 		mu:      sync.Mutex{},
 	}
 	return server

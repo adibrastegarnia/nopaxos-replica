@@ -41,9 +41,10 @@ func main() {
 	members := make(map[string]cluster.Member)
 	for _, member := range partitionConfig.Members {
 		members[member.ID] = cluster.Member{
-			ID:   member.ID,
-			Host: member.Host,
-			Port: int(member.Port),
+			ID:           member.ID,
+			Host:         member.Host,
+			APIPort:      int(member.APIPort),
+			ProtocolPort: int(member.ProtocolPort),
 		}
 	}
 

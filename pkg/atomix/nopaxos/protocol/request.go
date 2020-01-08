@@ -14,7 +14,10 @@
 
 package protocol
 
-import "github.com/atomix/atomix-go-node/pkg/atomix/node"
+import (
+	streams "github.com/atomix/atomix-go-node/pkg/atomix/stream"
+	"github.com/gogo/protobuf/proto"
+)
 
 func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientStreamServer) {
 	s.logger.Receive("CommandRequest", request)
@@ -42,16 +45,20 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 		// Apply the command to the state machine before responding if leader
 		if stream != nil {
 			if s.getLeader(s.viewID) == s.cluster.Member() {
-				ch := make(chan node.Output)
+				ch := make(chan streams.Result)
 				viewID := s.viewID
 				go func() {
 					for result := range ch {
+						indexed := &Indexed{}
+						if err := proto.Unmarshal(result.Value, indexed); err != nil {
+							continue
+						}
 						commandReply := &CommandReply{
 							MessageNum: request.MessageNum,
 							Sender:     s.cluster.Member(),
 							ViewID:     viewID,
-							SlotNum:    LogSlotID(result.Index),
-							Value:      result.Value,
+							SlotNum:    LogSlotID(indexed.Index),
+							Value:      indexed.Value,
 						}
 						message := &ClientMessage{
 							Message: &ClientMessage_CommandReply{
@@ -79,7 +86,7 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 						s.logger.Error("Failed to send CommandClose")
 					}
 				}()
-				s.state.applyCommand(entry, ch)
+				s.state.applyCommand(entry, streams.NewChannelStream(ch))
 			} else {
 				commandReply := &CommandReply{
 					MessageNum: request.MessageNum,
@@ -156,8 +163,7 @@ func (s *NOPaxos) query(request *QueryRequest, stream ClientService_ClientStream
 	}
 
 	if request.SessionNum == s.viewID.SessionNum && stream != nil && s.getLeader(s.viewID) == s.cluster.Member() {
-		ch := make(chan node.Output)
-		s.state.applyQuery(request, ch)
+		ch := make(chan streams.Result)
 		go func() {
 			for result := range ch {
 				// TODO: Send state machine errors
@@ -192,6 +198,7 @@ func (s *NOPaxos) query(request *QueryRequest, stream ClientService_ClientStream
 				s.logger.Error("Failed to send QueryClose")
 			}
 		}()
+		s.state.applyQuery(request, streams.NewChannelStream(ch))
 	}
 }
 
