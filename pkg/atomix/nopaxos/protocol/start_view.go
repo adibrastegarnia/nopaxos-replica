@@ -14,12 +14,6 @@
 
 package protocol
 
-import (
-	"encoding/binary"
-	"encoding/json"
-	"github.com/willf/bloom"
-)
-
 func (s *NOPaxos) handleStartView(request *StartView) {
 	s.logger.ReceiveFrom("StartView", request, request.Sender)
 
@@ -37,9 +31,9 @@ func (s *NOPaxos) handleStartView(request *StartView) {
 	}
 
 	// Unmarshal the leader's no-op filter
-	noOpFilter := &bloom.BloomFilter{}
-	if err := json.Unmarshal(request.NoOpFilter, noOpFilter); err != nil {
-		s.logger.Error("Failed to decode bloom filter", err)
+	noOpFilter := newNoOpFilter(request.FirstLogSlotNum, request.LastLogSlotNum)
+	if err := noOpFilter.unmarshal(request.NoOpFilter); err != nil {
+		s.logger.Error("Failed to decode no-op filter", err)
 		return
 	}
 
@@ -48,10 +42,8 @@ func (s *NOPaxos) handleStartView(request *StartView) {
 	for slotNum := request.FirstLogSlotNum; slotNum <= request.LastLogSlotNum; slotNum++ {
 		// If the entry is greater than the last in the replica's log, request it.
 		if entry := s.log.Get(slotNum); entry != nil {
-			// If the entry is missing from the leader's log, request it. Otherwise add it to the new log.
-			key := make([]byte, 8)
-			binary.BigEndian.PutUint64(key, uint64(slotNum))
-			if noOpFilter.Test(key) {
+			// If the entry may be a no-op, verify it. Otherwise add it to the new log.
+			if noOpFilter.isMaybeNoOp(slotNum) {
 				entrySlots = append(entrySlots, slotNum)
 			} else {
 				newLog.Set(entry)

@@ -14,12 +14,6 @@
 
 package protocol
 
-import (
-	"encoding/binary"
-	"encoding/json"
-	"github.com/willf/bloom"
-)
-
 func (s *NOPaxos) startSync() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -37,18 +31,16 @@ func (s *NOPaxos) startSync() {
 	s.syncReps = make(map[MemberID]*SyncReply)
 	s.tentativeSync = s.log.LastSlot()
 
-	// Create a bloom filter of the log and add non-empty entries
-	noOpFilter := bloom.New(uint(s.log.LastSlot()-s.log.FirstSlot()+1), bloomFilterHashFunctions)
+	// Create a no-op filter
+	noOpFilter := newNoOpFilter(s.log.FirstSlot(), s.log.LastSlot())
 	for slotNum := s.log.FirstSlot(); slotNum <= s.log.LastSlot(); slotNum++ {
 		if entry := s.log.Get(slotNum); entry == nil {
-			key := make([]byte, 8)
-			binary.BigEndian.PutUint64(key, uint64(slotNum))
-			noOpFilter.Add(key)
+			noOpFilter.add(slotNum)
 		}
 	}
 
 	// Marshall the bloom filter to bytes
-	noOpFilterBytes, err := json.Marshal(noOpFilter)
+	noOpFilterBytes, err := noOpFilter.marshal()
 	if err != nil {
 		s.logger.Error("Failed to marshal bloom filter", err)
 		return
@@ -98,8 +90,8 @@ func (s *NOPaxos) handleSyncPrepare(request *SyncPrepare) {
 	}
 
 	// Unmarshal the leader's no-op filter
-	noOpFilter := &bloom.BloomFilter{}
-	if err := json.Unmarshal(request.NoOpFilter, noOpFilter); err != nil {
+	noOpFilter := newNoOpFilter(request.FirstLogSlotNum, request.LastLogSlotNum)
+	if err := noOpFilter.unmarshal(request.NoOpFilter); err != nil {
 		s.logger.Error("Failed to decode bloom filter", err)
 		return
 	}
@@ -110,9 +102,7 @@ func (s *NOPaxos) handleSyncPrepare(request *SyncPrepare) {
 		// If the entry is greater than the last in the replica's log, request it.
 		if entry := s.log.Get(slotNum); entry != nil {
 			// If the entry is missing from the leader's log, request it. Otherwise add it to the new log.
-			key := make([]byte, 8)
-			binary.BigEndian.PutUint64(key, uint64(slotNum))
-			if noOpFilter.Test(key) {
+			if noOpFilter.isMaybeNoOp(slotNum) {
 				entrySlots = append(entrySlots, slotNum)
 			} else {
 				newLog.Set(entry)

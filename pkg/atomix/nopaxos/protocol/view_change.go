@@ -194,15 +194,14 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 		var minSlotNum, maxSlotNum LogSlotID
 		var maxCheckpoint LogSlotID
 
-		noOpFilters := make(map[MemberID]*bloom.BloomFilter)
+		noOpFilters := make(map[MemberID]*noOpFilter)
 		for _, viewChange := range viewChanges {
 			if viewChange.LastNormal.SessionNum == lastNormal.SessionNum && viewChange.LastNormal.LeaderNum == lastNormal.LeaderNum {
-				noOpFilter := &bloom.BloomFilter{}
-				if err := json.Unmarshal(viewChange.NoOpFilter, noOpFilter); err != nil {
-					s.logger.Error("Failed to decode bloom filter", err)
+				noOpFilter := newNoOpFilter(viewChange.FirstLogSlotNum, viewChange.LastLogSlotNum)
+				if err := noOpFilter.unmarshal(viewChange.NoOpFilter); err != nil {
+					s.logger.Error("Failed to decode no-op filter", err)
 					return
 				}
-
 				noOpFilters[viewChange.Sender] = noOpFilter
 
 				// Record the min and max slot for all view changes
@@ -226,7 +225,6 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 			}
 		}
 
-		var firstSlotNum, lastSlotNum LogSlotID
 		newLog := newLog(minSlotNum)
 		noOpSlots := make(map[MemberID][]LogSlotID)
 		for slotNum := minSlotNum; slotNum <= maxSlotNum; slotNum++ {
@@ -238,9 +236,7 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 
 				// For each member, if the no-op is present in the member's filter request a repair.
 				for member, noOpFilter := range noOpFilters {
-					key := make([]byte, 8)
-					binary.BigEndian.PutUint64(key, uint64(slotNum))
-					if noOpFilter.Test(key) {
+					if noOpFilter.isMaybeNoOp(slotNum) {
 						slots := noOpSlots[member]
 						if slots == nil {
 							slots = make([]LogSlotID, 0)
@@ -276,17 +272,15 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 			}
 		} else {
 			// Create a new no-op filter and add no-op entries
-			newNoOpFilter := bloom.New(uint(lastSlotNum-firstSlotNum+1), bloomFilterHashFunctions)
-			for slotNum := firstSlotNum; slotNum <= lastSlotNum; slotNum++ {
+			filter := newNoOpFilter(s.viewLog.FirstSlot(), s.viewLog.LastSlot())
+			for slotNum := s.viewLog.FirstSlot(); slotNum <= s.viewLog.LastSlot(); slotNum++ {
 				if entry := s.viewLog.Get(slotNum); entry == nil {
-					key := make([]byte, 8)
-					binary.BigEndian.PutUint64(key, uint64(slotNum))
-					newNoOpFilter.Add(key)
+					filter.add(slotNum)
 				}
 			}
 
 			// Marshal the no-op filter to JSON
-			newNoOpFilterJson, err := json.Marshal(newNoOpFilter)
+			filterJson, err := filter.marshal()
 			if err != nil {
 				s.logger.Error("Failed to marshal bloom filter", err)
 				return
@@ -297,9 +291,9 @@ func (s *NOPaxos) handleViewChange(request *ViewChange) {
 				Sender:          s.cluster.Member(),
 				ViewID:          s.viewID,
 				MessageNum:      newMessageID,
-				NoOpFilter:      newNoOpFilterJson,
-				FirstLogSlotNum: firstSlotNum,
-				LastLogSlotNum:  lastSlotNum,
+				NoOpFilter:      filterJson,
+				FirstLogSlotNum: s.viewLog.FirstSlot(),
+				LastLogSlotNum:  s.viewLog.LastSlot(),
 			}
 			message := &ReplicaMessage{
 				Message: &ReplicaMessage_StartView{
@@ -416,19 +410,17 @@ func (s *NOPaxos) handleViewChangeRepairReply(reply *ViewChangeRepairReply) {
 		}
 
 		// Create a new no-op filter and add no-op entries
-		newNoOpFilter := bloom.New(uint(s.viewLog.LastSlot()-s.viewLog.FirstSlot()+1), bloomFilterHashFunctions)
+		noOpFilter := newNoOpFilter(s.viewLog.FirstSlot(), s.viewLog.LastSlot())
 		for slotNum := s.viewLog.FirstSlot(); slotNum <= s.viewLog.LastSlot(); slotNum++ {
 			if entry := s.viewLog.Get(slotNum); entry == nil {
-				key := make([]byte, 8)
-				binary.BigEndian.PutUint64(key, uint64(slotNum))
-				newNoOpFilter.Add(key)
+				noOpFilter.add(slotNum)
 			}
 		}
 
 		// Marshal the no-op filter to JSON
-		newNoOpFilterJson, err := json.Marshal(newNoOpFilter)
+		noOpFilterJson, err := noOpFilter.marshal()
 		if err != nil {
-			s.logger.Error("Failed to marshal bloom filter", err)
+			s.logger.Error("Failed to marshal no-op filter", err)
 			return
 		}
 
@@ -437,7 +429,7 @@ func (s *NOPaxos) handleViewChangeRepairReply(reply *ViewChangeRepairReply) {
 			Sender:          s.cluster.Member(),
 			ViewID:          s.viewID,
 			MessageNum:      reply.MessageNum,
-			NoOpFilter:      newNoOpFilterJson,
+			NoOpFilter:      noOpFilterJson,
 			FirstLogSlotNum: s.viewLog.FirstSlot(),
 			LastLogSlotNum:  s.viewLog.LastSlot(),
 		}
@@ -463,4 +455,46 @@ func (s *NOPaxos) handleViewChangeRepairReply(reply *ViewChangeRepairReply) {
 type repairState struct {
 	requests int
 	replies  int
+}
+
+func newNoOpFilter(firstSlotNum LogSlotID, lastSlotNum LogSlotID) *noOpFilter {
+	filter := bloom.New(uint(lastSlotNum-firstSlotNum+1), bloomFilterHashFunctions)
+	return &noOpFilter{
+		firstSlotNum: firstSlotNum,
+		lastSlotNum:  lastSlotNum,
+		filter:       filter,
+	}
+}
+
+type noOpFilter struct {
+	firstSlotNum LogSlotID
+	lastSlotNum  LogSlotID
+	filter       *bloom.BloomFilter
+}
+
+func (f *noOpFilter) add(slotNum LogSlotID) {
+	key := make([]byte, 8)
+	binary.BigEndian.PutUint64(key, uint64(slotNum))
+	f.filter.Add(key)
+}
+
+func (f *noOpFilter) isMaybeNoOp(slotNum LogSlotID) bool {
+	if slotNum < f.firstSlotNum || slotNum > f.lastSlotNum {
+		return false
+	}
+	key := make([]byte, 8)
+	binary.BigEndian.PutUint64(key, uint64(slotNum))
+	return f.filter.Test(key)
+}
+
+func (f *noOpFilter) marshal() ([]byte, error) {
+	return json.Marshal(newNoOpFilter)
+}
+
+func (f *noOpFilter) unmarshal(bytes []byte) error {
+	f.filter = &bloom.BloomFilter{}
+	if err := json.Unmarshal(bytes, f.filter); err != nil {
+		return err
+	}
+	return nil
 }
