@@ -1,11 +1,11 @@
-module github.com/atomix/atomix-nopaxos-node
+module github.com/atomix/nopaxos-replica
 
 go 1.12
 
 require (
 	cloud.google.com/go v0.43.0 // indirect
-	github.com/atomix/atomix-api v0.0.0-20191219205733-d87d186a4fba
-	github.com/atomix/atomix-go-node v0.0.0-20200108075738-abed9e2478db
+	github.com/atomix/api v0.0.0-20200123231207-4e5fb1cbaf40
+	github.com/atomix/go-framework v0.0.0-20200124005401-251d56394345
 	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/mock v1.3.1

@@ -16,10 +16,10 @@ package nopaxos
 
 import (
 	"fmt"
-	"github.com/atomix/atomix-go-node/pkg/atomix/cluster"
-	"github.com/atomix/atomix-go-node/pkg/atomix/node"
-	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/config"
-	nopaxos "github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/protocol"
+	"github.com/atomix/go-framework/pkg/atomix/cluster"
+	"github.com/atomix/go-framework/pkg/atomix/node"
+	"github.com/atomix/nopaxos-replica/pkg/atomix/nopaxos/config"
+	nopaxos "github.com/atomix/nopaxos-replica/pkg/atomix/nopaxos/protocol"
 	"google.golang.org/grpc"
 	"net"
 	"sync"

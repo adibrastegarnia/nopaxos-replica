@@ -16,12 +16,12 @@ package nopaxos
 
 import (
 	"context"
-	"github.com/atomix/atomix-api/proto/atomix/counter"
-	atomix "github.com/atomix/atomix-go-node/pkg/atomix/cluster"
-	"github.com/atomix/atomix-go-node/pkg/atomix/registry"
-	"github.com/atomix/atomix-go-node/pkg/atomix/service"
-	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/config"
-	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/protocol"
+	"github.com/atomix/api/proto/atomix/counter"
+	atomix "github.com/atomix/go-framework/pkg/atomix/cluster"
+	"github.com/atomix/go-framework/pkg/atomix/registry"
+	"github.com/atomix/go-framework/pkg/atomix/service"
+	"github.com/atomix/nopaxos-replica/pkg/atomix/nopaxos/config"
+	"github.com/atomix/nopaxos-replica/pkg/atomix/nopaxos/protocol"
 	"github.com/gogo/protobuf/proto"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"

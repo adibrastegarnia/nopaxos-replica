@@ -2,6 +2,6 @@ FROM alpine:3.9
 
 USER nobody
 
-ADD build/_output/atomix-nopaxos-node /usr/local/bin/atomix-nopaxos-node
+ADD build/_output/nopaxos-replica /usr/local/bin/nopaxos-replica
 
-ENTRYPOINT ["atomix-nopaxos-node"]
+ENTRYPOINT ["nopaxos-replica"]

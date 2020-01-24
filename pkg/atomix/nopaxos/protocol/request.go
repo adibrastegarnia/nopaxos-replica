@@ -15,7 +15,7 @@
 package protocol
 
 import (
-	streams "github.com/atomix/atomix-go-node/pkg/atomix/stream"
+	streams "github.com/atomix/go-framework/pkg/atomix/stream"
 	"github.com/gogo/protobuf/proto"
 )
 
@@ -50,7 +50,7 @@ func (s *NOPaxos) command(request *CommandRequest, stream ClientService_ClientSt
 				go func() {
 					for result := range ch {
 						indexed := &Indexed{}
-						if err := proto.Unmarshal(result.Value, indexed); err != nil {
+						if err := proto.Unmarshal(result.Value.([]byte), indexed); err != nil {
 							continue
 						}
 						commandReply := &CommandReply{
@@ -171,7 +171,7 @@ func (s *NOPaxos) query(request *QueryRequest, stream ClientService_ClientStream
 					MessageNum: request.MessageNum,
 					Sender:     s.cluster.Member(),
 					ViewID:     s.viewID,
-					Value:      result.Value,
+					Value:      result.Value.([]byte),
 				}
 				message := &ClientMessage{
 					Message: &ClientMessage_QueryReply{

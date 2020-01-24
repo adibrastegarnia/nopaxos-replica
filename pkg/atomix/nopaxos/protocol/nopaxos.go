@@ -15,11 +15,11 @@
 package protocol
 
 import (
-	"github.com/atomix/atomix-go-node/pkg/atomix/node"
-	"github.com/atomix/atomix-go-node/pkg/atomix/service"
-	streams "github.com/atomix/atomix-go-node/pkg/atomix/stream"
-	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/config"
-	"github.com/atomix/atomix-nopaxos-node/pkg/atomix/nopaxos/util"
+	"github.com/atomix/go-framework/pkg/atomix/node"
+	"github.com/atomix/go-framework/pkg/atomix/service"
+	streams "github.com/atomix/go-framework/pkg/atomix/stream"
+	"github.com/atomix/nopaxos-replica/pkg/atomix/nopaxos/config"
+	"github.com/atomix/nopaxos-replica/pkg/atomix/nopaxos/util"
 	"github.com/gogo/protobuf/proto"
 	"github.com/google/uuid"
 	"io"
@@ -338,22 +338,22 @@ func (s *stateMachine) restore(checkpoint *Checkpoint) {
 }
 
 // applyCommand applies a command to the state machine
-func (s *stateMachine) applyCommand(entry *LogEntry, stream streams.Stream) {
+func (s *stateMachine) applyCommand(entry *LogEntry, stream streams.WriteStream) {
 	s.context.index = uint64(entry.SlotNum)
 	s.context.op = service.OpTypeCommand
 	if entry.Timestamp.After(s.context.timestamp) {
 		s.context.timestamp = entry.Timestamp
 	}
-	s.state.Command(entry.Value, streams.NewEncodingStream(stream, func(bytes []byte) ([]byte, error) {
+	s.state.Command(entry.Value, streams.NewEncodingStream(stream, func(value interface{}) (interface{}, error) {
 		return proto.Marshal(&Indexed{
 			Index: s.context.index,
-			Value: bytes,
+			Value: value.([]byte),
 		})
 	}))
 }
 
 // applyQuery applies a query to the state machine
-func (s *stateMachine) applyQuery(request *QueryRequest, stream streams.Stream) {
+func (s *stateMachine) applyQuery(request *QueryRequest, stream streams.WriteStream) {
 	s.context.op = service.OpTypeQuery
 	s.state.Query(request.Value, stream)
 }
